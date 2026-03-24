@@ -1,9 +1,17 @@
 const mongoose = require('mongoose');
 
 const materialSchema = new mongoose.Schema({
-  classId: {
+  teacherId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'ClassBundle',
+    ref: 'User',
+    required: true
+  },
+  assignmentId: {
+    type: String, // Can be classLevel or subjectId
+    required: true
+  },
+  classLevel: {
+    type: String,
     required: true
   },
   subjectName: {
@@ -15,11 +23,12 @@ const materialSchema = new mongoose.Schema({
     required: true
   },
   fileUrl: {
-    type: String,
+    type: String, // PDF or Document URL (Cloudinary/S3)
     required: true
   },
   type: {
     type: String,
+    enum: ['notes', 'worksheet', 'assignment', 'other'],
     default: 'notes'
   }
 }, { timestamps: true });

@@ -1,5 +1,4 @@
-import React from 'react';
-import { HiCheckCircle, HiLightBulb, HiSun, HiShieldCheck } from 'react-icons/hi';
+import { HiCheckCircle, HiLightBulb, HiSun, HiShieldCheck, HiGlobeAlt, HiAcademicCap } from 'react-icons/hi';
 import { FaGraduationCap, FaUserTie, FaRocket } from 'react-icons/fa';
 
 const About = () => {
@@ -89,7 +88,7 @@ const About = () => {
          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10">
             {[
               { icon: FaRocket, val: "100%", label: "Curriculum Coverage" },
-              { icon: HiStatusOnline, val: "24/7", label: "Dashboard Access" },
+              { icon: HiGlobeAlt, val: "24/7", label: "Dashboard Access" },
               { icon: HiAcademicCap, val: "500+", label: "Expert Educators" }
             ].map((stat, i) => (
               <div key={i} className="space-y-4">

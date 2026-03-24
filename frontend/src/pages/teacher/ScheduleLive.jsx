@@ -3,10 +3,10 @@ import axios from 'axios';
 import { Video, Calendar, Clock, Link as LinkIcon, GraduationCap, Monitor, Target, Loader2, CheckCircle2 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import { usePreview } from '../../context/PreviewContext';
+import CustomSelect from '../../components/common/CustomSelect';
 
 const ScheduleLive = () => {
   const { activeView } = usePreview();
-  const [activeDashboardView] = useState(activeView); // For local check if needed
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
@@ -24,11 +24,12 @@ const ScheduleLive = () => {
         
         // MOCK DATA FOR ADMIN PREVIEW
         if (activeView === 'admin' && data.length === 0) {
-          setClasses([
+          const mocks = [
             { id: 'mock1', name: 'Class 10 (Full Bundle)', classLevel: 'Class 10', subjectName: 'All Subjects', type: 'bundle' },
             { id: 'mock2', name: 'Physics (Class 12)', classLevel: 'Class 12', subjectName: 'Physics', type: 'subject' },
             { id: 'mock3', name: 'Maths (Class 11)', classLevel: 'Class 11', subjectName: 'Maths', type: 'subject' },
-          ]);
+          ];
+          setClasses(mocks);
         } else {
           setClasses(data);
         }
@@ -82,7 +83,7 @@ const ScheduleLive = () => {
   );
 
   return (
-    <div className="max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
+    <div className="max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700 px-4 mb-20">
       <Toaster position="top-right" />
       
       <div className="space-y-1 text-center">
@@ -94,53 +95,30 @@ const ScheduleLive = () => {
          <p className="text-slate-500 font-bold max-w-md mx-auto italic">Engage with your students in real-time. Schedule your next digital classroom session here.</p>
       </div>
 
-      <div className="bg-white rounded-[40px] border border-slate-100 shadow-xl shadow-teal-900/5 p-10 md:p-14">
+      <div className="bg-white rounded-[40px] border border-slate-100 shadow-xl shadow-teal-900/5 p-8 md:p-14">
         <form onSubmit={handleSubmit} className="space-y-10">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-3">
-                 <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest pl-2 flex items-center gap-2">
-                    <GraduationCap className="w-4 h-4 text-teal-500" /> Targeted Course
-                 </label>
-                 <div className="relative group">
-                    <select 
-                      required
-                      value={formData.courseString}
-                      onChange={(e) => setFormData({...formData, courseString: e.target.value})}
-                      className="w-full px-8 py-5 bg-slate-50 border-2 border-transparent focus:border-teal-600 focus:bg-white rounded-3xl outline-none font-black text-slate-900 appearance-none cursor-pointer transition-all hover:bg-slate-100/50 shadow-inner"
-                    >
-                       <option value="">Choose Course...</option>
-                       {classes.map((cls, i) => (
-                          <option key={i} value={JSON.stringify(cls)}>
-                             {cls.name}
-                          </option>
-                       ))}
-                    </select>
-                    <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover:text-teal-600 transition-colors">
-                       <Monitor className="w-4 h-4" />
-                    </div>
-                 </div>
-              </div>
+              <CustomSelect 
+                label="Targeted Course"
+                icon={GraduationCap}
+                placeholder="Choose Course..."
+                options={classes.map(cls => ({ ...cls, value: JSON.stringify(cls) }))}
+                value={formData.courseString}
+                onChange={(val) => setFormData({ ...formData, courseString: val })}
+              />
 
-              <div className="space-y-3">
-                 <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest pl-2 flex items-center gap-2">
-                    <Video className="w-4 h-4 text-rose-500" /> Select Platform
-                 </label>
-                 <div className="relative group">
-                    <select 
-                      required
-                      value={formData.platform}
-                      onChange={(e) => setFormData({...formData, platform: e.target.value})}
-                      className="w-full px-8 py-5 bg-slate-50 border-2 border-transparent focus:border-teal-600 focus:bg-white rounded-3xl outline-none font-black text-slate-900 appearance-none cursor-pointer transition-all hover:bg-slate-100/50 shadow-inner"
-                    >
-                       <option value="Zoom">Zoom Meeting</option>
-                       <option value="Google Meet">Google Meet</option>
-                       <option value="YouTube Live">YouTube Live</option>
-                    </select>
-                    <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover:text-teal-600 transition-colors">
-                       <Monitor className="w-4 h-4" />
-                    </div>
-                 </div>
-              </div>
+              <CustomSelect 
+                label="Select Platform"
+                icon={Video}
+                placeholder="Select Platform..."
+                options={[
+                  { label: 'Zoom Meeting', value: 'Zoom' },
+                  { label: 'Google Meet', value: 'Google Meet' },
+                  { label: 'YouTube Live', value: 'YouTube Live' },
+                ]}
+                value={formData.platform}
+                onChange={(val) => setFormData({ ...formData, platform: val })}
+              />
 
               <div className="md:col-span-2 space-y-3">
                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest pl-2 flex items-center gap-2">
@@ -187,7 +165,7 @@ const ScheduleLive = () => {
            <div className="p-8 bg-teal-50 rounded-[32px] border border-teal-100 flex items-start gap-5">
               <CheckCircle2 className="w-6 h-6 text-teal-600 mt-1" />
               <div>
-                 <p className="font-black text-teal-900 leading-tight mb-1">Live Notifications</p>
+                 <p className="font-black text-teal-900 leading-tight mb-1" id="notif-label">Live Notifications</p>
                  <p className="text-xs font-bold text-teal-700/60 leading-relaxed uppercase tracking-wider">Once you schedule, a push notification will be sent to all enrolled students for this subject. Ensure your link is valid before confirming.</p>
               </div>
            </div>

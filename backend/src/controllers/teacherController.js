@@ -120,3 +120,73 @@ exports.getRecordings = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Upload / Link Material (Notes, PDFs)
+// @route   POST /api/teacher/materials
+// @access  Teacher
+exports.uploadMaterial = async (req, res, next) => {
+  try {
+    console.log('--- UPLOAD MATERIAL REQUEST ---');
+    console.log('BODY:', req.body);
+    console.log('FILE:', req.file ? {
+      fieldname: req.file.fieldname,
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+      size: req.file.size,
+      path: req.file.path
+    } : 'NO FILE');
+
+    const { classLevel, subjectName, title, fileUrl: externalUrl, type, assignmentId } = req.body;
+    
+    // If a file was uploaded via multer, use that path. Otherwise use the provided URL.
+    const finalFileUrl = req.file ? `/uploads/${req.file.filename}` : externalUrl;
+
+    if (!finalFileUrl) {
+      console.error('ERROR: Missing fileUrl or uploaded file');
+      return res.status(400).json({ message: 'File or link is required' });
+    }
+
+    const material = await Material.create({
+      teacherId: req.user._id,
+      assignmentId,
+      classLevel,
+      subjectName,
+      title,
+      fileUrl: finalFileUrl,
+      type: type || 'notes'
+    });
+
+    res.status(201).json({
+      message: 'Material uploaded successfully!',
+      material
+    });
+  } catch (error) {
+    console.error('SERVER ERROR (Upload Material):', error);
+    next(error);
+  }
+};
+
+// @desc    Get teacher's materials
+// @route   GET /api/teacher/materials
+// @access  Teacher
+exports.getMaterials = async (req, res, next) => {
+  try {
+    const materials = await Material.find({ teacherId: req.user._id }).sort({ createdAt: -1 });
+    res.status(200).json(materials);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete teacher's material
+// @route   DELETE /api/teacher/materials/:id
+// @access  Teacher
+exports.deleteMaterial = async (req, res, next) => {
+  try {
+    const material = await Material.findOneAndDelete({ _id: req.params.id, teacherId: req.user._id });
+    if (!material) return res.status(404).json({ message: 'Material not found or unauthorized' });
+    res.status(200).json({ message: 'Material deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+};

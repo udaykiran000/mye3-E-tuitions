@@ -7,10 +7,11 @@ import Navbar from './components/shared/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import StudentDashboard from './pages/StudentDashboard';
+import StudentDashboard from './pages/student/StudentDashboard';
+import StudentStore from './pages/student/StudentStore';
 import AdminDashboard from './pages/AdminDashboard';
 import About from './pages/About';
-import Store from './pages/Store';
+import Store from './pages/student/StudentStore'; // Unified Store
 import Footer from './components/shared/Footer';
 import AdminLayout from './components/admin/AdminLayout';
 import PricingManagement from './pages/admin/PricingManagement';
@@ -29,6 +30,7 @@ import ContentUpload from './pages/teacher/ContentUpload';
 import ManageStudents from './pages/admin/ManageStudents'; // Moved up
 
 // Student Pages
+import TeacherMaterials from './pages/teacher/TeacherMaterials';
 import StudentLayout from './components/student/StudentLayout';
 import StudentCourseContent from './pages/student/StudentCourseContent';
 
@@ -68,11 +70,11 @@ function App() {
                     <Routes>
                       <Route index element={<Navigate to="/student/dashboard" replace />} />
                       <Route path="dashboard" element={<StudentDashboard />} />
+                      <Route path="store" element={<StudentStore />} />
                       <Route path="classes/:courseName" element={<StudentCourseContent />} />
-                      <Route path="my-classes" element={<StudentDashboard />} />
-                      <Route path="materials" element={<div className="text-2xl font-black text-slate-300 italic pt-20 text-center uppercase tracking-widest">Materials Archive...</div>} />
-                      <Route path="payments" element={<div className="text-2xl font-black text-slate-300 italic pt-20 text-center uppercase tracking-widest">Payment History...</div>} />
-                      <Route path="profile" element={<div className="text-2xl font-black text-slate-300 italic pt-20 text-center uppercase tracking-widest">Student Profile...</div>} />
+                      <Route path="materials" element={<div className="text-2xl font-black text-slate-300 italic pt-20 text-center uppercase tracking-widest leading-loose">Materials Hub<br/><span className="text-sm opacity-50">Centralized Resource Archive coming soon...</span></div>} />
+                      <Route path="payments" element={<div className="text-2xl font-black text-slate-300 italic pt-20 text-center uppercase tracking-widest leading-loose">Payment History<br/><span className="text-sm opacity-50">Transaction Audit Logs coming soon...</span></div>} />
+                      <Route path="profile" element={<div className="text-2xl font-black text-slate-300 italic pt-20 text-center uppercase tracking-widest leading-loose">Profile Settings<br/><span className="text-sm opacity-50">Account Management coming soon...</span></div>} />
                     </Routes>
                   </StudentLayout>
                 </ProtectedRoute>
@@ -88,7 +90,7 @@ function App() {
                       <Route path="classes" element={<MyClasses />} />
                       <Route path="schedule-live" element={<ScheduleLive />} />
                       <Route path="recordings" element={<ContentUpload />} />
-                      <Route path="materials" element={<div className="text-2xl font-black text-slate-300 italic pt-20 text-center">Study Materials Hub...</div>} />
+                      <Route path="materials" element={<TeacherMaterials />} />
                     </Routes>
                   </TeacherLayout>
                 </ProtectedRoute>

@@ -14,10 +14,10 @@ import {
 const StudentSidebar = () => {
   const menuItems = [
     { icon: Home, label: 'Dashboard', path: '/student/dashboard' },
-    { icon: BookOpen, label: 'My Classes', path: '/student/my-classes' },
+    { icon: BookOpen, label: 'My Learning', path: '/student/dashboard' }, // Linking to learning grid for now
+    { icon: ShoppingBag, label: 'Store', path: '/student/store' },
     { icon: FileText, label: 'Materials', path: '/student/materials' },
     { icon: CreditCard, label: 'Payments', path: '/student/payments' },
-    { icon: ShoppingBag, label: 'Store', path: '/store' },
     { icon: User, label: 'Profile', path: '/student/profile' },
   ];
 

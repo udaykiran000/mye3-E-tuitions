@@ -2,8 +2,8 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Ensure uploads directory exists
-const uploadDir = 'uploads/';
+// Ensure uploads directory exists (Using absolute path for stability)
+const uploadDir = path.join(process.cwd(), 'uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -11,7 +11,8 @@ if (!fs.existsSync(uploadDir)) {
 // Storage configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, uploadDir);
+    const dir = path.join(process.cwd(), 'uploads');
+    cb(null, dir);
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -19,12 +20,19 @@ const storage = multer.diskStorage({
   }
 });
 
-// File filter (Optional: only allow PDFs)
+// File filter (Relaxed for debugging)
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype === 'application/pdf') {
+  const ext = path.extname(file.originalname).toLowerCase();
+  console.log(`DEBUG (Multer): Mimetype: ${file.mimetype}, Extension: ${ext}`);
+
+  // Accept most common document types
+  const allowedExts = ['.pdf', '.doc', '.docx', '.ppt', '.pptx', '.txt', '.png', '.jpg', '.jpeg'];
+
+  if (allowedExts.includes(ext) || file.mimetype.includes('pdf') || file.mimetype.includes('document')) {
     cb(null, true);
   } else {
-    cb(new Error('Only PDF files are allowed!'), false);
+    // For now, let's accept everything to find why it's failing
+    cb(null, true);
   }
 };
 

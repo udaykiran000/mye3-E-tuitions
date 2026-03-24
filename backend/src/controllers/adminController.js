@@ -1,0 +1,425 @@
+const Class = require('../models/Class');
+const Subject = require('../models/Subject');
+const User = require('../models/User');
+const Payment = require('../models/Payment');
+const ClassBundle = require('../models/ClassBundle');
+const Material = require('../models/Material');
+
+exports.updatePricing = async (req, res, next) => {
+  try {
+    const { type, id, newPrice } = req.body;
+
+    if (type === 'bundle') {
+      const classItem = await Class.findByIdAndUpdate(id, { bundlePrice: newPrice }, { new: true });
+      return res.status(200).json(classItem);
+    } else if (type === 'subject') {
+      const subjectItem = await Subject.findByIdAndUpdate(id, { individualPrice: newPrice }, { new: true });
+      return res.status(200).json(subjectItem);
+    } else {
+      return res.status(400).json({ message: 'Invalid type' });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getReports = async (req, res, next) => {
+  try {
+    const totalStudents = await User.countDocuments({ role: 'Student' });
+    const totalTeachers = await User.countDocuments({ role: 'Teacher' });
+
+    const payments = await Payment.find({ status: 'captured' });
+    const totalRevenue = payments.reduce((acc, curr) => acc + curr.amount, 0);
+
+    res.status(200).json({
+      totalStudents,
+      totalTeachers,
+      totalRevenue,
+      transactionsCount: payments.length
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+// @desc    Get all class bundles (6-10)
+// @route   GET /api/admin/classes
+// @access  Admin
+exports.getClassBundles = async (req, res, next) => {
+  try {
+    const bundles = await ClassBundle.find({}).sort({ className: 1 });
+    res.status(200).json(bundles);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update class bundle price
+// @route   PUT /api/admin/classes/:id
+// @access  Admin
+exports.updateClassBundlePrice = async (req, res, next) => {
+  try {
+    const { price } = req.body;
+    const bundle = await ClassBundle.findByIdAndUpdate(
+      req.params.id,
+      { price: Number(price) },
+      { new: true, runValidators: true }
+    );
+
+    if (!bundle) {
+      return res.status(404).json({ message: 'Bundle not found' });
+    }
+
+    res.status(200).json(bundle);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get all subjects (11-12)
+// @route   GET /api/admin/subjects
+// @access  Admin
+exports.getSubjects = async (req, res, next) => {
+  try {
+    const subjects = await Subject.find({}).populate('teacherId', 'name email').sort({ classLevel: 1 });
+    res.status(200).json(subjects);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Add a new subject
+// @route   POST /api/admin/subjects
+// @access  Admin
+exports.addSubject = async (req, res, next) => {
+  try {
+    const { subjectName, classLevel, price, description, teacherId } = req.body;
+    const subject = await Subject.create({
+      subjectName,
+      classLevel,
+      price,
+      description,
+      teacherId: teacherId || null
+    });
+    res.status(201).json(subject);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update a subject
+// @route   PUT /api/admin/subjects/:id
+// @access  Admin
+exports.updateSubject = async (req, res, next) => {
+  try {
+    const subject = await Subject.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!subject) return res.status(404).json({ message: 'Subject not found' });
+    res.status(200).json(subject);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete a subject
+// @route   DELETE /api/admin/subjects/:id
+// @access  Admin
+exports.deleteSubject = async (req, res, next) => {
+  try {
+    const subject = await Subject.findByIdAndDelete(req.params.id);
+    if (!subject) return res.status(404).json({ message: 'Subject not found' });
+    res.status(200).json({ message: 'Subject removed successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get all teachers (for dropdown)
+// @route   GET /api/admin/teachers-list
+// @access  Admin
+exports.getTeachersList = async (req, res, next) => {
+  try {
+    const teachers = await User.find({ role: 'teacher' }).select('-password').sort({ createdAt: -1 });
+    res.status(200).json(teachers);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Assign subject to teacher
+// @route   PUT /api/admin/teachers/:id/assign
+// @access  Admin
+exports.assignSubjectToTeacher = async (req, res, next) => {
+  try {
+    const { assignmentType, classLevel, subjectName, subjectId } = req.body;
+    const teacher = await User.findById(req.params.id);
+
+    if (!teacher || teacher.role !== 'teacher') {
+      return res.status(404).json({ message: 'Teacher not found' });
+    }
+
+    // Add new assignment to the array
+    teacher.assignedSubjects.push({ 
+      assignmentType, 
+      classLevel, 
+      subjectName, 
+      subjectId: subjectId || null 
+    });
+    
+    await teacher.save();
+    res.status(200).json(teacher);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Remove assignment from teacher
+// @route   DELETE /api/admin/teachers/:id/assign/:assignmentId
+// @access  Admin
+exports.removeAssignmentFromTeacher = async (req, res, next) => {
+  try {
+    const teacher = await User.findById(req.params.id);
+    if (!teacher) return res.status(404).json({ message: 'Teacher not found' });
+
+    teacher.assignedSubjects = teacher.assignedSubjects.filter(
+      a => a._id.toString() !== req.params.assignmentId
+    );
+
+    await teacher.save();
+    res.status(200).json(teacher);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get all students
+// @route   GET /api/admin/students
+// @access  Admin
+exports.getStudentsList = async (req, res, next) => {
+  try {
+    const students = await User.find({ role: 'student' }).select('-password').sort({ createdAt: -1 });
+    res.status(200).json(students);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Admin manually add student
+// @route   POST /api/admin/students
+// @access  Admin
+exports.addStudent = async (req, res, next) => {
+  try {
+    const { name, email, password } = req.body;
+    const userExists = await User.findOne({ email });
+
+    if (userExists) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    const student = await User.create({
+      name,
+      email,
+      password,
+      role: 'student'
+    });
+
+    res.status(201).json(student);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Manually assign subscription to student
+// @route   PUT /api/admin/students/assign-subscription/:id
+// @access  Admin
+exports.assignSubscription = async (req, res, next) => {
+  try {
+    const { type, referenceId, name, durationDays } = req.body;
+    const student = await User.findById(req.params.id);
+
+    if (!student || student.role !== 'student') {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + parseInt(durationDays));
+
+    student.activeSubscriptions.push({
+      type,
+      referenceId,
+      name,
+      expiryDate
+    });
+
+    await student.save();
+    res.status(200).json(student);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get dashboard stats
+// @route   GET /api/admin/stats
+// @access  Admin
+exports.getDashboardStats = async (req, res, next) => {
+  try {
+    const studentCount = await User.countDocuments({ role: 'student' });
+    const teacherCount = await User.countDocuments({ role: 'teacher' });
+    
+    // Revenue logic (placeholder until payment model is robust)
+    const revenue = 124500; // This can be sum of all payments
+    
+    // Expiring soon logic
+    const now = new Date();
+    const thirtyDaysLater = new Date();
+    thirtyDaysLater.setDate(now.getDate() + 30);
+    
+    const expiringSoonCount = await User.countDocuments({
+      role: 'student',
+      'activeSubscriptions.expiryDate': { $gte: now, $lte: thirtyDaysLater }
+    });
+
+    res.status(200).json({
+      totalStudents: studentCount,
+      totalTeachers: teacherCount,
+      totalRevenue: revenue,
+      expiringSoon: expiringSoonCount
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Extend student subscription
+// @route   PUT /api/admin/students/:id/extend
+// @access  Admin
+exports.extendSubscription = async (req, res, next) => {
+  try {
+    const { subscriptionId, newExpiryDate } = req.body;
+    const user = await User.findById(req.params.id);
+
+    if (!user) return res.status(404).json({ message: 'Student not found' });
+
+    const subscription = user.activeSubscriptions.id(subscriptionId);
+    if (!subscription) return res.status(404).json({ message: 'Subscription not found' });
+
+    subscription.expiryDate = newExpiryDate;
+    await user.save();
+
+    res.status(200).json(user);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Add a new teacher
+// @route   POST /api/admin/teachers
+// @access  Admin
+exports.addTeacher = async (req, res, next) => {
+  try {
+    const { name, email, password } = req.body;
+    const userExists = await User.findOne({ email });
+
+    if (userExists) return res.status(400).json({ message: 'User already exists' });
+
+    const teacher = await User.create({
+      name,
+      email,
+      password,
+      role: 'teacher'
+    });
+
+    res.status(201).json({ _id: teacher._id, name: teacher.name, email: teacher.email });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update any user
+// @route   PUT /api/admin/users/:id
+// @access  Admin
+exports.updateUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+    if (req.body.password) user.password = req.body.password;
+
+    const updatedUser = await user.save();
+    res.status(200).json({ _id: updatedUser._id, name: updatedUser.name, email: updatedUser.email });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete any user
+// @route   DELETE /api/admin/users/:id
+// @access  Admin
+exports.deleteUser = async (req, res, next) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.status(200).json({ message: 'User removed successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+// @desc    Update subjects in a bundle
+// @route   PUT /api/admin/classes/:id/subjects
+// @access  Admin
+exports.updateBundleSubjects = async (req, res, next) => {
+  try {
+    const { subjects } = req.body;
+    const bundle = await ClassBundle.findByIdAndUpdate(
+      req.params.id,
+      { subjects },
+      { new: true }
+    );
+    if (!bundle) return res.status(404).json({ message: 'Bundle not found' });
+    res.status(200).json(bundle);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Add study material
+// @route   POST /api/admin/materials
+// @access  Admin
+exports.addMaterial = async (req, res, next) => {
+  try {
+    const { classId, subjectName, title } = req.body;
+    
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    // Save the relative path to be served statically
+    const fileUrl = `/uploads/${req.file.filename}`;
+
+    const material = await Material.create({
+      classId,
+      subjectName,
+      title,
+      fileUrl
+    });
+    res.status(201).json(material);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get materials for a class
+// @route   GET /api/admin/materials/:classId
+// @access  Admin
+exports.getMaterials = async (req, res, next) => {
+  try {
+    const materials = await Material.find({ classId: req.params.classId }).sort({ createdAt: -1 });
+    res.status(200).json(materials);
+  } catch (error) {
+    next(error);
+  }
+};

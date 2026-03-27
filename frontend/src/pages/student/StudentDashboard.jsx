@@ -120,10 +120,10 @@ const StudentDashboard = () => {
       <div className="space-y-6">
          <div className="flex items-center justify-between">
             <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-               <Layers className="w-6 h-6 text-indigo-600" /> My Learning Path
+               <Layers className="w-6 h-6 text-indigo-600" /> Quick Start: Your Courses
             </h2>
-            <Link to="/store" className="text-xs font-black text-indigo-600 uppercase tracking-widest hover:underline flex items-center gap-2">
-               Explore Store <ArrowUpRight className="w-4 h-4" />
+            <Link to="/courses" className="text-xs font-black text-indigo-600 uppercase tracking-widest hover:underline flex items-center gap-2">
+               Explore Courses <ArrowUpRight className="w-4 h-4" />
             </Link>
          </div>
 
@@ -132,7 +132,7 @@ const StudentDashboard = () => {
                <div className="col-span-full py-20 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[50px] text-center space-y-4">
                   <MonitorPlay className="w-16 h-16 text-slate-200 mx-auto" />
                   <p className="text-slate-400 font-black text-lg italic uppercase tracking-widest">No active courses found</p>
-                  <Link to="/store" className="inline-block py-4 px-10 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all">Browse Curriculum</Link>
+                  <Link to="/courses" className="inline-block py-4 px-10 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all">Browse Curriculum</Link>
                </div>
             ) : learning.map((sub, i) => (
                <Link 

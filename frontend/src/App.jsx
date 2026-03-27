@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { PreviewProvider, usePreview } from './context/PreviewContext';
 import ViewSwitcher from './components/admin/ViewSwitcher';
@@ -26,13 +26,13 @@ import TeacherLayout from './components/teacher/TeacherLayout';
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
 import MyClasses from './pages/teacher/MyClasses';
 import ScheduleLive from './pages/teacher/ScheduleLive';
-import ContentUpload from './pages/teacher/ContentUpload';
 import ManageStudents from './pages/admin/ManageStudents'; // Moved up
 
 // Student Pages
 import TeacherMaterials from './pages/teacher/TeacherMaterials';
 import StudentLayout from './components/student/StudentLayout';
 import StudentCourseContent from './pages/student/StudentCourseContent';
+import MyLearning from './pages/student/MyLearning';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, role }) => {
@@ -49,19 +49,20 @@ const ProtectedRoute = ({ children, role }) => {
 };
 
 
-function App() {
+function AppContent() {
+  const location = useLocation();
+  const isDashboardRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/teacher') || location.pathname.startsWith('/student');
+
   return (
-    <PreviewProvider>
-      <Router>
-        <div className="min-h-screen bg-slate-50 font-sans selection:bg-indigo-100 selection:text-indigo-900">
-          <Navbar />
-          <main>
+    <div className="min-h-screen bg-slate-50 font-sans selection:bg-indigo-100 selection:text-indigo-900">
+      {!isDashboardRoute && <Navbar />}
+      <main>
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/store" element={<Store />} />
+              <Route path="/courses" element={<Store />} />
               
               {/* Student Routes */}
               <Route path="/student/*" element={
@@ -70,7 +71,8 @@ function App() {
                     <Routes>
                       <Route index element={<Navigate to="/student/dashboard" replace />} />
                       <Route path="dashboard" element={<StudentDashboard />} />
-                      <Route path="store" element={<StudentStore />} />
+                      <Route path="my-learning" element={<MyLearning />} />
+                      <Route path="courses" element={<StudentStore />} />
                       <Route path="classes/:courseName" element={<StudentCourseContent />} />
                       <Route path="materials" element={<div className="text-2xl font-black text-slate-300 italic pt-20 text-center uppercase tracking-widest leading-loose">Materials Hub<br/><span className="text-sm opacity-50">Centralized Resource Archive coming soon...</span></div>} />
                       <Route path="payments" element={<div className="text-2xl font-black text-slate-300 italic pt-20 text-center uppercase tracking-widest leading-loose">Payment History<br/><span className="text-sm opacity-50">Transaction Audit Logs coming soon...</span></div>} />
@@ -89,7 +91,6 @@ function App() {
                       <Route path="dashboard" element={<TeacherDashboard />} />
                       <Route path="classes" element={<MyClasses />} />
                       <Route path="schedule-live" element={<ScheduleLive />} />
-                      <Route path="recordings" element={<ContentUpload />} />
                       <Route path="materials" element={<TeacherMaterials />} />
                     </Routes>
                   </TeacherLayout>
@@ -103,8 +104,9 @@ function App() {
                     <Routes>
                       <Route index element={<AdminDashboard />} />
                       <Route path="dashboard" element={<AdminDashboard />} />
-                      <Route path="pricing/classes" element={<ManageClasses />} />
-                      <Route path="pricing/subjects" element={<ManageSubjects />} />
+                      <Route path="pricing" element={<PricingManagement />} />
+                      <Route path="pricing/classes" element={<Navigate to="/admin/pricing" replace />} />
+                      <Route path="pricing/subjects" element={<Navigate to="/admin/pricing" replace />} />
                       <Route path="teachers" element={<TeacherManagement />} />
                       <Route path="students" element={<ManageStudents />} />
                       <Route path="transactions" element={<div className="text-2xl font-black text-slate-300 italic pt-20 text-center uppercase tracking-widest">Transaction History Logs...</div>} />
@@ -119,9 +121,17 @@ function App() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
-          <Footer />
+          {!isDashboardRoute && <Footer />}
           <ViewSwitcher />
         </div>
+  );
+}
+
+function App() {
+  return (
+    <PreviewProvider>
+      <Router>
+        <AppContent />
       </Router>
     </PreviewProvider>
   );

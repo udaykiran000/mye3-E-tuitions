@@ -5,6 +5,7 @@ const Material = require('../models/Material');
 const Transaction = require('../models/Transaction');
 const Class = require('../models/Class');
 const Subject = require('../models/Subject');
+const ClassBundle = require('../models/ClassBundle');
 
 // @desc    Get all available classes and subjects for the store
 // @route   GET /api/student/catalog
@@ -12,21 +13,22 @@ const Subject = require('../models/Subject');
 exports.getCatalog = async (req, res, next) => {
   try {
     const [classes, subjects] = await Promise.all([
-      Class.find({}).sort({ level: 1 }),
-      Subject.find({}).sort({ classLevel: 1 })
+      ClassBundle.find({ isActive: true }).sort({ className: 1 }),
+      Subject.find({ isActive: true }).sort({ classLevel: 1 })
     ]);
 
     const catalog = [
       ...classes.map(c => ({
         id: c._id,
-        name: `${c.name} (Full Bundle)`,
+        name: `${c.className} (Full Course)`,
         type: 'bundle',
-        price: c.bundlePrice,
-        classLevel: c.name
+        price: c.price,
+        classLevel: c.className,
+        subjects: c.subjects // [{ name, singleSubjectPrice }]
       })),
       ...subjects.map(s => ({
         id: s._id,
-        name: s.name,
+        name: s.subjectName || s.name,
         type: 'subject',
         price: s.price,
         classLevel: `Class ${s.classLevel}`
@@ -79,6 +81,7 @@ exports.processMockPayment = async (req, res, next) => {
       student.activeSubscriptions.push({
         name: packageName,
         type,
+        subscriptionType: req.body.subscriptionType || 'full', // Updated
         referenceId,
         expiryDate,
         purchaseDate: new Date()
@@ -144,7 +147,7 @@ exports.getLiveAlerts = async (req, res, next) => {
     const student = await User.findById(req.user._id);
     if (!student) return res.status(404).json({ message: 'Student not found' });
 
-    const activeSubs = student.activeSubscriptions.filter(sub => new Date() < new Date(sub.expiryDate));
+    const activeSubs = (student.activeSubscriptions || []).filter(sub => new Date() < new Date(sub.expiryDate));
     const enrolledNames = activeSubs.map(sub => sub.name);
 
     // Find sessions that are currently 'live' and in student's enrolled subjects/bundles
@@ -169,24 +172,36 @@ exports.getCourseContent = async (req, res, next) => {
   try {
     const { courseName } = req.params;
     const student = await User.findById(req.user._id);
+    
+    if (!student) return res.status(404).json({ message: 'Student not found' });
 
-    // Clean name for bundles (e.g., "Class 10 (Full Bundle)" -> "Class 10")
-    const cleanName = courseName.replace(' (Full Bundle)', '');
+    // Clean names (e.g., "Class 10 (Full Course)" -> "Class 10")
+    const cleanName = courseName.replace(' (Full Course)', '');
+    const classLevelMatch = courseName.match(/Class \d+/i)?.[0];
 
-    // Find the subscription for this course (using original or clean name)
-    const subscription = student.activeSubscriptions.find(sub => 
-      sub.name === courseName || sub.name === cleanName
+    // Access Logic:
+    // 1. Check for Active "Full Course" for this grade
+    const fullCourseSub = student.activeSubscriptions.find(sub => 
+      (sub.name === cleanName || sub.name === courseName || sub.name === classLevelMatch) && 
+      sub.subscriptionType === 'full' && 
+      new Date() < new Date(sub.expiryDate)
+    );
+
+    // 2. Check for Active "Single Subject" for this specific subject
+    const singleSubjectSub = student.activeSubscriptions.find(sub => 
+      (sub.name === cleanName || sub.name === courseName) && 
+      sub.subscriptionType === 'single' && 
+      new Date() < new Date(sub.expiryDate)
     );
 
     // BYPASS FOR ADMIN/TEACHER OR MOCK COURSES
     const isBypass = req.user.role === 'admin' || req.user.role === 'teacher' || courseName.includes('(Mock)');
 
-    if (!subscription && !isBypass) {
-      return res.status(403).json({ message: 'No active subscription for this course', type: 'buy' });
-    }
-
-    if (subscription && new Date() > new Date(subscription.expiryDate) && !isBypass) {
-      return res.status(403).json({ message: 'Subscription expired', type: 'renew', expiryDate: subscription.expiryDate });
+    if (!fullCourseSub && !singleSubjectSub && !isBypass) {
+      return res.status(403).json({ 
+        message: 'No active subscription found. Subscribe to the Full Course or this individual subject to unlock.', 
+        type: 'buy' 
+      });
     }
 
     // Fetch recordings and materials using the clean name

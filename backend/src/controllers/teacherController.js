@@ -2,15 +2,29 @@ const User = require('../models/User');
 const LiveSession = require('../models/LiveSession');
 const Recording = require('../models/Recording');
 const Material = require('../models/Material');
+const Class = require('../models/Class');
+const Subject = require('../models/Subject');
 
 // @desc    Get teacher's assigned classes and subjects
 // @route   GET /api/teacher/my-classes
 // @access  Teacher
 exports.getMyClasses = async (req, res, next) => {
   try {
+    // Admin bypass: return all classes and subjects
+    if (req.user.role === 'admin') {
+      const [classes, subjects] = await Promise.all([
+        Class.find({}).sort({ level: 1 }),
+        Subject.find({}).sort({ classLevel: 1 })
+      ]);
+      const allAssignments = [
+        ...classes.map(c => ({ assignmentType: 'bundle', classLevel: c.name, subjectName: c.name })),
+        ...subjects.map(s => ({ assignmentType: 'subject', classLevel: `Class ${s.classLevel}`, subjectName: s.name, subjectId: s._id }))
+      ];
+      return res.status(200).json(allAssignments);
+    }
+
     const teacher = await User.findById(req.user._id);
     if (!teacher) return res.status(404).json({ message: 'Teacher not found' });
-
     res.status(200).json(teacher.assignedSubjects || []);
   } catch (error) {
     next(error);
@@ -22,6 +36,31 @@ exports.getMyClasses = async (req, res, next) => {
 // @access  Teacher
 exports.getMyAssignments = async (req, res, next) => {
   try {
+    // Admin bypass: return all classes and subjects formatted for dropdowns
+    if (req.user.role === 'admin') {
+      const [classes, subjects] = await Promise.all([
+        Class.find({}).sort({ level: 1 }),
+        Subject.find({}).sort({ classLevel: 1 })
+      ]);
+      const allAssignments = [
+        ...classes.map(c => ({
+          id: c._id,
+          name: `${c.name} (Full Bundle)`,
+          type: 'bundle',
+          classLevel: c.name,
+          subjectName: c.name
+        })),
+        ...subjects.map(s => ({
+          id: s._id,
+          name: `${s.name} (Class ${s.classLevel})`,
+          type: 'subject',
+          classLevel: `Class ${s.classLevel}`,
+          subjectName: s.name
+        }))
+      ];
+      return res.status(200).json(allAssignments);
+    }
+
     const teacher = await User.findById(req.user._id);
     if (!teacher) return res.status(404).json({ message: 'Teacher not found' });
 
@@ -34,7 +73,7 @@ exports.getMyAssignments = async (req, res, next) => {
       }
 
       return {
-        id: item.subjectId || item.classLevel, // fallback to classLevel for bundles
+        id: item.subjectId || item.classLevel,
         name: label,
         type: item.assignmentType,
         classLevel: item.classLevel,
@@ -81,7 +120,9 @@ exports.createLiveSession = async (req, res, next) => {
 // @access  Teacher
 exports.getLiveSessions = async (req, res, next) => {
   try {
-    const sessions = await LiveSession.find({ teacherId: req.user._id }).sort({ startTime: -1 });
+    // Admin sees ALL sessions; Teacher sees only their own
+    const query = req.user.role === 'admin' ? {} : { teacherId: req.user._id };
+    const sessions = await LiveSession.find(query).sort({ startTime: -1 });
     res.status(200).json(sessions);
   } catch (error) {
     next(error);
@@ -171,7 +212,9 @@ exports.uploadMaterial = async (req, res, next) => {
 // @access  Teacher
 exports.getMaterials = async (req, res, next) => {
   try {
-    const materials = await Material.find({ teacherId: req.user._id }).sort({ createdAt: -1 });
+    // Admin sees ALL materials; Teacher sees only their own
+    const query = req.user.role === 'admin' ? {} : { teacherId: req.user._id };
+    const materials = await Material.find(query).sort({ createdAt: -1 });
     res.status(200).json(materials);
   } catch (error) {
     next(error);

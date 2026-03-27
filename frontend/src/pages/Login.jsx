@@ -27,7 +27,7 @@ const Login = () => {
       } else if (user.role.toLowerCase() === 'teacher') {
         navigate('/teacher/dashboard');
       } else {
-        navigate('/dashboard');
+        navigate('/student/dashboard');
       }
     } catch (err) {
       setError(err.response?.data?.message || err.message);

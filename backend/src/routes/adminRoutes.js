@@ -1,14 +1,41 @@
 const express = require('express');
 const router = express.Router();
-const { updatePricing, getReports, getClassBundles, updateClassBundlePrice, getSubjects, addSubject, updateSubject, deleteSubject, getTeachersList, getStudentsList, extendSubscription, addTeacher, updateUser, deleteUser, updateBundleSubjects, addMaterial, getMaterials, assignSubjectToTeacher, removeAssignmentFromTeacher, addStudent, assignSubscription, getDashboardStats } = require('../controllers/adminController');
+const { 
+  updatePricing, 
+  getReports, 
+  getClassBundles, 
+  updateClassPricing, // Updated
+  getSubjects, 
+  addSubject, 
+  updateSubject, 
+  deleteSubject, 
+  getTeachersList, 
+  getStudentsList, 
+  extendSubscription, 
+  addTeacher, 
+  updateUser, 
+  deleteUser, 
+  updateBundleSubjects, 
+  addMaterial, 
+  getMaterials, 
+  assignSubjectToTeacher, 
+  removeAssignmentFromTeacher, 
+  addStudent, 
+  assignSubscription, 
+  getDashboardStats,
+  toggleStatus, // New
+  grantManualAccess // New
+} = require('../controllers/adminController');
 const { protect } = require('../middleware/authMiddleware');
 const { authorizeRoles } = require('../middleware/roleMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
 router.put('/pricing', protect, authorizeRoles('admin'), updatePricing);
 router.get('/classes', protect, authorizeRoles('admin'), getClassBundles);
-router.put('/classes/:id', protect, authorizeRoles('admin'), updateClassBundlePrice);
+router.put('/classes/:id', protect, authorizeRoles('admin'), updateClassPricing); // Updated
 router.put('/classes/:id/subjects', protect, authorizeRoles('admin'), updateBundleSubjects);
+router.put('/toggle-status', protect, authorizeRoles('admin'), toggleStatus); // New
+router.post('/grant-access', protect, authorizeRoles('admin'), grantManualAccess); // New
 
 router.get('/materials/:classId', protect, authorizeRoles('admin'), getMaterials);
 router.post('/materials', protect, authorizeRoles('admin'), upload.single('file'), addMaterial);

@@ -28,7 +28,7 @@ const Home = () => {
             <Link to="/register" className="btn-primary flex items-center gap-3 px-12 py-6 text-xl shadow-2xl shadow-indigo-300 transform hover:scale-105 active:scale-95 transition-all">
               Book a Free Demo <HiArrowRight />
             </Link>
-            <Link to="/store" className="btn-secondary px-12 py-6 text-xl hover:bg-slate-100 transition-all">
+            <Link to="/courses" className="btn-secondary px-12 py-6 text-xl hover:bg-slate-100 transition-all">
               Explore Courses
             </Link>
           </div>

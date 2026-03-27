@@ -12,9 +12,15 @@ const classBundleSchema = new mongoose.Schema({
     required: true,
     default: 0
   },
-  subjects: {
-    type: [String],
-    default: []
+  subjects: [
+    {
+      name: { type: String, required: true },
+      singleSubjectPrice: { type: Number, default: 0 }
+    }
+  ],
+  isActive: {
+    type: Boolean,
+    default: true
   },
   updatedAt: {
     type: Date,

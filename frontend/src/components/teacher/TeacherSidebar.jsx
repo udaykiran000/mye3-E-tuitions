@@ -1,22 +1,30 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate, Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../store/slices/authSlice';
 import { 
   LayoutDashboard, 
   Video, 
   BookOpen, 
-  Upload, 
   FileText,
-  Settings,
   LogOut,
-  Calendar
+  Home
 } from 'lucide-react';
 
 const TeacherSidebar = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/login');
+  };
+
   const menuItems = [
+    { icon: Home, label: 'Home', path: '/', exact: true },
     { icon: LayoutDashboard, label: 'Overview', path: '/teacher/dashboard' },
     { icon: BookOpen, label: 'My Classes', path: '/teacher/classes' },
     { icon: Video, label: 'Schedule Live', path: '/teacher/schedule-live' },
-    { icon: Upload, label: 'Recordings', path: '/teacher/recordings' },
     { icon: FileText, label: 'Study Materials', path: '/teacher/materials' },
   ];
 
@@ -31,19 +39,30 @@ const TeacherSidebar = () => {
 
       <nav className="flex-1 p-6 space-y-2 mt-4 overflow-y-auto">
         {menuItems.map((item, idx) => (
-          <NavLink
-            key={idx}
-            to={item.path}
-            className={({ isActive }) => `
-              flex items-center gap-4 px-6 py-4 rounded-2xl font-bold transition-all group
-              ${isActive 
-                ? 'bg-teal-600 text-white shadow-xl shadow-teal-900/20' 
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'}
-            `}
-          >
-            <item.icon className="w-5 h-5" />
-            <span>{item.label}</span>
-          </NavLink>
+          item.exact ? (
+            <Link
+              key={idx}
+              to={item.path}
+              className="flex items-center gap-4 px-6 py-4 rounded-2xl font-bold transition-all group text-slate-400 hover:text-white hover:bg-slate-800"
+            >
+              <item.icon className="w-5 h-5" />
+              <span>{item.label}</span>
+            </Link>
+          ) : (
+            <NavLink
+              key={idx}
+              to={item.path}
+              className={({ isActive }) => `
+                flex items-center gap-4 px-6 py-4 rounded-2xl font-bold transition-all group
+                ${isActive 
+                  ? 'bg-teal-600 text-white shadow-xl shadow-teal-900/20' 
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800'}
+              `}
+            >
+              <item.icon className="w-5 h-5" />
+              <span>{item.label}</span>
+            </NavLink>
+          )
         ))}
       </nav>
 
@@ -55,8 +74,11 @@ const TeacherSidebar = () => {
                <span className="text-sm font-black text-emerald-500">Online</span>
             </div>
          </div>
-        <button className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-all">
-          <LogOut className="w-5 h-5" />
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-rose-400 hover:text-white hover:bg-rose-600/20 transition-all group"
+        >
+          <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
           <span>Exit Suite</span>
         </button>
       </div>

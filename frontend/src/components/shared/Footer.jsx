@@ -30,7 +30,7 @@ const Footer = () => {
             <ul className="space-y-4 text-slate-400 font-medium">
               <li><Link to="/" className="hover:text-indigo-400 transition-colors">Home</Link></li>
               <li><Link to="/about" className="hover:text-indigo-400 transition-colors">About Mye3</Link></li>
-              <li><Link to="/store" className="hover:text-indigo-400 transition-colors">Our Courses</Link></li>
+              <li><Link to="/courses" className="hover:text-indigo-400 transition-colors">Our Courses</Link></li>
               <li><Link to="/login" className="hover:text-indigo-400 transition-colors">Account Login</Link></li>
             </ul>
           </div>
@@ -39,8 +39,8 @@ const Footer = () => {
           <div className="space-y-6">
             <h4 className="text-lg font-bold">Programs</h4>
             <ul className="space-y-4 text-slate-400 font-medium">
-              <li><Link to="/store" className="hover:text-indigo-400 transition-colors">Classes 6-10 (Bundles)</Link></li>
-              <li><Link to="/store" className="hover:text-indigo-400 transition-colors">Classes 11-12 (Subjects)</Link></li>
+              <li><Link to="/courses" className="hover:text-indigo-400 transition-colors">Classes 6-10 (Bundles)</Link></li>
+              <li><Link to="/courses" className="hover:text-indigo-400 transition-colors">Classes 11-12 (Subjects)</Link></li>
               <li><Link to="/about" className="hover:text-indigo-400 transition-colors">Free Resources</Link></li>
               <li><Link to="/register" className="hover:text-indigo-400 transition-colors">Join as Student</Link></li>
             </ul>

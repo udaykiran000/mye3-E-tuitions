@@ -5,6 +5,7 @@ const subscriptionSchema = new mongoose.Schema({
   type: { type: String, enum: ['bundle', 'subject'], required: true },
   referenceId: { type: String, required: true }, // Refers to Class or Subject (Flexible for Mock/Real)
   name: { type: String, required: true }, // e.g. "Class 10 Bundle" or "Physics Class 11"
+  subscriptionType: { type: String, enum: ['full', 'single'], default: 'full' },
   expiryDate: { type: Date, required: true }
 });
 

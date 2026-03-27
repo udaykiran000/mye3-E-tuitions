@@ -6,11 +6,56 @@ const seedData = async () => {
   try {
     // 1. Seed ClassBundles
     const defaultClasses = [
-      { className: 'Class 6', price: 999, subjects: ['Maths', 'Science', 'English', 'Social Studies'] },
-      { className: 'Class 7', price: 999, subjects: ['Maths', 'Science', 'English', 'Social Studies'] },
-      { className: 'Class 8', price: 1099, subjects: ['Maths', 'Science', 'English', 'Social Studies'] },
-      { className: 'Class 9', price: 1499, subjects: ['Maths', 'Science', 'Physics', 'Chemistry', 'Biology'] },
-      { className: 'Class 10', price: 1499, subjects: ['Maths', 'Science', 'Physics', 'Chemistry', 'Biology'] },
+      { 
+        className: 'Class 6', 
+        price: 999, 
+        subjects: [
+          { name: 'Maths', singleSubjectPrice: 299 },
+          { name: 'Science', singleSubjectPrice: 249 },
+          { name: 'English', singleSubjectPrice: 199 },
+          { name: 'Social Studies', singleSubjectPrice: 199 }
+        ] 
+      },
+      { 
+        className: 'Class 7', 
+        price: 999, 
+        subjects: [
+          { name: 'Maths', singleSubjectPrice: 299 },
+          { name: 'Science', singleSubjectPrice: 249 },
+          { name: 'English', singleSubjectPrice: 199 },
+          { name: 'Social Studies', singleSubjectPrice: 199 }
+        ] 
+      },
+      { 
+        className: 'Class 8', 
+        price: 1099, 
+        subjects: [
+          { name: 'Maths', singleSubjectPrice: 349 },
+          { name: 'Science', singleSubjectPrice: 299 },
+          { name: 'English', singleSubjectPrice: 199 },
+          { name: 'Social Studies', singleSubjectPrice: 199 }
+        ] 
+      },
+      { 
+        className: 'Class 9', 
+        price: 1499, 
+        subjects: [
+          { name: 'Maths', singleSubjectPrice: 499 },
+          { name: 'Physics', singleSubjectPrice: 399 },
+          { name: 'Chemistry', singleSubjectPrice: 399 },
+          { name: 'Biology', singleSubjectPrice: 399 }
+        ] 
+      },
+      { 
+        className: 'Class 10', 
+        price: 1499, 
+        subjects: [
+          { name: 'Maths', singleSubjectPrice: 499 },
+          { name: 'Physics', singleSubjectPrice: 399 },
+          { name: 'Chemistry', singleSubjectPrice: 399 },
+          { name: 'Biology', singleSubjectPrice: 399 }
+        ] 
+      },
     ];
 
     for (const classData of defaultClasses) {

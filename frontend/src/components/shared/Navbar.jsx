@@ -23,7 +23,7 @@ const Navbar = () => {
 
         <div className="hidden lg:flex items-center gap-10">
           <Link to="/" className="font-bold text-slate-600 hover:text-indigo-600 transition-colors">Home</Link>
-          <Link to="/store" className="font-bold text-slate-600 hover:text-indigo-600 transition-colors">Courses</Link>
+          <Link to="/courses" className="font-bold text-slate-600 hover:text-indigo-600 transition-colors">Courses</Link>
           <Link to="/about" className="font-bold text-slate-600 hover:text-indigo-600 transition-colors">About Mye3</Link>
         </div>
 
@@ -31,7 +31,7 @@ const Navbar = () => {
           {userInfo ? (
             <div className="flex items-center gap-4">
               <Link 
-                to={userInfo.role.toLowerCase() === 'admin' ? '/admin/dashboard' : userInfo.role.toLowerCase() === 'teacher' ? '/teacher/dashboard' : '/dashboard'}
+                to={userInfo.role.toLowerCase() === 'admin' ? '/admin/dashboard' : userInfo.role.toLowerCase() === 'teacher' ? '/teacher/dashboard' : '/student/dashboard'}
                 className="px-6 py-3 bg-slate-100 text-slate-900 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
               >
                 Dashboard

@@ -1,22 +1,29 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../store/slices/authSlice';
 import { 
   LayoutDashboard, 
-  Layers, 
-  BookOpen, 
+  IndianRupee, // Added
   Users, 
   UserSquare2, 
   CreditCard, 
-  MonitorPlay,
   Settings,
   LogOut
 } from 'lucide-react';
 
 const AdminSidebar = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/login');
+  };
+
   const menuItems = [
     { icon: LayoutDashboard, label: 'Overview', path: '/admin/dashboard' },
-    { icon: Layers, label: 'Class 6-10', path: '/admin/pricing/classes' },
-    { icon: BookOpen, label: 'Subject 11-12', path: '/admin/pricing/subjects' },
+    { icon: IndianRupee, label: 'Pricing Manager', path: '/admin/pricing' },
     { icon: UserSquare2, label: 'Teachers', path: '/admin/teachers' },
     { icon: Users, label: 'Students', path: '/admin/students' },
     { icon: CreditCard, label: 'Transactions', path: '/admin/transactions' },
@@ -51,9 +58,12 @@ const AdminSidebar = () => {
       </nav>
 
       <div className="p-6 border-t border-slate-800">
-        <button className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-all">
-          <Settings className="w-5 h-5" />
-          <span>Settings</span>
+        <button 
+          onClick={handleLogout}
+          className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-rose-400 hover:text-white hover:bg-rose-600/20 transition-all group"
+        >
+          <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
+          <span>Logout</span>
         </button>
       </div>
     </aside>

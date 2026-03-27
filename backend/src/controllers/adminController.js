@@ -80,7 +80,7 @@ exports.updateClassBundlePrice = async (req, res, next) => {
 // @access  Admin
 exports.getSubjects = async (req, res, next) => {
   try {
-    const subjects = await Subject.find({}).populate('teacherId', 'name email').sort({ classLevel: 1 });
+    const subjects = await Subject.find({}).sort({ classLevel: 1 });
     res.status(200).json(subjects);
   } catch (error) {
     next(error);
@@ -92,13 +92,11 @@ exports.getSubjects = async (req, res, next) => {
 // @access  Admin
 exports.addSubject = async (req, res, next) => {
   try {
-    const { subjectName, classLevel, price, description, teacherId } = req.body;
+    const { subjectName, classLevel, price } = req.body;
     const subject = await Subject.create({
-      subjectName,
-      classLevel,
-      price,
-      description,
-      teacherId: teacherId || null
+      name: subjectName, // Mapping subjectName to name
+      classLevel: Number(classLevel),
+      price: Number(price)
     });
     res.status(201).json(subject);
   } catch (error) {
@@ -419,6 +417,80 @@ exports.getMaterials = async (req, res, next) => {
   try {
     const materials = await Material.find({ classId: req.params.classId }).sort({ createdAt: -1 });
     res.status(200).json(materials);
+  } catch (error) {
+    next(error);
+  }
+};
+// @desc    Update pricing for a class (Full Course + Individual Subjects)
+// @route   PUT /api/admin/classes/:id
+// @access  Admin
+exports.updateClassPricing = async (req, res, next) => {
+  try {
+    const { price, subjects } = req.body;
+    const updateData = {};
+    if (price !== undefined) updateData.price = Number(price);
+    if (subjects !== undefined) updateData.subjects = subjects;
+
+    const bundle = await ClassBundle.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!bundle) return res.status(404).json({ message: 'Full Course not found' });
+    res.status(200).json(bundle);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Toggle Active status for Class (6-10) or Subject (11-12)
+// @route   PUT /api/admin/toggle-status
+// @access  Admin
+exports.toggleStatus = async (req, res, next) => {
+  try {
+    const { type, id, isActive } = req.body;
+    let item;
+
+    if (type === 'class') {
+      item = await ClassBundle.findByIdAndUpdate(id, { isActive }, { new: true });
+    } else {
+      item = await Subject.findByIdAndUpdate(id, { isActive }, { new: true });
+    }
+
+    if (!item) return res.status(404).json({ message: 'Item not found' });
+    res.status(200).json(item);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Manual Grant access to student via email
+// @route   POST /api/admin/grant-access
+// @access  Admin
+exports.grantManualAccess = async (req, res, next) => {
+  try {
+    const { email, type, referenceId, name, subscriptionType, durationDays } = req.body;
+    const student = await User.findOne({ email });
+
+    if (!student || student.role !== 'student') {
+      return res.status(404).json({ message: 'Student with this email not found' });
+    }
+
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + parseInt(durationDays || 365));
+
+    student.activeSubscriptions.push({
+      type, // 'bundle' or 'subject'
+      referenceId,
+      name,
+      subscriptionType: subscriptionType || 'full',
+      expiryDate
+    });
+
+    student.markModified('activeSubscriptions');
+    await student.save();
+    res.status(200).json({ message: `Access granted to ${student.name} successfully!` });
   } catch (error) {
     next(error);
   }

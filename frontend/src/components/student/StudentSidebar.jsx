@@ -1,21 +1,33 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate, Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../store/slices/authSlice';
 import { 
-  Home, 
+  LayoutDashboard, 
   BookOpen, 
   FileText, 
   CreditCard, 
   User, 
-  ShoppingBag,
   LogOut,
-  Sparkles
+  Sparkles,
+  Home,
+  ShoppingBag
 } from 'lucide-react';
 
 const StudentSidebar = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/login');
+  };
+
   const menuItems = [
-    { icon: Home, label: 'Dashboard', path: '/student/dashboard' },
-    { icon: BookOpen, label: 'My Learning', path: '/student/dashboard' }, // Linking to learning grid for now
-    { icon: ShoppingBag, label: 'Store', path: '/student/store' },
+    { icon: Home, label: 'Home', path: '/', end: true },
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/student/dashboard' },
+    { icon: BookOpen, label: 'My Learning', path: '/student/my-learning' },
+    { icon: ShoppingBag, label: 'Courses', path: '/student/courses' },
     { icon: FileText, label: 'Materials', path: '/student/materials' },
     { icon: CreditCard, label: 'Payments', path: '/student/payments' },
     { icon: User, label: 'Profile', path: '/student/profile' },
@@ -35,6 +47,7 @@ const StudentSidebar = () => {
           <NavLink
             key={idx}
             to={item.path}
+            end={item.end}
             className={({ isActive }) => `
               flex items-center gap-4 px-6 py-4 rounded-2xl font-bold transition-all group
               ${isActive 
@@ -55,8 +68,11 @@ const StudentSidebar = () => {
             <h3 className="text-2xl font-black leading-tight">5 Days</h3>
             <p className="text-[10px] mt-2 font-bold text-indigo-100/60">Keep it up! You're on fire.</p>
          </div>
-        <button className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all border border-transparent hover:border-rose-100">
-          <LogOut className="w-5 h-5" />
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all border border-transparent hover:border-rose-100 group"
+        >
+          <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
           <span>Logout</span>
         </button>
       </div>

@@ -55,7 +55,7 @@ const TeacherDashboard = () => {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
          <div className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm">
             <h2 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-3">
-               <Video className="text-teal-600" /> Recent Life Feed
+               <Video className="text-teal-600" /> Recent Live History
             </h2>
             <div className="space-y-4">
                {[1, 2].map(i => (

@@ -1,10 +1,19 @@
 import AdminSidebar from './AdminSidebar';
 import { HiBell, HiSearch } from 'react-icons/hi';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { logout } from '../../store/slices/authSlice';
 import { LogOut } from 'lucide-react';
 
 const AdminLayout = ({ children }) => {
   const { userInfo } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/login');
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
@@ -35,7 +44,10 @@ const AdminLayout = ({ children }) => {
                  <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-100 cursor-pointer">
                     {userInfo?.name?.charAt(0) || 'A'}
                  </div>
-                 <button className="flex items-center gap-2 px-4 py-2 text-rose-600 font-bold hover:bg-rose-50 rounded-xl transition-all ml-2 border border-rose-100">
+                 <button
+                   onClick={handleLogout}
+                   className="flex items-center gap-2 px-4 py-2 text-rose-600 font-bold hover:bg-rose-50 rounded-xl transition-all ml-2 border border-rose-100"
+                 >
                     <LogOut className="w-4 h-4" />
                     <span>Logout</span>
                  </button>

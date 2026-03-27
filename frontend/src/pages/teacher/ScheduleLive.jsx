@@ -3,10 +3,12 @@ import axios from 'axios';
 import { Video, Calendar, Clock, Link as LinkIcon, GraduationCap, Monitor, Target, Loader2, CheckCircle2 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import { usePreview } from '../../context/PreviewContext';
+import { useSelector } from 'react-redux';
 import CustomSelect from '../../components/common/CustomSelect';
 
 const ScheduleLive = () => {
   const { activeView } = usePreview();
+  const { userInfo } = useSelector((state) => state.auth);
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
@@ -22,21 +24,21 @@ const ScheduleLive = () => {
       try {
         const { data } = await axios.get('/api/teacher/my-assignments');
         
-        // MOCK DATA FOR ADMIN PREVIEW
-        if (activeView === 'admin' && data.length === 0) {
-          const mocks = [
+        const isStaff = activeView === 'admin' || userInfo?.role?.toLowerCase() === 'admin';
+
+        if (isStaff && data.length === 0) {
+          setClasses([
             { id: 'mock1', name: 'Class 10 (Full Bundle)', classLevel: 'Class 10', subjectName: 'All Subjects', type: 'bundle' },
             { id: 'mock2', name: 'Physics (Class 12)', classLevel: 'Class 12', subjectName: 'Physics', type: 'subject' },
             { id: 'mock3', name: 'Maths (Class 11)', classLevel: 'Class 11', subjectName: 'Maths', type: 'subject' },
-          ];
-          setClasses(mocks);
+          ]);
         } else {
           setClasses(data);
         }
         setLoading(false);
       } catch (error) {
-        // Fallback for preview
-        if (activeView === 'admin') {
+        const isStaff = activeView === 'admin' || userInfo?.role?.toLowerCase() === 'admin';
+        if (isStaff) {
           setClasses([
             { id: 'mock1', name: 'Class 10 (Full Bundle)', classLevel: 'Class 10', subjectName: 'All Subjects', type: 'bundle' },
             { id: 'mock2', name: 'Physics (Class 12)', classLevel: 'Class 12', subjectName: 'Physics', type: 'subject' },
@@ -46,7 +48,7 @@ const ScheduleLive = () => {
       }
     };
     fetchAssigned();
-  }, [activeView]);
+  }, [activeView, userInfo]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

@@ -9,6 +9,10 @@ const protect = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.user = await User.findById(decoded.userId).select('-password');
       
+      if (!req.user) {
+        return res.status(401).json({ message: 'User no longer exists. Please login again.' });
+      }
+      
       // Single device login enforcement
       if (req.user.currentDeviceToken && req.user.currentDeviceToken !== decoded.deviceToken) {
         return res.status(401).json({ message: 'Security: Logged in from another device. Please login again.' });

@@ -1,11 +1,20 @@
 import React from 'react';
 import TeacherSidebar from './TeacherSidebar';
-import { HiBell, HiSearch } from 'react-icons/hi';
-import { useSelector } from 'react-redux';
+import { HiBell } from 'react-icons/hi';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { logout } from '../../store/slices/authSlice';
 import { LogOut, UserCircle } from 'lucide-react';
 
 const TeacherLayout = ({ children }) => {
   const { userInfo } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/login');
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
@@ -33,6 +42,13 @@ const TeacherLayout = ({ children }) => {
                  <div className="w-11 h-11 bg-teal-600 rounded-xl flex items-center justify-center text-white font-black text-lg shadow-lg shadow-teal-100">
                     {userInfo?.name?.charAt(0) || <UserCircle className="w-6 h-6" />}
                  </div>
+                 <button
+                   onClick={handleLogout}
+                   className="flex items-center gap-2 px-4 py-2 text-rose-600 font-bold hover:bg-rose-50 rounded-xl transition-all border border-rose-100"
+                 >
+                    <LogOut className="w-4 h-4" />
+                    <span>Logout</span>
+                 </button>
               </div>
            </div>
         </header>

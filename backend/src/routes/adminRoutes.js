@@ -24,7 +24,8 @@ const {
   assignSubscription, 
   getDashboardStats,
   toggleStatus, // New
-  grantManualAccess // New
+  grantManualAccess, // New
+  getAllTransactions
 } = require('../controllers/adminController');
 const { protect } = require('../middleware/authMiddleware');
 const { authorizeRoles } = require('../middleware/roleMiddleware');
@@ -60,5 +61,6 @@ router.delete('/users/:id', protect, authorizeRoles('admin'), deleteUser);
 
 router.get('/stats', protect, authorizeRoles('admin'), getDashboardStats);
 router.get('/reports', protect, authorizeRoles('admin'), getReports);
+router.get('/transactions', protect, authorizeRoles('admin'), getAllTransactions);
 
 module.exports = router;

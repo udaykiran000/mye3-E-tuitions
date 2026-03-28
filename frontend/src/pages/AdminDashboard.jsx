@@ -2,23 +2,37 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { TrendingUp, Users, IndianRupee, BookOpen, Clock, Activity, Calendar, Loader2, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { 
+  AreaChart, 
+  Area, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer 
+} from 'recharts';
 
 const AdminDashboard = () => {
   const [statsData, setStatsData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isChartReady, setIsChartReady] = useState(false);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const { data } = await axios.get('/api/admin/stats');
+        const { data } = await axios.get('/admin/stats');
         setStatsData(data);
         setLoading(false);
       } catch (error) {
-        console.error('Failed to fetch dashboard stats');
+        console.error('DASHBOARD ERROR:', error);
         setLoading(false);
       }
     };
     fetchStats();
+
+    // The Universal Fix for Recharts dimension warnings:
+    const timer = setTimeout(() => setIsChartReady(true), 150);
+    return () => clearTimeout(timer);
   }, []);
 
   if (loading) return (
@@ -28,10 +42,10 @@ const AdminDashboard = () => {
   );
 
   const stats = [
-    { label: 'Total Revenue', value: statsData ? `₹${statsData.totalRevenue?.toLocaleString()}` : '₹0', icon: IndianRupee, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Total Students', value: statsData?.totalStudents || '0', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    { label: 'Active Teachers', value: statsData?.totalTeachers || '0', icon: Activity, color: 'text-amber-600', bg: 'bg-amber-50' },
-    { label: 'Expiring Soon', value: statsData?.expiringSoon || '0', icon: Clock, color: 'text-rose-600', bg: 'bg-rose-50' },
+    { label: 'Total Revenue', value: statsData?.totalRevenue ? `₹${Number(statsData.totalRevenue).toLocaleString('en-IN')}` : '₹0', icon: IndianRupee, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: 'Total Students', value: statsData?.totalStudents?.toString() || '0', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    { label: 'Active Teachers', value: statsData?.totalTeachers?.toString() || '0', icon: Activity, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { label: 'Live Now', value: statsData?.liveSessionsCount?.toString() || '0', icon: TrendingUp, color: 'text-rose-600', bg: 'bg-rose-50' },
   ];
 
   return (
@@ -49,17 +63,20 @@ const AdminDashboard = () => {
       
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, idx) => (
-          <div key={idx} className="premium-card p-8 flex items-center gap-6 border-none shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] bg-white group hover:scale-[1.02] transition-all">
-            <div className={`w-16 h-16 rounded-2xl ${stat.bg} ${stat.color} flex items-center justify-center text-3xl group-hover:rotate-6 transition-transform`}>
-              <stat.icon className="w-8 h-8" />
+        {stats.map((stat, idx) => {
+          const Icon = stat.icon;
+          return (
+            <div key={idx} className="premium-card bg-white p-8 flex items-center gap-6 border-none shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] group hover:scale-[1.02] transition-all">
+              <div className={`w-16 h-16 rounded-2xl ${stat.bg} ${stat.color} flex items-center justify-center text-3xl group-hover:rotate-6 transition-transform`}>
+                <Icon className="w-8 h-8" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">{stat.label}</p>
+                <p className="text-3xl font-black text-slate-900 mt-1">{stat.value}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">{stat.label}</p>
-              <p className="text-3xl font-black text-slate-900 mt-1">{stat.value}</p>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Feature Quick Access for Students (Addressing user's concern about visibility) */}
@@ -109,21 +126,58 @@ const AdminDashboard = () => {
                    ))}
                 </div>
              </div>
-             <div className="h-64 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-100 flex flex-col items-center justify-center p-8">
-                <div className="text-center space-y-4">
-                   <TrendingUp className="w-12 h-12 text-indigo-100 mx-auto" />
-                   <div className="space-y-1">
-                      <p className="text-slate-900 font-extrabold text-sm uppercase tracking-widest">Revenue Analytics Integration</p>
-                      <p className="text-slate-400 text-xs font-bold max-w-xs mx-auto">Connecting to Razorpay API for live daily revenue visualization...</p>
+             <div className="h-72 w-full mt-6 overflow-hidden">
+                {(isChartReady && statsData?.revenueChartData) ? (
+                   <ResponsiveContainer width="100%" height={280}>
+                      <AreaChart 
+                        data={statsData.revenueChartData} 
+                        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                      >
+                         <defs>
+                            <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                               <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.3}/>
+                               <stop offset="95%" stopColor="#4f46e5" stopOpacity={0}/>
+                            </linearGradient>
+                         </defs>
+                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                         <XAxis 
+                           dataKey="name" 
+                           axisLine={false} 
+                           tickLine={false} 
+                           tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 'bold'}}
+                           dy={10}
+                         />
+                         <YAxis 
+                           axisLine={false} 
+                           tickLine={false} 
+                           tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 'bold'}}
+                           tickFormatter={(val) => `₹${val}`}
+                         />
+                         <Tooltip 
+                           contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontWeight: 'bold'}}
+                         />
+                         <Area 
+                           type="monotone" 
+                           dataKey="revenue" 
+                           stroke="#4f46e5" 
+                           strokeWidth={4}
+                           fillOpacity={1} 
+                           fill="url(#colorRev)" 
+                         />
+                      </AreaChart>
+                   </ResponsiveContainer>
+                ) : (
+                   <div className="h-full w-full flex items-center justify-center bg-slate-50 rounded-3xl animate-pulse">
+                      <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest text-center">Optimizing Analytics Hub...</p>
                    </div>
-                </div>
+                )}
              </div>
           </div>
 
           <div className="premium-card overflow-hidden bg-white">
             <div className="p-8 border-b border-slate-50 flex items-center justify-between">
               <h2 className="text-xl font-black text-slate-900">Recent Transactions</h2>
-              <button className="text-xs font-black text-indigo-600 hover:underline px-4 py-2 bg-indigo-50 rounded-xl transition-all">View All</button>
+              <Link to="/admin/transactions" className="text-xs font-black text-indigo-600 hover:underline px-4 py-2 bg-indigo-50 rounded-xl transition-all">View All</Link>
             </div>
             <div className="overflow-x-auto">
                <table className="w-full text-left">
@@ -137,25 +191,25 @@ const AdminDashboard = () => {
                    </tr>
                  </thead>
                  <tbody className="text-sm border-t border-slate-50 divide-y divide-slate-50">
-                   {[
-                     { name: 'Rahul Sharma', pkg: 'Class 10 Bundle', amt: '₹1,499', status: 'SUCCESS', date: 'March 24, 2:30 PM' },
-                     { name: 'Priya Patel', pkg: 'Physics (Class 12)', amt: '₹599', status: 'SUCCESS', date: 'March 24, 1:15 PM' },
-                     { name: 'Ankit Verma', pkg: 'Maths (Class 11)', amt: '₹499', status: 'PENDING', date: 'March 23, 6:45 PM' },
-                     { name: 'Sneha Reddy', pkg: 'Class 9 Bundle', amt: '₹1,499', status: 'SUCCESS', date: 'March 23, 4:20 PM' },
-                     { name: 'Vikram Singh', pkg: 'Class 10 Bundle', amt: '₹1,499', status: 'SUCCESS', date: 'March 23, 11:05 AM' }
-                   ].map((txn, i) => (
-                     <tr key={i} className="hover:bg-slate-50/80 transition-all group">
-                       <td className="px-8 py-5 font-black text-slate-900">{txn.name}</td>
-                       <td className="px-8 py-5 text-slate-600 font-bold">{txn.pkg}</td>
-                       <td className="px-8 py-5 font-black text-slate-900">{txn.amt}</td>
-                       <td className="px-8 py-5">
-                          <span className={`px-3 py-1 text-[10px] font-black rounded-lg tracking-wider ${txn.status === 'SUCCESS' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
-                             {txn.status}
-                          </span>
-                       </td>
-                       <td className="px-8 py-5 text-slate-400 font-bold">{txn.date}</td>
-                     </tr>
-                   ))}
+                    {statsData?.recentTransactions?.length > 0 ? statsData.recentTransactions.map((txn, i) => (
+                      <tr key={i} className="hover:bg-slate-50/80 transition-all group">
+                        <td className="px-8 py-5 font-black text-slate-900">{txn.name}</td>
+                        <td className="px-8 py-5 text-slate-600 font-bold uppercase tracking-tight">{txn.packageName}</td>
+                        <td className="px-8 py-5 font-black text-slate-900">{txn.amount}</td>
+                        <td className="px-8 py-5">
+                           <span className={`px-3 py-1 text-[10px] font-black rounded-lg tracking-wider ${txn.status === 'SUCCESS' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+                              {txn.status}
+                           </span>
+                        </td>
+                        <td className="px-8 py-5 text-slate-400 font-bold lowercase tracking-tight">
+                           {new Date(txn.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                        </td>
+                      </tr>
+                    )) : (
+                      <tr>
+                        <td colSpan="5" className="px-8 py-20 text-center italic font-bold text-slate-300">No recent activity detected</td>
+                      </tr>
+                    )}
                  </tbody>
                </table>
             </div>
@@ -170,29 +224,36 @@ const AdminDashboard = () => {
                     <Activity className="text-indigo-400 w-6 h-6 animate-pulse" />
                     <h2 className="text-xl font-black tracking-tight uppercase">Live Hub</h2>
                  </div>
-                 <span className="px-3 py-1 bg-white/10 text-white text-[10px] font-black rounded-lg backdrop-blur-md">3 ACTIVE</span>
+                 <span className="px-3 py-1 bg-white/10 text-white text-[10px] font-black rounded-lg backdrop-blur-md">{statsData?.activeSessions?.length || 0} ACTIVE</span>
               </div>
               
               <div className="space-y-6">
-                 {[
-                   { sub: 'Linear Equations', prof: 'Prof. Arjun Singh', class: 'Class 9', color: 'border-indigo-500/30 text-indigo-400' },
-                   { sub: 'Quantum Mech.', prof: 'Dr. Emily Watson', class: 'Class 12', color: 'border-emerald-500/30 text-emerald-400' }
-                 ].map((c, i) => (
-                    <div key={i} className={`p-6 bg-white/5 rounded-3xl border ${c.color} space-y-4 hover:bg-white/10 transition-all cursor-pointer group`}>
-                       <div className="flex justify-between items-start">
-                          <p className="font-black text-lg group-hover:text-white transition-colors">{c.sub}</p>
-                          <span className="w-2 h-2 bg-rose-500 rounded-full animate-ping"></span>
-                       </div>
-                       <div className="space-y-2">
-                          <p className="text-xs font-bold text-white/50">Tutor: {c.prof}</p>
-                          <div className="flex items-center gap-2">
-                             <span className="px-2 py-0.5 bg-white/10 rounded-md text-[9px] font-black tracking-widest uppercase">{c.class}</span>
-                             <span className="text-[9px] font-black text-white/30 uppercase tracking-widest underline decoration-indigo-500 decoration-2 underline-offset-4">Join Session</span>
-                          </div>
-                       </div>
-                    </div>
-                 ))}
-                 <button className="w-full py-5 text-xs font-black uppercase tracking-widest border border-white/10 rounded-2xl hover:bg-white/10 transition-all text-white/60 hover:text-white">Audit Active Sessions</button>
+                  {statsData?.activeSessions?.length > 0 ? statsData.activeSessions.map((c, i) => (
+                     <div key={i} className="p-6 bg-white/5 rounded-3xl border border-indigo-500/30 text-indigo-400 space-y-4 hover:bg-white/10 transition-all cursor-pointer group">
+                        <div className="flex justify-between items-start">
+                           <p className="font-black text-lg group-hover:text-white transition-colors uppercase tracking-tight">{c.title}</p>
+                           <span className="w-2 h-2 bg-rose-500 rounded-full animate-ping"></span>
+                        </div>
+                        <div className="space-y-2">
+                           <p className="text-xs font-bold text-white/50">Tutor: {c.teacherId?.name}</p>
+                           <div className="flex items-center gap-2">
+                              <span className="px-2 py-0.5 bg-white/10 rounded-md text-[9px] font-black tracking-widest uppercase">{c.subjectName}</span>
+                              <span className="text-[9px] font-black text-white/30 uppercase tracking-widest underline decoration-indigo-500 decoration-2 underline-offset-4">Join Session</span>
+                           </div>
+                        </div>
+                     </div>
+                  )) : (
+                     <div className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/10 opacity-30">
+                        <Activity className="w-10 h-10 mx-auto mb-4" />
+                        <p className="text-[10px] font-black uppercase tracking-widest">No Sessions Live</p>
+                     </div>
+                  )}
+                  <Link 
+                    to="/admin/live-monitor"
+                    className="w-full py-5 text-[10px] flex items-center justify-center font-black uppercase tracking-widest border border-white/10 rounded-2xl hover:bg-white/10 transition-all text-white/60 hover:text-white"
+                  >
+                    Audit Active Sessions
+                  </Link>
               </div>
            </div>
 

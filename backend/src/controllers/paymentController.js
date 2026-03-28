@@ -2,6 +2,7 @@ const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const User = require('../models/User');
 const Payment = require('../models/Payment');
+const Transaction = require('../models/Transaction');
 
 if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
     console.warn("WARN: Razorpay keys are missing from environment variables.");
@@ -11,6 +12,20 @@ const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID || 'dummy_key',
   key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummy_secret',
 });
+
+exports.getPaymentConfig = async (req, res, next) => {
+  try {
+    const keyId = process.env.RAZORPAY_KEY_ID;
+    const isMock = !keyId || keyId === 'testmode' || keyId.includes('YOUR_');
+    
+    res.status(200).json({
+      mode: isMock ? 'test' : 'live',
+      keyId: isMock ? null : keyId
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 exports.createOrder = async (req, res, next) => {
   try {
@@ -75,6 +90,17 @@ exports.razorpayWebhook = async (req, res, next) => {
         });
 
         await user.save();
+
+        // Create Transaction History Record
+        await Transaction.create({
+          studentId: paymentRecord.userId,
+          amount: paymentRecord.amount,
+          status: 'success',
+          packageName: type === 'bundle' ? 'Class Bundle Subscription' : 'Individual Subject Access',
+          referenceId: referenceIds[0], // First ID as primary reference
+          type: type,
+          date: now
+        });
       }
 
       res.status(200).json({ status: 'ok' });

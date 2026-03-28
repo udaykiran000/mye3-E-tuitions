@@ -7,7 +7,14 @@ import ErrorBoundary from './components/shared/ErrorBoundary.jsx'
 import axios from 'axios'
 import './index.css'
 
-// Send cookies (httpOnly JWT) with every request automatically
+// Global Axios Configuration (Automatically appends /api and handles Proxy vs. Production)
+const backendUrl = import.meta.env.VITE_API_URL || '';
+const isLocal = backendUrl.includes('localhost') || backendUrl.includes('127.0.0.1');
+
+axios.defaults.baseURL = (isLocal || !backendUrl) 
+  ? '/api' 
+  : backendUrl.endsWith('/') ? `${backendUrl}api` : `${backendUrl}/api`;
+
 axios.defaults.withCredentials = true;
 
 ReactDOM.createRoot(document.getElementById('root')).render(

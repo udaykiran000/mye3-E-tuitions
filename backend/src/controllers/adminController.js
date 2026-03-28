@@ -4,6 +4,8 @@ const User = require('../models/User');
 const Payment = require('../models/Payment');
 const ClassBundle = require('../models/ClassBundle');
 const Material = require('../models/Material');
+const Transaction = require('../models/Transaction');
+const LiveSession = require('../models/LiveSession');
 
 exports.updatePricing = async (req, res, next) => {
   try {
@@ -265,10 +267,58 @@ exports.getDashboardStats = async (req, res, next) => {
   try {
     const studentCount = await User.countDocuments({ role: 'student' });
     const teacherCount = await User.countDocuments({ role: 'teacher' });
+    const liveSessions = await LiveSession.find({ status: 'live' }).populate('teacherId', 'name').sort({ createdAt: -1 });
+    const liveCount = liveSessions.length;
     
-    // Revenue logic (placeholder until payment model is robust)
-    const revenue = 124500; // This can be sum of all payments
-    
+    // Revenue logic - Sum of all successful payments/transactions
+    const [txs, payments] = await Promise.all([
+      Transaction.find({ status: 'success' }).populate('studentId', 'name email').sort({ date: -1 }),
+      Payment.find({ status: 'captured' }).populate('userId', 'name email').sort({ createdAt: -1 })
+    ]);
+
+    const totalRevenue = txs.reduce((acc, curr) => acc + curr.amount, 0) + 
+                         payments.reduce((acc, curr) => acc + curr.amount, 0);
+
+    // --- CHART DATA LOGIC: Last 7 Days ---
+    const chartData = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      
+      // Filter transactions and payments for this specific day
+      const dailyTx = txs.filter(t => new Date(t.date || t.createdAt).toDateString() === date.toDateString());
+      const dailyPay = payments.filter(p => new Date(p.createdAt).toDateString() === date.toDateString());
+      
+      const dailySum = dailyTx.reduce((acc, curr) => acc + curr.amount, 0) + 
+                       dailyPay.reduce((acc, curr) => acc + curr.amount, 0);
+      
+      chartData.push({ name: dateStr, revenue: dailySum });
+    }
+
+    // Normalize and take top 5 for "Recent Transactions"
+    const normalizedPayments = payments.map(p => ({
+      _id: p._id,
+      name: p.userId?.name || 'Manual Grant',
+      packageName: p.subscriptionDetails.type === 'bundle' ? 'Class Bundle' : 'Individual Subject',
+      amount: `₹${p.amount.toLocaleString()}`,
+      status: 'SUCCESS',
+      date: p.createdAt
+    }));
+
+    const normalizedtxs = txs.map(t => ({
+      _id: t._id,
+      name: t.studentId?.name || 'Manual Grant',
+      packageName: t.packageName,
+      amount: `₹${t.amount.toLocaleString()}`,
+      status: t.status === 'success' ? 'SUCCESS' : t.status.toUpperCase(),
+      date: t.date || t.createdAt
+    }));
+
+    const recentTransactions = [...normalizedtxs, ...normalizedPayments]
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 5);
+
     // Expiring soon logic
     const now = new Date();
     const thirtyDaysLater = new Date();
@@ -282,8 +332,12 @@ exports.getDashboardStats = async (req, res, next) => {
     res.status(200).json({
       totalStudents: studentCount,
       totalTeachers: teacherCount,
-      totalRevenue: revenue,
-      expiringSoon: expiringSoonCount
+      totalRevenue,
+      expiringSoon: expiringSoonCount,
+      liveSessionsCount: liveCount,
+      activeSessions: liveSessions.slice(0, 2),
+      recentTransactions,
+      revenueChartData: chartData
     });
   } catch (error) {
     next(error);
@@ -490,7 +544,50 @@ exports.grantManualAccess = async (req, res, next) => {
 
     student.markModified('activeSubscriptions');
     await student.save();
+
+    // Create Transaction Record for History
+    await Transaction.create({
+      studentId: student._id,
+      amount: 0, // Manual grant is usually free or handled differently
+      status: 'success',
+      packageName: `Manual Grant: ${name}`,
+      referenceId: referenceId,
+      type: type,
+      date: new Date()
+    });
+
     res.status(200).json({ message: `Access granted to ${student.name} successfully!` });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get all platform transactions
+// @route   GET /api/admin/transactions
+// @access  Admin
+exports.getAllTransactions = async (req, res, next) => {
+  try {
+    const [txs, payments] = await Promise.all([
+      Transaction.find({}).populate('studentId', 'name email').sort({ createdAt: -1 }),
+      Payment.find({ status: 'captured' }).populate('userId', 'name email').sort({ createdAt: -1 })
+    ]);
+
+    // Normalize payments into transaction format
+    const normalizedPayments = payments.map(p => ({
+      _id: p._id,
+      studentId: p.userId,
+      amount: p.amount,
+      status: 'success', // 'captured' means success
+      packageName: p.subscriptionDetails.type === 'bundle' ? 'Class Bundle' : 'Individual Subject',
+      type: p.subscriptionDetails.type,
+      referenceId: p.subscriptionDetails.referenceIds[0],
+      date: p.createdAt,
+      isLegacy: true
+    }));
+
+    const allTransactions = [...txs, ...normalizedPayments].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    res.status(200).json(allTransactions);
   } catch (error) {
     next(error);
   }

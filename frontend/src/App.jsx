@@ -20,6 +20,8 @@ import StudentManagement from './pages/admin/StudentManagement';
 
 import ManageClasses from './pages/admin/ManageClasses';
 import ManageSubjects from './pages/admin/ManageSubjects';
+import AdminTransactions from './pages/admin/AdminTransactions';
+import LiveMonitor from './pages/admin/LiveMonitor';
 
 // Teacher Pages
 import TeacherLayout from './components/teacher/TeacherLayout';
@@ -33,6 +35,8 @@ import TeacherMaterials from './pages/teacher/TeacherMaterials';
 import StudentLayout from './components/student/StudentLayout';
 import StudentCourseContent from './pages/student/StudentCourseContent';
 import MyLearning from './pages/student/MyLearning';
+import ProfileSettings from './pages/shared/ProfileSettings';
+import PaymentHistory from './pages/student/PaymentHistory';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, role }) => {
@@ -75,8 +79,8 @@ function AppContent() {
                       <Route path="courses" element={<StudentStore />} />
                       <Route path="classes/:courseName" element={<StudentCourseContent />} />
                       <Route path="materials" element={<div className="text-2xl font-black text-slate-300 italic pt-20 text-center uppercase tracking-widest leading-loose">Materials Hub<br/><span className="text-sm opacity-50">Centralized Resource Archive coming soon...</span></div>} />
-                      <Route path="payments" element={<div className="text-2xl font-black text-slate-300 italic pt-20 text-center uppercase tracking-widest leading-loose">Payment History<br/><span className="text-sm opacity-50">Transaction Audit Logs coming soon...</span></div>} />
-                      <Route path="profile" element={<div className="text-2xl font-black text-slate-300 italic pt-20 text-center uppercase tracking-widest leading-loose">Profile Settings<br/><span className="text-sm opacity-50">Account Management coming soon...</span></div>} />
+                      <Route path="payments" element={<PaymentHistory />} />
+                      <Route path="profile" element={<ProfileSettings role="Student" />} />
                     </Routes>
                   </StudentLayout>
                 </ProtectedRoute>
@@ -92,6 +96,7 @@ function AppContent() {
                       <Route path="classes" element={<MyClasses />} />
                       <Route path="schedule-live" element={<ScheduleLive />} />
                       <Route path="materials" element={<TeacherMaterials />} />
+                      <Route path="profile" element={<ProfileSettings role="Teacher" />} />
                     </Routes>
                   </TeacherLayout>
                 </ProtectedRoute>
@@ -109,9 +114,9 @@ function AppContent() {
                       <Route path="pricing/subjects" element={<Navigate to="/admin/pricing" replace />} />
                       <Route path="teachers" element={<TeacherManagement />} />
                       <Route path="students" element={<ManageStudents />} />
-                      <Route path="transactions" element={<div className="text-2xl font-black text-slate-300 italic pt-20 text-center uppercase tracking-widest">Transaction History Logs...</div>} />
-                      <Route path="settings" element={<div className="text-2xl font-black text-slate-300 italic pt-20 text-center uppercase tracking-widest">Admin Suite Settings...</div>} />
-                      <Route path="live-monitor" element={<div className="text-2xl font-black text-slate-300 italic pt-20 text-center uppercase tracking-widest">Live Class Audit Hub...</div>} />
+                      <Route path="transactions" element={<AdminTransactions />} />
+                      <Route path="settings" element={<ProfileSettings role="Admin" />} />
+                      <Route path="live-monitor" element={<LiveMonitor />} />
                     </Routes>
                   </AdminLayout>
                 </ProtectedRoute>

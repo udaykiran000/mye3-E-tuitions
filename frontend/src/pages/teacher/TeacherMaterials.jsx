@@ -57,8 +57,8 @@ const TeacherMaterials = () => {
     const fetchData = async () => {
       try {
         const [mRes, aRes] = await Promise.all([
-          axios.get('/api/teacher/materials'),
-          axios.get('/api/teacher/my-assignments')
+          axios.get('/teacher/materials'),
+          axios.get('/teacher/my-assignments')
         ]);
         
         setMaterials(mRes.data);
@@ -102,7 +102,7 @@ const TeacherMaterials = () => {
         submitData.append('fileUrl', formData.fileUrl);
       }
 
-      const { data } = await axios.post('/api/teacher/materials', submitData);
+      const { data } = await axios.post('/teacher/materials', submitData);
 
       setMaterials([data.material, ...materials]);
       
@@ -124,7 +124,7 @@ const TeacherMaterials = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this material?')) return;
     try {
-      await axios.delete(`/api/teacher/materials/${id}`);
+      await axios.delete(`/teacher/materials/${id}`);
       setMaterials(materials.filter(m => m._id !== id));
       toast.success('Deleted successfully');
     } catch (error) {
@@ -139,57 +139,58 @@ const TeacherMaterials = () => {
   );
 
   return (
-    <div className="space-y-10 animate-in fade-in duration-700 pb-20">
+    <div className="space-y-8 md:space-y-10 animate-in fade-in duration-700 pb-20 p-4 md:p-6">
       <Toaster position="top-right" />
       
       {/* Header compact */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-6 md:p-8 rounded-[30px] border border-slate-100 shadow-sm">
-         <div className="space-y-1">
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Study Materials Hub</h1>
-            <p className="text-slate-400 text-sm font-bold">Manage resources for your assigned classes</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
+         <div className="absolute top-0 right-0 w-64 h-64 bg-teal-50 rounded-full -mr-32 -mt-32 blur-3xl opacity-50" />
+         <div className="space-y-1 relative z-10">
+            <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Study Materials</h1>
+            <p className="text-slate-400 text-sm md:text-base font-bold italic">Manage resources for your assigned classes</p>
          </div>
          <button 
            onClick={() => setShowModal(true)}
-           className="px-6 py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-slate-900/10"
+           className="w-full md:w-auto px-6 py-4 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-teal-600 transition-all shadow-xl shadow-slate-900/10 relative z-10"
          >
             <Plus className="w-4 h-4" /> Add Material
          </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
          {materials.length === 0 ? (
-           <div className="col-span-full py-20 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[40px] text-center space-y-4">
-              <FileBox className="w-16 h-16 text-slate-200 mx-auto" />
-              <p className="text-slate-400 font-black text-lg italic uppercase tracking-widest">No materials uploaded yet</p>
+           <div className="col-span-full py-16 md:py-20 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl text-center space-y-4">
+              <FileBox className="w-12 h-12 md:w-16 md:h-16 text-slate-200 mx-auto" />
+              <p className="text-slate-400 font-black text-base md:text-lg italic uppercase tracking-widest px-6">No materials uploaded yet</p>
            </div>
          ) : materials.map((m) => (
-           <div key={m._id} className="bg-white rounded-[35px] border border-slate-100 shadow-sm overflow-hidden group hover:shadow-xl hover:shadow-indigo-900/5 transition-all flex flex-col p-6">
+           <div key={m._id} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden group hover:shadow-xl hover:shadow-indigo-900/5 transition-all flex flex-col p-6">
               <div className="flex items-start justify-between mb-4">
-                 <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
-                    <FileText className="w-6 h-6" />
+                 <div className="w-10 h-10 md:w-12 md:h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 shrink-0">
+                    <FileText className="w-5 h-5 md:w-6 md:h-6" />
                  </div>
                  <button 
                    onClick={() => handleDelete(m._id)}
-                   className="p-2.5 bg-rose-50 text-rose-600 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-600 hover:text-white"
+                   className="p-2.5 bg-rose-50 text-rose-600 rounded-lg md:opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-600 hover:text-white"
                  >
                     <Trash2 className="w-4 h-4" />
                  </button>
               </div>
 
               <div className="flex-1 space-y-2">
-                 <div className="flex items-center gap-2 mb-1">
+                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <span className="px-2 py-0.5 bg-slate-900 text-white text-[8px] font-black rounded uppercase tracking-tighter">
                        {m.type}
                     </span>
-                    <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">
+                    <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest truncate max-w-[200px]">
                        {m.classLevel} • {m.subjectName}
                     </span>
                  </div>
-                 <h3 className="text-lg font-black text-slate-900 leading-tight line-clamp-2">{m.title}</h3>
+                 <h3 className="text-base md:text-lg font-black text-slate-900 leading-tight line-clamp-2 uppercase tracking-tight">{m.title}</h3>
               </div>
 
               <div className="mt-6 pt-4 border-t border-slate-50 flex items-center justify-between">
-                 <p className="text-[9px] font-bold text-slate-400">
+                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                     {new Date(m.createdAt).toLocaleDateString('en-GB')}
                  </p>
                  <a 

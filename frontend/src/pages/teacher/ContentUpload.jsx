@@ -15,7 +15,7 @@ const ContentUpload = () => {
   useEffect(() => {
     const fetchAssigned = async () => {
       try {
-        const { data } = await axios.get('/api/teacher/my-classes');
+        const { data } = await axios.get('/teacher/my-classes');
         setClasses(data);
         setLoading(false);
       } catch (error) {
@@ -38,7 +38,7 @@ const ContentUpload = () => {
         subjectName: course.subjectName,
       };
       
-      await axios.post('/api/teacher/recordings', payload);
+      await axios.post('/teacher/recordings', payload);
       toast.success('Lecture Video Linked Successfully!');
       setFormData({
         courseString: '',

@@ -7,7 +7,8 @@ const {
   getMyLearning,
   getMaterialsByAssignment,
   processMockPayment,
-  getCatalog
+  getCatalog,
+  getMyTransactions
 } = require('../controllers/studentController');
 const { protect } = require('../middleware/authMiddleware');
 const { authorizeRoles } = require('../middleware/roleMiddleware');
@@ -23,5 +24,6 @@ router.get('/content/:courseName', getCourseContent);
 router.get('/materials/:assignmentId', getMaterialsByAssignment);
 router.post('/mock-payment-success', processMockPayment);
 router.get('/catalog', getCatalog);
+router.get('/transactions', getMyTransactions);
 
 module.exports = router;

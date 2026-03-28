@@ -240,3 +240,15 @@ exports.getMaterialsByAssignment = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get student's transaction history
+// @route   GET /api/student/transactions
+// @access  Student
+exports.getMyTransactions = async (req, res, next) => {
+  try {
+    const transactions = await Transaction.find({ studentId: req.user._id }).sort({ createdAt: -1 });
+    res.status(200).json(transactions);
+  } catch (error) {
+    next(error);
+  }
+};

@@ -18,7 +18,7 @@ const ManageSubjects = () => {
 
   const fetchSubjects = async () => {
     try {
-      const { data } = await axios.get('/api/subjects');
+      const { data } = await axios.get('/subjects');
       setSubjects(data);
       setLoading(false);
     } catch (error) {
@@ -35,10 +35,10 @@ const ManageSubjects = () => {
     e.preventDefault();
     try {
       if (editingId) {
-        await axios.put(`/api/subjects/${editingId}`, formData);
+        await axios.put(`/subjects/${editingId}`, formData);
         toast.success(`${formData.name} updated successfully!`);
       } else {
-        await axios.post('/api/subjects', formData);
+        await axios.post('/subjects', formData);
         toast.success(`${formData.name} added to Class ${formData.classLevel}!`);
       }
       resetForm();
@@ -51,7 +51,7 @@ const ManageSubjects = () => {
   const handleDelete = async (id, name) => {
     if (window.confirm(`Are you sure you want to remove ${name}?`)) {
       try {
-        await axios.delete(`/api/subjects/${id}`);
+        await axios.delete(`/subjects/${id}`);
         toast.success(`${name} deleted`);
         fetchSubjects();
       } catch (error) {

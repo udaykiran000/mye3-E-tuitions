@@ -27,9 +27,9 @@ const ManageStudents = () => {
   const fetchData = async () => {
     try {
       const [studentRes, bundleRes, subjectRes] = await Promise.all([
-        axios.get('/api/admin/students'),
-        axios.get('/api/admin/classes'),
-        axios.get('/api/subjects')
+        axios.get('/admin/students'),
+        axios.get('/admin/classes'),
+        axios.get('/subjects')
       ]);
       setStudents(studentRes.data);
       setBundles(bundleRes.data);
@@ -48,7 +48,7 @@ const ManageStudents = () => {
   const handleAddStudent = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/admin/students', studentForm);
+      await axios.post('/admin/students', studentForm);
       toast.success('Student account created!');
       setShowAddModal(false);
       setStudentForm({ name: '', email: '', password: '' });
@@ -63,7 +63,7 @@ const ManageStudents = () => {
     if (!grantForm.referenceId) return toast.error('Please select a course');
 
     try {
-      await axios.put(`/api/admin/students/assign-subscription/${selectedStudent._id}`, grantForm);
+      await axios.put(`/admin/students/assign-subscription/${selectedStudent._id}`, grantForm);
       toast.success(`Access granted for ${grantForm.name}`);
       setShowGrantModal(false);
       fetchData();

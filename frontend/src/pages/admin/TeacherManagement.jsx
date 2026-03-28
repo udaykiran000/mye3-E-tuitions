@@ -24,7 +24,7 @@ const TeacherManagement = () => {
 
   const fetchTeachers = async () => {
     try {
-      const { data } = await axios.get('/api/admin/teachers-list');
+      const { data } = await axios.get('/admin/teachers-list');
       setTeachers(data);
       setLoading(false);
     } catch (error) {
@@ -35,8 +35,8 @@ const TeacherManagement = () => {
 
   const fetchClassesAndSubjects = async () => {
     try {
-      const { data: bundles } = await axios.get('/api/admin/classes');
-      const { data: subjects1112 } = await axios.get('/api/subjects');
+      const { data: bundles } = await axios.get('/admin/classes');
+      const { data: subjects1112 } = await axios.get('/subjects');
       
       const allClasses = [
         ...bundles.map(b => ({ ...b, type: 'bundle', displayName: b.className })),
@@ -57,10 +57,10 @@ const TeacherManagement = () => {
     e.preventDefault();
     try {
       if (editingTeacher) {
-        await axios.put(`/api/admin/users/${editingTeacher._id}`, formData);
+        await axios.put(`/admin/users/${editingTeacher._id}`, formData);
         toast.success('Teacher updated!');
       } else {
-        await axios.post('/api/admin/teachers', formData);
+        await axios.post('/admin/teachers', formData);
         toast.success('Teacher account created!');
       }
       setShowModal(false);
@@ -82,7 +82,7 @@ const TeacherManagement = () => {
         subjectId: category === 'subject' ? selectedClass._id : null
       };
 
-      const { data } = await axios.put(`/api/admin/teachers/${selectedTeacher._id}/assign`, payload);
+      const { data } = await axios.put(`/admin/teachers/${selectedTeacher._id}/assign`, payload);
       toast.success(`Assigned ${assignmentForm.subjectName} to ${selectedTeacher.name}`);
       // Refresh teacher in the list to update tags immediately
       setTeachers(prev => prev.map(t => t._id === data._id ? data : t));
@@ -94,7 +94,7 @@ const TeacherManagement = () => {
 
   const handleRemoveAssignment = async (teacherId, assignmentId) => {
     try {
-      const { data } = await axios.delete(`/api/admin/teachers/${teacherId}/assign/${assignmentId}`);
+      const { data } = await axios.delete(`/admin/teachers/${teacherId}/assign/${assignmentId}`);
       setTeachers(prev => prev.map(t => t._id === data._id ? data : t));
       if (selectedTeacher && selectedTeacher._id === teacherId) setSelectedTeacher(data);
       toast.success('Assignment removed');

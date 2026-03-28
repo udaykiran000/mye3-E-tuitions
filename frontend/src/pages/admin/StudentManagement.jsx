@@ -13,7 +13,7 @@ const StudentManagement = () => {
 
   const fetchStudents = async () => {
     try {
-      const { data } = await axios.get('/api/admin/students');
+      const { data } = await axios.get('/admin/students');
       setStudents(data);
       setLoading(false);
     } catch (error) {
@@ -29,7 +29,7 @@ const StudentManagement = () => {
   const handleExtend = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`/api/admin/students/${selectedStudent._id}/extend`, {
+      await axios.put(`/admin/students/${selectedStudent._id}/extend`, {
         subscriptionId: selectedSubId,
         newExpiryDate
       });

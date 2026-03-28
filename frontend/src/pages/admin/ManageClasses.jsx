@@ -21,7 +21,7 @@ const ManageClasses = () => {
 
   const fetchClasses = async () => {
     try {
-      const { data } = await axios.get('/api/admin/classes');
+      const { data } = await axios.get('/admin/classes');
       setClasses(data);
       setLoading(false);
     } catch (error) {
@@ -32,7 +32,7 @@ const ManageClasses = () => {
 
   const fetchMaterials = async (classId) => {
     try {
-      const { data } = await axios.get(`/api/admin/materials/${classId}`);
+      const { data } = await axios.get(`/admin/materials/${classId}`);
       setMaterials(data);
     } catch (error) {
       toast.error('Failed to load study materials');
@@ -50,7 +50,7 @@ const ManageClasses = () => {
 
   const handleSavePrice = async (id) => {
     try {
-      await axios.put(`/api/admin/classes/${id}`, { price: newPrice });
+      await axios.put(`/admin/classes/${id}`, { price: newPrice });
       toast.success('Price updated successfully!');
       setEditingId(null);
       fetchClasses();
@@ -72,7 +72,7 @@ const ManageClasses = () => {
     if (!newSubject.trim()) return;
     const updatedSubjects = [...selectedClass.subjects, newSubject.trim()];
     try {
-      const { data } = await axios.put(`/api/admin/classes/${selectedClass._id}/subjects`, { subjects: updatedSubjects });
+      const { data } = await axios.put(`/admin/classes/${selectedClass._id}/subjects`, { subjects: updatedSubjects });
       setSelectedClass(data);
       setNewSubject('');
       toast.success(`${newSubject} added to the bundle!`);
@@ -85,7 +85,7 @@ const ManageClasses = () => {
   const handleRemoveSubject = async (subjectToRemove) => {
     const updatedSubjects = selectedClass.subjects.filter(s => s !== subjectToRemove);
     try {
-      const { data } = await axios.put(`/api/admin/classes/${selectedClass._id}/subjects`, { subjects: updatedSubjects });
+      const { data } = await axios.put(`/admin/classes/${selectedClass._id}/subjects`, { subjects: updatedSubjects });
       setSelectedClass(data);
       toast.success('Subject removed');
       fetchClasses();
@@ -107,7 +107,7 @@ const ManageClasses = () => {
     formData.append('file', selectedFile);
 
     try {
-      await axios.post('/api/admin/materials', formData, {
+      await axios.post('/admin/materials', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       toast.success('Material uploaded successfully!');

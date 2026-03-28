@@ -1,57 +1,63 @@
 import React from 'react';
-import { NavLink, useNavigate, Link } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
 import { 
   LayoutDashboard, 
   BookOpen, 
-  FileText, 
   CreditCard, 
   User, 
   LogOut,
   Sparkles,
   Home,
-  ShoppingBag
+  ShoppingBag,
+  X
 } from 'lucide-react';
 
-const StudentSidebar = () => {
+const StudentSidebar = ({ onClose }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     dispatch(logout());
     navigate('/login');
+    if (onClose) onClose();
   };
 
   const menuItems = [
     { icon: Home, label: 'Home', path: '/', end: true },
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/student/dashboard' },
+    { icon: LayoutDashboard, label: 'Summary', path: '/student/dashboard' },
     { icon: BookOpen, label: 'My Learning', path: '/student/my-learning' },
     { icon: ShoppingBag, label: 'Courses', path: '/student/courses' },
-    { icon: FileText, label: 'Materials', path: '/student/materials' },
-    { icon: CreditCard, label: 'Payments', path: '/student/payments' },
+    { icon: CreditCard, label: 'Fee Payments', path: '/student/payments' },
     { icon: User, label: 'Profile', path: '/student/profile' },
   ];
 
   return (
-    <aside className="w-72 bg-white h-screen fixed left-0 top-0 border-r border-slate-100 flex flex-col z-50">
-      <div className="p-8 border-b border-slate-50">
+    <aside className="w-full lg:w-72 bg-white h-screen text-slate-900 flex flex-col shadow-2xl lg:shadow-none lg:border-r lg:border-slate-100">
+      <div className="p-6 md:p-8 border-b border-slate-50 flex items-center justify-between">
         <h1 className="text-2xl font-black tracking-tighter flex items-center gap-3 text-slate-900">
           <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white text-xl">S</div>
-          Student <span className="text-indigo-600">Hub</span>
+          Student <span className="text-indigo-600">Portal</span>
         </h1>
+        {onClose && (
+          <button onClick={onClose} className="lg:hidden p-2 text-slate-400 hover:text-indigo-600 transition-colors">
+            <X className="w-6 h-6" />
+          </button>
+        )}
       </div>
 
-      <nav className="flex-1 p-6 space-y-2 mt-4 overflow-y-auto">
+      <nav className="flex-1 p-4 md:p-6 space-y-1.5 mt-4 overflow-y-auto">
         {menuItems.map((item, idx) => (
           <NavLink
             key={idx}
             to={item.path}
             end={item.end}
+            onClick={() => onClose && onClose()}
             className={({ isActive }) => `
-              flex items-center gap-4 px-6 py-4 rounded-2xl font-bold transition-all group
+              flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all group text-sm
               ${isActive 
-                ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-200' 
+                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' 
                 : 'text-slate-400 hover:text-indigo-600 hover:bg-slate-50'}
             `}
           >
@@ -62,15 +68,15 @@ const StudentSidebar = () => {
       </nav>
 
       <div className="p-6">
-         <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-6 rounded-3xl text-white relative overflow-hidden group mb-6">
-            <Sparkles className="absolute top-4 right-4 w-5 h-5 text-indigo-200 animate-pulse" />
+         <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-5 rounded-2xl text-white relative overflow-hidden group mb-6 hidden md:block">
+            <Sparkles className="absolute top-4 right-4 w-5 h-5 text-indigo-200/50 animate-pulse" />
             <p className="text-[10px] font-black uppercase tracking-widest text-indigo-100 mb-1">Learning Streak</p>
-            <h3 className="text-2xl font-black leading-tight">5 Days</h3>
-            <p className="text-[10px] mt-2 font-bold text-indigo-100/60">Keep it up! You're on fire.</p>
+            <h3 className="text-xl font-black leading-tight">5 Days</h3>
+            <p className="text-[9px] mt-2 font-bold text-indigo-100/40 uppercase tracking-wider">Keep crushing it!</p>
          </div>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all border border-transparent hover:border-rose-100 group"
+          className="w-full flex items-center gap-4 px-5 py-4 rounded-xl font-bold text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all group text-sm border border-transparent hover:border-rose-100"
         >
           <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
           <span>Logout</span>

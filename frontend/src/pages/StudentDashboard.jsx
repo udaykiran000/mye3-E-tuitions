@@ -23,8 +23,8 @@ const StudentDashboard = () => {
     const fetchDashboardData = async () => {
       try {
         const [subRes, liveRes] = await Promise.all([
-          axios.get('/api/student/subscriptions'),
-          axios.get('/api/student/live-alerts')
+          axios.get('/student/subscriptions'),
+          axios.get('/student/live-alerts')
         ]);
         
         // MOCK DATA INJECTION FOR ADMIN PREVIEW

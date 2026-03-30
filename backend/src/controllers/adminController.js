@@ -265,19 +265,25 @@ exports.assignSubscription = async (req, res, next) => {
 // @access  Admin
 exports.getDashboardStats = async (req, res, next) => {
   try {
+    console.log('--- START getDashboardStats ---');
     const studentCount = await User.countDocuments({ role: 'student' });
     const teacherCount = await User.countDocuments({ role: 'teacher' });
+    console.log('Counts:', { studentCount, teacherCount });
+
     const liveSessions = await LiveSession.find({ status: 'live' }).populate('teacherId', 'name').sort({ createdAt: -1 });
     const liveCount = liveSessions.length;
+    console.log('Live Count:', liveCount);
     
     // Revenue logic - Sum of all successful payments/transactions
     const [txs, payments] = await Promise.all([
       Transaction.find({ status: 'success' }).populate('studentId', 'name email').sort({ date: -1 }),
       Payment.find({ status: 'captured' }).populate('userId', 'name email').sort({ createdAt: -1 })
     ]);
+    console.log('Records Found:', { txs: txs.length, payments: payments.length });
 
-    const totalRevenue = txs.reduce((acc, curr) => acc + curr.amount, 0) + 
-                         payments.reduce((acc, curr) => acc + curr.amount, 0);
+    const totalRevenue = txs.reduce((acc, curr) => acc + (curr.amount || 0), 0) + 
+                         payments.reduce((acc, curr) => acc + (curr.amount || 0), 0);
+    console.log('Total Revenue:', totalRevenue);
 
     // --- CHART DATA LOGIC: Last 7 Days ---
     const chartData = [];
@@ -286,22 +292,22 @@ exports.getDashboardStats = async (req, res, next) => {
       date.setDate(date.getDate() - i);
       const dateStr = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
       
-      // Filter transactions and payments for this specific day
       const dailyTx = txs.filter(t => new Date(t.date || t.createdAt).toDateString() === date.toDateString());
       const dailyPay = payments.filter(p => new Date(p.createdAt).toDateString() === date.toDateString());
       
-      const dailySum = dailyTx.reduce((acc, curr) => acc + curr.amount, 0) + 
-                       dailyPay.reduce((acc, curr) => acc + curr.amount, 0);
+      const dailySum = dailyTx.reduce((acc, curr) => acc + (curr.amount || 0), 0) + 
+                       dailyPay.reduce((acc, curr) => acc + (curr.amount || 0), 0);
       
       chartData.push({ name: dateStr, revenue: dailySum });
     }
+    console.log('Chart Data Count:', chartData.length);
 
     // Normalize and take top 5 for "Recent Transactions"
     const normalizedPayments = payments.map(p => ({
       _id: p._id,
       name: p.userId?.name || 'Manual Grant',
-      packageName: p.subscriptionDetails.type === 'bundle' ? 'Class Bundle' : 'Individual Subject',
-      amount: `₹${p.amount.toLocaleString()}`,
+      packageName: p.subscriptionDetails?.type === 'bundle' ? 'Class Bundle' : 'Individual Subject',
+      amount: `₹${(p.amount || 0).toLocaleString()}`,
       status: 'SUCCESS',
       date: p.createdAt
     }));
@@ -309,15 +315,16 @@ exports.getDashboardStats = async (req, res, next) => {
     const normalizedtxs = txs.map(t => ({
       _id: t._id,
       name: t.studentId?.name || 'Manual Grant',
-      packageName: t.packageName,
-      amount: `₹${t.amount.toLocaleString()}`,
-      status: t.status === 'success' ? 'SUCCESS' : t.status.toUpperCase(),
+      packageName: t.packageName || 'Unknown Package',
+      amount: `₹${(t.amount || 0).toLocaleString()}`,
+      status: t.status ? (t.status === 'success' ? 'SUCCESS' : t.status.toUpperCase()) : 'PENDING',
       date: t.date || t.createdAt
     }));
 
     const recentTransactions = [...normalizedtxs, ...normalizedPayments]
-      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
       .slice(0, 5);
+    console.log('Recent Tx Count:', recentTransactions.length);
 
     // Expiring soon logic
     const now = new Date();
@@ -328,6 +335,7 @@ exports.getDashboardStats = async (req, res, next) => {
       role: 'student',
       'activeSubscriptions.expiryDate': { $gte: now, $lte: thirtyDaysLater }
     });
+    console.log('Expiring Soon:', expiringSoonCount);
 
     res.status(200).json({
       totalStudents: studentCount,
@@ -339,7 +347,9 @@ exports.getDashboardStats = async (req, res, next) => {
       recentTransactions,
       revenueChartData: chartData
     });
+    console.log('--- END getDashboardStats Success ---');
   } catch (error) {
+    console.error('DASHBOARD ERROR FAIL:', error);
     next(error);
   }
 };

@@ -1,171 +1,569 @@
-import React from 'react';
-import { HiArrowRight, HiStatusOnline, HiAcademicCap, HiClock, HiUserGroup, HiShieldCheck, HiOutlineLightBulb, HiCheckCircle } from 'react-icons/hi';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  HiArrowRight,
+  HiCheck,
+  HiStar,
+  HiUserGroup,
+  HiAcademicCap,
+  HiGlobeAlt,
+  HiLightBulb,
+  HiDeviceMobile,
+  HiVideoCamera,
+  HiLightningBolt,
+  HiChevronLeft,
+  HiChevronRight
+} from 'react-icons/hi';
 import { Link } from 'react-router-dom';
 
+// Import local assets
+import slider1 from '../assets/slider1.jpeg';
+import slider2 from '../assets/slider2.jpeg';
+import slider3 from '../assets/slider3.jpeg';
+import mobileSlider1 from '../assets/mobile slider1.jpeg';
+import mobileSlider2 from '../assets/mobile slider2.jpeg';
+import mobileSlider3 from '../assets/mobile slider3.jpeg';
+import aboutImg from '../assets/about-img-1.jpg';
+import playBtn from '../assets/play-btn.gif';
+import course1 from '../assets/course-item-1.webp';
+import course2 from '../assets/course-item-2.webp';
+import course3 from '../assets/course-item-3.webp';
+import course4 from '../assets/course-item-4.webp';
+
+// Slide content data
+const SLIDES = [
+  {
+    image: slider1,
+    mobileImage: mobileSlider1,
+    headline1: 'Personalized Learning,',
+    headline2: 'Real Results',
+    highlight: 'Only at e-Tuitions',
+    bullets: [
+      'School Tuitions (1-12)',
+      'Best Indian Teachers',
+      'Flexible Scheduling',
+      'Global Language Classes',
+      '1-to-1 Live Online Classes',
+    ],
+  },
+  {
+    image: slider2,
+    mobileImage: mobileSlider2,
+    headline1: 'Expert Teachers,',
+    headline2: 'Affordable Classes',
+    highlight: 'Starting ₹200/- Only',
+    bullets: [
+      'CBSE / ICSE / State Board',
+      'IIT JEE & NEET Coaching',
+      'Coding & Tech Courses',
+      'Language Classes',
+      'Free Demo Available',
+    ],
+  },
+  {
+    image: slider3,
+    mobileImage: mobileSlider3,
+    headline1: 'Learn From',
+    headline2: 'Anywhere, Anytime',
+    highlight: 'With e-Tuitions',
+    bullets: [
+      'Live & Recorded Sessions',
+      'Certified Teachers',
+      'Personal Mentor Assigned',
+      'Flexible Scheduling',
+      '100% Student Satisfaction',
+    ],
+  },
+];
+
+const POPULAR_COURSES = [
+  { title: 'Short Term\nCourses', color: '#fbe08e', border: '#fbbf24', shadow: '#f59e0b', img: course1 },
+  { title: 'Language\nCourses', color: '#fca876', border: '#fb923c', shadow: '#f97316', img: course2 },
+  { title: 'Coding\nClasses', color: '#b0f1cc', border: '#4ade80', shadow: '#22c55e', img: course3 },
+  { title: 'School\nClasses', color: '#bae0fe', border: '#93c5fd', shadow: '#3b82f6', img: course4 },
+];
+
+const CATEGORIES = [
+  { title: 'Language', desc: 'Master new languages with ease.', color: 'from-amber-400 to-orange-500', icon: HiGlobeAlt },
+  { title: 'IT & Skill', desc: 'Future-proof your career.', color: 'from-indigo-500 to-purple-600', icon: HiDeviceMobile },
+  { title: 'Academic', desc: 'Excellence in school subjects.', color: 'from-emerald-400 to-teal-500', icon: HiAcademicCap },
+  { title: 'Extra Curricular', desc: 'Explore your passions.', color: 'from-rose-400 to-pink-500', icon: HiLightBulb },
+];
+
 const Home = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const nextSlide = () => setCurrentSlide((p) => (p === SLIDES.length - 1 ? 0 : p + 1));
+  const prevSlide = () => setCurrentSlide((p) => (p === 0 ? SLIDES.length - 1 : p - 1));
+
+  useEffect(() => {
+    const timer = setInterval(nextSlide, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
-    <div className="space-y-20 md:space-y-32 pb-20 -mt-8 px-4 md:px-0 max-w-7xl mx-auto">
-      {/* HERO SECTION - Inspired by e-tuitions.com */}
-      <section className="relative min-h-[70vh] lg:min-h-[80vh] flex flex-col lg:flex-row items-center gap-12 lg:gap-16 py-12 md:py-20 overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-indigo-50/50 -z-10 rounded-2xl hidden lg:block"></div>
-        
-        <div className="flex-1 space-y-8 md:space-y-10 text-center lg:text-left z-10">
-          <div className="inline-flex items-center gap-2 px-5 py-2 bg-indigo-100 text-indigo-700 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest shadow-sm">
-            <HiStatusOnline className="text-lg animate-pulse" /> Global Learning Standard
-          </div>
-          
-          <h1 className="text-4xl md:text-6xl lg:text-8xl font-black text-slate-900 leading-tight tracking-tight uppercase">
-            Mastery <br />
-            <span className="text-indigo-600">Without Bounds</span> <br />
-            From Your Space
-          </h1>
-          
-          <p className="text-lg md:text-2xl text-slate-500 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-bold italic">
-            Synchronized 1-on-1 and Group live classes for CBSE, ICSE, and Competitive Boards. Precision learning at your fingertips.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6 justify-center lg:justify-start pt-4">
-            <Link to="/register" className="w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-5 bg-indigo-600 text-white rounded-xl font-black text-sm md:text-xl shadow-xl shadow-indigo-900/10 transform hover:bg-indigo-700 active:scale-95 transition-all uppercase tracking-widest">
-              Join Demo <HiArrowRight />
-            </Link>
-            <Link to="/courses" className="w-full sm:w-auto flex items-center justify-center px-10 py-5 bg-white border-2 border-slate-100 text-slate-900 rounded-xl font-black text-sm md:text-xl hover:bg-slate-50 transition-all uppercase tracking-widest">
-              Explore Vault
-            </Link>
-          </div>
+    <div className="bg-white" style={{ overflowX: 'hidden' }}>
 
-          <div className="flex items-center gap-8 md:gap-10 justify-center lg:justify-start pt-8 border-t border-slate-100 flex-wrap">
-             <div className="flex flex-col">
-                <span className="text-2xl md:text-3xl font-black text-slate-900">10K+</span>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Minds</span>
-             </div>
-             <div className="flex flex-col">
-                <span className="text-2xl md:text-3xl font-black text-slate-900">500+</span>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Elite Tutors</span>
-             </div>
-             <div className="flex flex-col">
-                <span className="text-2xl md:text-3xl font-black text-slate-900">4.9/5</span>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Trust Index</span>
-             </div>
-          </div>
-        </div>
-        
-        <div className="flex-1 w-full max-w-2xl relative mt-12 lg:mt-0">
-           <div className="premium-card rounded-2xl md:rounded-3xl overflow-hidden aspect-[4/5] bg-slate-900 shadow-2xl shadow-indigo-900/20 relative group">
-              <div className="absolute inset-0 bg-indigo-600/10 group-hover:bg-transparent transition-all duration-700"></div>
-              
-              <div className="w-full h-full flex flex-col items-center justify-center p-8 md:p-12 text-center text-white space-y-6">
-                 <div className="w-24 h-24 md:w-32 md:h-32 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl mb-4 group-hover:rotate-6 transition-transform">
-                    <HiAcademicCap className="text-5xl md:text-6xl text-white" />
-                 </div>
-                 <h2 className="text-2xl md:text-4xl font-black italic underline decoration-indigo-500 decoration-4 underline-offset-8 uppercase tracking-tight">"The Nexus of <br /> Adaptive Intelligence"</h2>
-              </div>
-              
-              {/* Floating badges - Optimized for mobile */}
-              <div className="absolute top-8 left-4 md:-left-8 bg-white p-4 md:p-6 rounded-xl shadow-2xl group-hover:-translate-y-2 transition-transform">
-                 <div className="flex items-center gap-3 md:gap-4">
-                    <div className="w-10 h-10 md:w-12 md:h-12 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center text-lg md:text-xl font-black">1:1</div>
-                    <div className="text-left leading-tight">
-                       <p className="font-black text-slate-900 text-xs md:text-sm uppercase tracking-tight">Synchronized</p>
-                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Attention</p>
-                    </div>
-                 </div>
-              </div>
+      {/* ════════════════════════════════════════════
+          HERO SECTION — Clean Slider (images have text built-in)
+      ════════════════════════════════════════════ */}
+      <section className="relative w-full overflow-hidden bg-[#00158a]">
 
-              <div className="absolute bottom-8 right-4 md:-right-8 bg-white p-4 md:p-6 rounded-xl shadow-2xl group-hover:translate-y-2 transition-transform">
-                 <div className="flex items-center gap-3 md:gap-4">
-                    <div className="w-10 h-10 md:w-12 md:h-12 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center text-xl md:text-2xl"><HiShieldCheck /></div>
-                    <div className="text-left leading-tight">
-                       <p className="font-black text-slate-900 text-xs md:text-sm uppercase tracking-tight">Verified</p>
-                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Faculty</p>
-                    </div>
-                 </div>
-              </div>
-           </div>
+        {/* Slide Image — dynamically serves mobile/desktop optimized images */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentSlide}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="w-full flex"
+          >
+            <picture className="w-full">
+              <source media="(max-width: 767px)" srcSet={SLIDES[currentSlide].mobileImage} />
+              <img
+                src={SLIDES[currentSlide].image}
+                alt={`Slide ${currentSlide + 1}`}
+                className="w-full h-auto block"
+              />
+            </picture>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Prev Arrow */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-1 md:left-6 top-1/2 -translate-y-1/2 z-30 w-8 h-8 md:w-10 md:h-10 md:rounded-full md:border-2 md:border-white/40 flex items-center justify-center text-white/70 md:text-white md:bg-black/30 hover:text-white md:hover:border-white transition-colors"
+        >
+          <HiChevronLeft className="text-[32px] md:text-2xl" />
+        </button>
+
+        {/* Next Arrow */}
+        <button
+          onClick={nextSlide}
+          className="absolute right-1 md:right-6 top-1/2 -translate-y-1/2 z-30 w-8 h-8 md:w-10 md:h-10 md:rounded-full md:border-2 md:border-white/40 flex items-center justify-center text-white/70 md:text-white md:bg-black/30 hover:text-white md:hover:border-white transition-colors"
+        >
+          <HiChevronRight className="text-[32px] md:text-2xl" />
+        </button>
+
+        {/* Dot indicators */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 hidden md:flex gap-2">
+          {SLIDES.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentSlide(i)}
+              className="rounded-full transition-all"
+              style={{
+                width: i === currentSlide ? 24 : 8,
+                height: 8,
+                background: i === currentSlide ? '#f97316' : 'rgba(255,255,255,0.5)',
+              }}
+            />
+          ))}
         </div>
       </section>
 
-      {/* HOW IT WORKS - Step Process */}
-      <section className="py-12 md:py-24">
-         <div className="text-center max-w-3xl mx-auto mb-16 md:mb-24 space-y-4 px-6 font-black uppercase">
-            <h2 className="text-indigo-600 tracking-[0.3em] text-[10px] md:text-xs">Precision Workflow</h2>
-            <p className="text-3xl md:text-5xl text-slate-900 tracking-tight">Initialize Your Success</p>
-         </div>
+      {/* ════════════════════════════════════════════
+          POPULAR COURSES
+      ════════════════════════════════════════════ */}
+      <section className="relative z-20 pb-12 bg-slate-50 md:bg-transparent pt-8 md:pt-0 md:-mt-16">
+        <div className="max-w-[1100px] mx-auto px-4 md:px-8">
+          <div
+            className="bg-white rounded-2xl md:rounded-3xl pt-5 pb-6 px-4 md:px-10 md:py-8 border border-slate-200/60 md:border-none shadow-sm md:shadow-[0_20px_60px_rgba(0,0,0,0.12)]"
+          >
+            {/* Pill heading */}
+            <div className="mb-6 text-center md:text-left">
+              <span
+                className="inline-flex items-center gap-2 px-6 py-2 rounded-full font-bold text-[14px] text-white bg-[#fab500]"
+              >
+                Popular Courses
+              </span>
+            </div>
 
-         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-16">
-            {[
-              { step: "01", title: "Activation", desc: "Initialize your user record in our synchronized educational hub." },
-              { step: "02", title: "Allocation", desc: "Select your specialized curriculum or full academic bundles." },
-              { step: "03", title: "Deployment", desc: "Attend high-bandwidth interactive live sessions instantly." },
-              { step: "04", title: "Assessment", desc: "Analyze and track your performance via our data engine." }
-            ].map((s, i) => (
-              <div key={i} className="relative group p-6 md:p-8 rounded-2xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100">
-                 <div className="text-6xl md:text-7xl font-black text-indigo-50 group-hover:text-indigo-600/10 transition-colors absolute top-0 left-0 leading-none -mt-4 -ml-4">
-                    {s.step}
-                 </div>
-                 <div className="relative z-10 space-y-3 pt-4">
-                    <h3 className="text-xl md:text-2xl font-black text-slate-900 uppercase tracking-tight">{s.title}</h3>
-                    <p className="text-slate-500 font-bold italic text-sm leading-relaxed">{s.desc}</p>
-                 </div>
-                 {i < 3 && <div className="hidden lg:block absolute top-12 -right-12 w-12 border-t-2 border-dotted border-indigo-100"></div>}
-              </div>
-            ))}
-         </div>
+            {/* Course cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {POPULAR_COURSES.map((course, i) => (
+                <Link
+                  key={i}
+                  to="/courses"
+                  className="group relative rounded-2xl overflow-hidden flex flex-col"
+                  style={{
+                    background: course.color,
+                    border: '3px solid transparent',
+                    minHeight: 150,
+                    transition: 'transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.transform = 'translateY(-5px)';
+                    e.currentTarget.style.borderColor = course.border;
+                    e.currentTarget.style.boxShadow = `0 10px 30px rgba(0,0,0,0.1)`;
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.borderColor = 'transparent';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
+                  {/* Title top-left or centered vertically on mobile */}
+                  <div className="px-5 py-0 h-full flex items-center md:items-start md:p-3 z-10 relative">
+                    <h3 className="font-bold text-[14px] md:text-[13px] text-slate-700 leading-snug whitespace-pre-line" style={{ maxWidth: '40%' }}>
+                      {course.title}
+                    </h3>
+                  </div>
+
+                  {/* Student image — bottom right */}
+                  <div className="absolute bottom-0 right-3 w-[45%] h-full flex items-end justify-end">
+                    <img
+                      src={course.img}
+                      alt={course.title}
+                      className="max-h-[115%] w-auto object-contain object-bottom group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
       </section>
 
-      {/* WHY CHOOSE US - Sharp Layout */}
-      <section className="bg-slate-950 text-white rounded-2xl md:rounded-3xl p-8 md:p-16 lg:p-24 relative overflow-hidden shadow-2xl shadow-indigo-900/20">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500 opacity-5 rounded-full blur-[100px] -mr-48 -mt-48"></div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 md:gap-24 items-center">
-           <div className="space-y-6 md:space-y-8">
-              <h2 className="text-emerald-400 font-black uppercase tracking-[0.3em] text-[10px] md:text-xs">Competitive Edge</h2>
-              <p className="text-4xl md:text-6xl font-black leading-tight uppercase tracking-tight italic">Adaptive <br /> Logic Hub</p>
-              <p className="text-lg md:text-xl text-slate-400 font-bold leading-relaxed italic">
-                 We synchronize traditional teaching excellence with state-of-the-art digital infrastructure.
-              </p>
-              <ul className="space-y-4 md:space-y-6">
-                 {["Interactive live sessions with top tutors", "Cloud-stored session recordings", "Curated high-density study assets", "Direct 1:1 consultation support"].map((item, idx) => (
-                   <li key={idx} className="flex items-center gap-3 md:gap-4 text-sm md:text-lg font-black uppercase tracking-tight text-slate-200">
-                      <HiCheckCircle className="text-emerald-400 text-xl md:text-2xl shrink-0" /> {item}
-                   </li>
-                 ))}
-              </ul>
-           </div>
-           
-           <div className="grid grid-cols-2 gap-4 md:gap-8">
-              {[
-                { icon: HiStatusOnline, label: "Live Broadcast", color: "bg-indigo-500/10 text-indigo-400 border-indigo-500/30" },
-                { icon: HiClock, label: "Playback", color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" },
-                { icon: HiOutlineLightBulb, label: "Data Assets", color: "bg-amber-500/10 text-amber-400 border-amber-500/30" },
-                { icon: HiUserGroup, label: "User Support", color: "bg-rose-500/10 text-rose-400 border-rose-500/30" }
-              ].map((item, i) => (
-                <div key={i} className={`p-6 md:p-10 rounded-xl md:rounded-2xl border ${item.color} flex flex-col items-center gap-3 md:gap-4 group hover:bg-white/5 transition-all cursor-crosshair`}>
-                   <item.icon className="text-4xl md:text-5xl group-hover:scale-110 transition-transform" />
-                   <span className="font-black uppercase tracking-widest text-[9px] md:text-[10px] text-center">{item.label}</span>
+      {/* ════════════════════════════════════════════
+          ABOUT / INTRO SECTION
+      ════════════════════════════════════════════ */}
+      <section className="py-16 md:py-24 bg-white relative" style={{ overflow: 'visible' }}>
+
+        {/* ── Large green RING — right edge only arc visible, behind text column ── */}
+        <div className="absolute pointer-events-none hidden md:block" style={{
+          top: '10%', right: '-210px',
+          width: '320px', height: '320px',
+          borderRadius: '50%',
+          border: '28px solid #22c55e',
+          background: 'transparent',
+          zIndex: 0,
+        }} />
+
+        {/* ── Small green RING — bottom right, fully visible ── */}
+        <div className="absolute pointer-events-none hidden md:block" style={{
+          bottom: '10%', right: '2%',
+          width: '90px', height: '90px',
+          borderRadius: '50%',
+          border: '5px solid #22c55e',
+          background: 'transparent',
+          zIndex: 0,
+        }} />
+
+        {/* Content above rings */}
+        <div className="relative max-w-[1280px] mx-auto px-4 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center" style={{ zIndex: 2 }}>
+
+          {/* ── Left: Image Column ── */}
+          <div className="relative ml-0 md:ml-10">
+
+            {/* Teal dots — perfectly masked, behind image (Desktop) */}
+            <div className="absolute pointer-events-none -z-10 hidden md:block" style={{
+              top: '-30px',
+              left: '-80px',
+              width: '220px',
+              height: '220px',
+              borderRadius: '50%',
+              backgroundImage: 'radial-gradient(circle, #2dd4bf 2.5px, transparent 3px)',
+              backgroundSize: '16px 16px',
+              backgroundPosition: 'center',
+              opacity: 0.7
+            }}></div>
+            
+            {/* Mobile Teal dots (Top Left circle) */}
+            <div className="absolute pointer-events-none -z-10 md:hidden" style={{
+              top: '-120px',
+              left: '-40px',
+              width: '180px',
+              height: '180px',
+              borderRadius: '50%',
+              backgroundImage: 'radial-gradient(circle, #2dd4bf 2.5px, transparent 3px)',
+              backgroundSize: '20px 20px',
+              backgroundPosition: 'center',
+              opacity: 0.9
+            }}></div>
+
+            {/* Main Image — Explicitly brought forward so dots definitely hide behind */}
+            <div className="relative rounded-[16px] md:rounded-[32px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.06)] md:shadow-2xl border-none md:border-solid md:border-8 md:border-white bg-white z-10 mx-auto w-full md:w-auto">
+              <img src={aboutImg} alt="About e-Tuitions" className="w-full h-auto object-cover border-none" />
+            </div>
+
+
+            {/* Orange dots — perfectly masked, behind image (Desktop) */}
+            <div className="absolute pointer-events-none -z-10 hidden md:block" style={{
+              bottom: '-60px',
+              right: '-60px',
+              width: '220px',
+              height: '220px',
+              borderRadius: '50%',
+              backgroundImage: 'radial-gradient(circle, #f97316 2.5px, transparent 3px)',
+              backgroundSize: '16px 16px',
+              backgroundPosition: 'center',
+              opacity: 0.85
+            }}></div>
+
+            {/* Orange dots (Mobile) - Centered behind the 20K block */}
+            <div className="absolute pointer-events-none -z-10 md:hidden bottom-[-40px] left-1/2 -translate-x-[45%]" style={{
+              width: '260px',
+              height: '160px',
+              backgroundImage: 'radial-gradient(circle, #f97316 2px, transparent 3px)',
+              backgroundSize: '24px 24px',
+              backgroundPosition: 'center',
+              opacity: 0.7
+            }}></div>
+
+            {/* Video Card */}
+            <div className="relative md:absolute mt-8 md:mt-0 md:-top-8 md:-right-4 z-20 w-[95%] sm:w-[85%] mx-auto md:w-64 bg-white rounded-[20px] p-2 md:p-3 shadow-[0_8px_30px_rgba(0,0,0,0.06)] md:shadow-2xl border border-slate-100">
+              <div className="relative rounded-[16px] overflow-hidden aspect-[16/9] cursor-pointer">
+                <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg" alt="Play" className="w-full h-full object-cover brightness-[0.4]" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  
+                  {/* Play Button - exact matching CSS double ring play button for mobile */}
+                  <div className="w-[68px] h-[68px] md:hidden rounded-full flex items-center justify-center border-[1px] border-white/60 border-dashed p-[8px] shadow-2xl mb-1 mt-4">
+                    <div className="w-full h-full bg-[#fa3d11] rounded-full flex items-center justify-center shadow-lg">
+                      <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-white border-b-[6px] border-b-transparent ml-1"></div>
+                    </div>
+                  </div>
+                  <img src={playBtn} alt="Play" className="w-12 h-12 hidden md:block" />
+
+                  <span className="text-[19px] md:text-[10px] font-black text-white uppercase tracking-wide relative z-10 leading-none mt-1" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.8)' }}>1-on-1 Live Tuition</span>
+                  <span className="text-[7.5px] font-bold text-white/80 uppercase tracking-widest md:hidden mt-[3px]" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>Anytime, Anywhere</span>
+                </div>
+              </div>
+              
+              {/* Skeleton lines under video specifically requested in mobile layout */}
+              <div className="flex flex-col gap-[7px] mt-4 px-2 mb-2 md:hidden">
+                <div className="w-full h-[6px] bg-slate-200/80 rounded-full"></div>
+                <div className="w-[85%] h-[6px] bg-slate-200/80 rounded-full"></div>
+                <div className="w-[50%] h-[6px] bg-slate-200/80 rounded-full"></div>
+              </div>
+            </div>
+
+            {/* Learner count card */}
+            <div className="relative md:absolute mt-6 md:mt-0 md:-bottom-8 md:-left-6 z-20 bg-white rounded-2xl w-[90%] md:w-auto mx-auto px-6 py-4 shadow-xl md:shadow-2xl flex items-center gap-4 border border-slate-100">
+              <div className="w-12 h-12 bg-emerald-50 text-emerald-500 md:text-emerald-600 rounded-full md:rounded-xl flex items-center justify-center text-2xl border border-emerald-100/50">
+                <HiUserGroup />
+              </div>
+              <div>
+                <p className="text-[26px] md:text-2xl font-black text-slate-900 leading-none mb-0 md:mb-0.5">20K+</p>
+                <p className="text-[13px] md:text-[10px] font-semibold text-slate-500 md:text-slate-400 capitalize md:uppercase tracking-[0.02em] md:tracking-widest leading-tight">Enrolled Learners</p>
+              </div>
+              
+               {/* Small orange up-trend arrow present on mobile reference */}
+              <div className="ml-auto mr-2 md:hidden w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-orange-500"></div>
+            </div>
+          </div>
+
+          {/* ── Right: Text ── */}
+          <div className="space-y-7">
+            <div>
+              <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em]">About Us</span>
+              <h2 className="mt-2 text-3xl md:text-[42px] font-black text-slate-900 leading-tight tracking-tight">
+                India's best{' '}
+                <span className="text-emerald-500 relative inline-block">
+                  online tuition
+                  <svg className="absolute -bottom-1 left-0 w-full h-[18px] text-emerald-500" viewBox="0 0 100 20" preserveAspectRatio="none">
+                    <path d="M5,15 Q50,0 95,15" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+                  </svg>
+                </span>{' '}
+                website for quality education
+              </h2>
+            </div>
+            <p className="text-slate-500 font-medium leading-relaxed max-w-lg mt-8">
+              We are committed to providing personalised online classes that cater to the unique learning needs of each student. Learn from the best Indian teachers from the comfort of your home.
+            </p>
+            <div className="space-y-4">
+              {['Expert Trainers', '1-on-1 Live Tuition', 'Flexible Timings'].map((item, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <HiCheck className="text-emerald-500 text-2xl font-black shrink-0" />
+                  <span className="font-bold text-slate-800 text-lg">{item}</span>
                 </div>
               ))}
-           </div>
+            </div>
+            <Link
+              to="/register"
+              className="inline-flex items-center gap-2 px-7 py-3 text-white font-black text-[14px] rounded-xl hover:opacity-90 transition-all shadow-lg"
+              style={{ background: 'linear-gradient(135deg,#f97316,#ea580c)', boxShadow: '0 4px 16px rgba(249,115,22,0.35)' }}
+            >
+              Book Free Demo <HiArrowRight />
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* CTA SECTION - Updated */}
-      <section className="py-16 md:py-32 bg-indigo-600 rounded-2xl md:rounded-3xl text-center text-white relative overflow-hidden px-6 md:px-10 shadow-2xl shadow-indigo-900/30">
-         <div className="absolute inset-0 bg-gradient-to-br from-indigo-700 to-transparent"></div>
-         <div className="relative z-10 space-y-8 md:space-y-12 max-w-4xl mx-auto font-black uppercase">
-            <h2 className="text-4xl md:text-7xl leading-tight tracking-tight">Launch Your Potential</h2>
-            <p className="text-lg md:text-2xl text-white/80 font-bold italic max-w-2xl mx-auto normal-case">
-               Experience the future of synchronized learning. Professional tuition at a revolutionary standard.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6">
-               <Link to="/register" className="w-full sm:w-auto px-10 py-5 bg-white text-indigo-600 rounded-xl font-black text-sm md:text-xl shadow-xl shadow-indigo-900/20 hover:bg-slate-50 transition-all uppercase tracking-widest">
-                  Initialize Account
-               </Link>
-               <Link to="/about" className="w-full sm:w-auto px-10 py-5 border-2 border-white/30 hover:bg-white/10 text-white rounded-xl font-black text-sm md:text-xl transition-all uppercase tracking-widest">
-                  Documentation
-               </Link>
-            </div>
-         </div>
+      {/* ════════════════════════════════════════════
+          STATS BAR
+      ════════════════════════════════════════════ */}
+      <section className="bg-slate-50 md:bg-white md:border-t md:border-b border-slate-100 py-10 relative overflow-hidden">
+        {/* Mobile green left ring */}
+        <div className="absolute left-[-30px] top-[40px] w-[90px] h-[90px] rounded-full border-[4px] border-[#22c55e] md:hidden pointer-events-none z-0"></div>
+        <div className="max-w-[1280px] mx-auto px-4 md:px-8 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-5 md:gap-0 md:divide-x-2 md:divide-slate-100">
+            {[
+              { value: '15496+', label: 'HAPPY PARENTS/STUDENTS', color: '#f5a623' },
+              { value: '1.3M',   label: 'CLASS COMPLETED',        color: '#f97316' },
+              { value: '100%',   label: 'SATISFACTION RATE',      color: '#10b981' },
+              { value: '9875',   label: 'CERTIFIED TUTORS',       color: '#3b82f6' },
+            ].map((stat, i) => (
+              <div key={i} className="flex flex-col items-center justify-center py-5 md:py-0 gap-1 text-center bg-white md:bg-transparent rounded-2xl md:rounded-none shadow-[0_4px_20px_rgba(0,0,0,0.06)] md:shadow-none px-4 md:px-0 mx-3 md:mx-0">
+                <span className="text-4xl md:text-5xl font-black" style={{ color: stat.color }}>
+                  {stat.value}
+                </span>
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1 md:mt-0">
+                  {stat.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
+
+      {/* ════════════════════════════════════════════
+          COURSE CATEGORIES
+      ════════════════════════════════════════════ */}
+      <section className="py-16 md:py-24 bg-slate-50">
+        <div className="max-w-[1280px] mx-auto px-4 md:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
+              Discover Available <span style={{ color: '#f97316' }}>Courses</span>
+            </h2>
+            <p className="text-slate-500 font-medium mt-3">From elementary foundational courses to advanced skill development.</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {CATEGORIES.map((cat, i) => (
+              <motion.div
+                key={i}
+                whileHover={{ y: -8 }}
+                className={`p-8 rounded-3xl bg-gradient-to-br ${cat.color} text-white shadow-xl cursor-pointer relative overflow-hidden group`}
+              >
+                <div className="absolute top-0 right-0 w-28 h-28 bg-white/10 rounded-full -mr-12 -mt-12 blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                <cat.icon className="text-5xl mb-5 opacity-80" />
+                <h4 className="text-xl font-black mb-2">{cat.title}</h4>
+                <p className="text-white/80 text-sm font-medium leading-relaxed">{cat.desc}</p>
+                <div className="mt-6 flex items-center gap-2 text-xs font-black uppercase tracking-widest bg-white/20 px-4 py-2 rounded-lg w-fit">
+                  Read more <HiArrowRight />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════
+          WHY CHOOSE US
+      ════════════════════════════════════════════ */}
+      <section className="py-16 md:py-24 bg-white">
+        <div className="max-w-[1280px] mx-auto px-4 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="space-y-10">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+                Online Learning With <br /><span style={{ color: '#22c55e' }}>e-Tuitions</span>
+              </h2>
+              <p className="text-slate-500 font-medium mt-3 max-w-md">Our ecosystem is built for high-performance learning and academic excellence.</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {[
+                { title: 'Personal Mentor', icon: HiUserGroup, color: '#4f46e5', bg: '#eef2ff' },
+                { title: 'Effective Study Hub', icon: HiAcademicCap, color: '#059669', bg: '#ecfdf5' },
+                { title: 'Live Classes', icon: HiVideoCamera, color: '#f97316', bg: '#fff7ed' },
+                { title: 'Interactive Quizzes', icon: HiLightningBolt, color: '#e11d48', bg: '#fff1f2' },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-4 p-5 bg-white rounded-2xl shadow-sm border border-slate-100 hover:shadow-lg transition-all group">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl group-hover:rotate-6 transition-transform shrink-0" style={{ background: item.bg, color: item.color }}>
+                    <item.icon />
+                  </div>
+                  <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight">{item.title}</h4>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="w-full aspect-square bg-gradient-to-br from-slate-50 to-blue-50 rounded-[48px] overflow-hidden shadow-xl flex items-center justify-center">
+              <div className="text-center space-y-4 p-8">
+                {[
+                  { num: '10,400+', label: 'Sessions Conducted' },
+                  { num: '1.3M+', label: 'Learning Minutes' },
+                  { num: '100%', label: 'Student Satisfaction' },
+                  { num: '8,875+', label: 'Students Enrolled' },
+                ].map((stat, i) => (
+                  <div key={i} className="bg-white rounded-2xl px-6 py-4 shadow-md border border-slate-100">
+                    <p className="text-2xl md:text-3xl font-black text-slate-900">{stat.num}</p>
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="absolute -bottom-8 -right-8 text-white p-8 rounded-[32px] shadow-2xl space-y-1"
+              style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }}>
+              <p className="text-3xl font-black leading-none">Global</p>
+              <p className="text-xs font-bold uppercase tracking-widest opacity-80">Reach & Impact</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════
+          TEACHERS CTA
+      ════════════════════════════════════════════ */}
+      <section className="py-16 md:py-24 bg-[#00158a] text-white">
+        <div className="max-w-[1280px] mx-auto px-4 md:px-8 text-center space-y-6">
+          <span className="inline-block text-[11px] font-black text-emerald-400 uppercase tracking-[0.5em]">Meet Our Experts</span>
+          <h2 className="text-3xl md:text-5xl font-black tracking-tight">
+            Our Dedicated Online <span className="text-emerald-400">Teachers</span>
+          </h2>
+          <p className="text-blue-200 font-medium max-w-xl mx-auto">
+            Experienced faculty committed to making every concept clear and every student confident.
+          </p>
+          <Link
+            to="/register"
+            className="inline-flex items-center gap-2 px-10 py-4 text-white font-black text-[15px] rounded-xl hover:opacity-90 transition-all shadow-lg"
+            style={{ background: 'linear-gradient(135deg,#22c55e,#16a34a)', boxShadow: '0 4px 20px rgba(34,197,94,0.4)' }}
+          >
+            Find Your Mentor <HiArrowRight />
+          </Link>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════
+          FREE DEMO CTA BANNER
+      ════════════════════════════════════════════ */}
+      <section className="py-16 md:py-24 bg-white">
+        <div className="max-w-[1280px] mx-auto px-4 md:px-8">
+          <div
+            className="rounded-[48px] p-10 md:p-20 text-center text-white relative overflow-hidden"
+            style={{ background: 'linear-gradient(135deg,#f97316,#ea580c)', boxShadow: '0 30px 80px rgba(249,115,22,0.3)' }}
+          >
+            <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl -mr-40 -mt-40" />
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-black/10 rounded-full blur-3xl -ml-40 -mb-40" />
+
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-tight uppercase relative z-10">
+              Start Your Success Journey <br /> With a Free Demo
+            </h2>
+            <p className="text-orange-100 font-medium max-w-xl mx-auto mt-4 text-lg relative z-10">
+              "Experience the difference of personalized mentorship before you commit."
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8 relative z-10">
+              <Link
+                to="/register"
+                className="px-10 py-4 bg-white font-black text-[15px] rounded-xl hover:bg-slate-50 active:scale-95 transition-all shadow-xl"
+                style={{ color: '#f97316' }}
+              >
+                Book Free Demo
+              </Link>
+              <Link
+                to="/login"
+                className="px-10 py-4 bg-white/20 border-2 border-white/40 text-white font-black text-[15px] rounded-xl hover:bg-white/30 transition-all"
+              >
+                Login
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 };

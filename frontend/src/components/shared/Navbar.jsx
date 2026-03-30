@@ -1,12 +1,333 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
+import logoGif from '../../assets/loader-logo (1).gif';
+import contactSvg from '../../assets/contact-with-us.svg';
 import { logout } from '../../store/slices/authSlice';
+import {
+  HiMenuAlt3,
+  HiOutlineUserCircle,
+  HiChevronDown,
+  HiOutlinePhone,
+  HiOutlineMail,
+  HiX
+} from 'react-icons/hi';
+import { FaWhatsapp, FaHandshake } from 'react-icons/fa';
+import { MdEmail } from 'react-icons/md';
+
+// Dropdown data
+const NAV_ITEMS = [
+  { label: 'Home', to: '/' },
+  {
+    label: 'Tuitions',
+    dropdown: [
+      { label: 'School Tuitions (1-12)', to: '/courses' },
+      { label: 'CBSE Tuitions', to: '/courses' },
+      { label: 'ICSE Tuitions', to: '/courses' },
+      { label: 'State Board Tuitions', to: '/courses' },
+      { label: 'IIT JEE Preparation', to: '/courses' },
+      { label: 'NEET Preparation', to: '/courses' },
+    ],
+  },
+  {
+    label: 'Tech Courses',
+    isNew: true,
+    dropdown: [
+      { label: 'Coding Classes', to: '/courses' },
+      { label: 'Web Development', to: '/courses' },
+      { label: 'Python Programming', to: '/courses' },
+      { label: 'Data Science', to: '/courses' },
+    ],
+  },
+  {
+    label: 'Curricular Activities',
+    isNew: true,
+    dropdown: [
+      { label: 'Music Classes', to: '/courses' },
+      { label: 'Dance Classes', to: '/courses' },
+      { label: 'Art & Craft', to: '/courses' },
+      { label: 'Yoga & Meditation', to: '/courses' },
+    ],
+  },
+  {
+    label: 'Language',
+    isNew: true,
+    dropdown: [
+      { label: 'English Speaking', to: '/courses' },
+      { label: 'German Language', to: '/courses' },
+      { label: 'French Language', to: '/courses' },
+      { label: 'Spanish Language', to: '/courses' },
+      { label: 'Hindi Language', to: '/courses' },
+    ],
+  },
+  {
+    label: 'Crack Exam',
+    isNew: true,
+    dropdown: [
+      { label: 'Bank Exams', to: '/courses' },
+      { label: 'SSC Preparation', to: '/courses' },
+      { label: 'UPSC Coaching', to: '/courses' },
+      { label: 'CAT Preparation', to: '/courses' },
+    ],
+  },
+  { label: 'Teachers', to: '/courses' },
+  {
+    label: 'More',
+    dropdown: [
+      { label: 'About Us', to: '/about' },
+      { label: 'Blog', to: '/' },
+      { label: 'FAQs', to: '/' },
+      { label: 'Contact Us', to: '/' },
+    ],
+  },
+];
+
+// Single dropdown component
+const NavDropdown = ({ item }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  if (!item.dropdown) {
+    return (
+      <Link
+        to={item.to}
+        className="relative font-medium text-[14px] text-[#223654] hover:text-orange-600 transition-colors whitespace-nowrap"
+      >
+        {item.label}
+      </Link>
+    );
+  }
+
+  return (
+    <div
+      ref={ref}
+      className="relative"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1 font-medium text-[14px] text-[#223654] hover:text-orange-600 transition-colors whitespace-nowrap relative"
+      >
+        {item.label}
+        {item.isNew && (
+          <span className="absolute -top-[14px] right-1 text-[11px] font-medium text-[#f36b21] leading-none">
+            New
+          </span>
+        )}
+        <HiChevronDown
+          className={`w-[13px] h-[13px] text-[#223654] transition-transform duration-200 mt-0.5 ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+
+      {/* Dropdown Panel */}
+      {open && (
+        <div className="absolute top-full left-0 pt-2 w-52 z-[200]">
+          <div className="bg-white rounded-xl shadow-2xl border border-slate-100 py-2 animate-fadeIn">
+            {item.dropdown.map((sub, i) => (
+              <Link
+                key={i}
+                to={sub.to}
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2.5 text-[12px] font-medium text-slate-600 hover:bg-orange-50 hover:text-orange-600 transition-colors"
+              >
+                {sub.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+// ── Floating Connect With Us Button + Side Panel ──
+const ConnectButton = () => {
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ name: '', mobile: '', role: 'Student' });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    alert(`Thanks ${form.name}! We'll connect with you soon.`);
+    setOpen(false);
+    setForm({ name: '', mobile: '', role: 'Student' });
+  };
+
+  return (
+    <>
+      {/* Floating Tab Button — orange pill, right edge, center */}
+      <button
+        onClick={() => setOpen(true)}
+        title="Connect With Us"
+        className="fixed right-0 top-1/2 -translate-y-1/2 z-[998] flex items-center group"
+        style={{
+          background: 'linear-gradient(135deg,#f97316,#ea580c)',
+          borderRadius: '12px 0 0 12px',
+          boxShadow: '0 4px 20px rgba(249,115,22,0.4)',
+          height: '46px',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Text — slides in on hover */}
+        <span
+          className="text-[12px] font-semibold text-white whitespace-nowrap overflow-hidden"
+          style={{
+            maxWidth: '0',
+            paddingLeft: '0',
+            transition: 'max-width 0.35s ease, padding 0.35s ease',
+          }}
+          ref={el => {
+            if (!el) return;
+            const btn = el.closest('button');
+            btn.addEventListener('mouseenter', () => {
+              el.style.maxWidth = '130px';
+              el.style.paddingLeft = '14px';
+            });
+            btn.addEventListener('mouseleave', () => {
+              el.style.maxWidth = '0';
+              el.style.paddingLeft = '0';
+            });
+          }}
+        >
+          Connect With Us
+        </span>
+        {/* Icon */}
+        <div className="w-11 h-full flex items-center justify-center shrink-0">
+          <FaHandshake className="text-white text-[20px]" />
+        </div>
+      </button>
+
+      {/* Side Panel Overlay */}
+      {open && (
+        <div className="fixed inset-0 z-[1100] flex justify-end">
+          {/* Dark backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setOpen(false)}
+          />
+
+          {/* Panel — full height, no scroll */}
+          <div
+            className="relative w-full max-w-sm bg-white h-screen shadow-2xl flex flex-col"
+            style={{ animation: 'slideInRight 0.3s ease-out' }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
+              <h2 className="text-[17px] font-black text-slate-800">Connect With Us</h2>
+              <button
+                onClick={() => setOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors text-slate-500 font-bold text-lg"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Form — compact, no scroll needed */}
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-6 py-4 shrink-0">
+              {/* Name */}
+              <div>
+                <label className="block text-[12px] font-bold text-slate-700 mb-1">
+                  Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  required
+                  type="text"
+                  placeholder="Enter your Name"
+                  value={form.name}
+                  onChange={e => setForm({ ...form, name: e.target.value })}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-[13px] text-slate-700 outline-none focus:border-orange-400 transition-colors"
+                />
+              </div>
+
+              {/* Mobile */}
+              <div>
+                <label className="block text-[12px] font-bold text-slate-700 mb-1">
+                  Mobile Number <span className="text-red-500">*</span>
+                </label>
+                <div className="flex gap-2">
+                  <select className="border border-slate-200 rounded-lg px-2 py-2.5 text-[12px] text-slate-600 outline-none focus:border-orange-400 bg-white">
+                    <option>IN +91</option>
+                    <option>US +1</option>
+                    <option>UK +44</option>
+                    <option>AE +971</option>
+                  </select>
+                  <input
+                    required
+                    type="tel"
+                    placeholder="Enter Mobile Number"
+                    value={form.mobile}
+                    onChange={e => setForm({ ...form, mobile: e.target.value })}
+                    className="flex-1 border border-slate-200 rounded-lg px-3 py-2.5 text-[13px] text-slate-700 outline-none focus:border-orange-400 transition-colors"
+                  />
+                </div>
+              </div>
+
+              {/* Role */}
+              <div className="flex items-center gap-6">
+                {['Parents', 'Student'].map(r => (
+                  <label key={r} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="role"
+                      value={r}
+                      checked={form.role === r}
+                      onChange={() => setForm({ ...form, role: r })}
+                      className="accent-orange-500 w-4 h-4"
+                    />
+                    <span className="text-[13px] font-medium text-slate-700">{r}</span>
+                  </label>
+                ))}
+              </div>
+
+              {/* Connect Button */}
+              <button
+                type="submit"
+                className="w-full py-2.5 text-white font-black text-[14px] rounded-xl hover:opacity-90 active:scale-95 transition-all shadow-lg"
+                style={{ background: 'linear-gradient(135deg,#f97316,#ea580c)' }}
+              >
+                Connect
+              </button>
+            </form>
+
+            {/* Illustration — fills remaining space */}
+            <div className="flex-1 flex flex-col items-center justify-end px-4 pb-4 overflow-hidden">
+              <img
+                src={contactSvg}
+                alt="Connect With Us"
+                className="w-full object-contain"
+                style={{ maxHeight: '260px' }}
+              />
+              <div className="flex items-center gap-2 text-orange-500 text-[12px] font-bold mt-1">
+                <span>📞</span> +91 9876543210
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes slideInRight {
+          from { transform: translateX(100%); opacity: 0; }
+          to   { transform: translateX(0);    opacity: 1; }
+        }
+      `}</style>
+    </>
+  );
+};
 
 const Navbar = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileExpanded, setMobileExpanded] = useState(null);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -14,46 +335,223 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-50">
-      <div className="container mx-auto px-4 h-24 flex items-center justify-between">
-        <Link to="/" className="text-3xl font-black text-slate-900 flex items-center gap-3 tracking-tighter">
-          <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-xl rotate-3 shadow-lg shadow-indigo-200">e3</div>
-          Mye3
-        </Link>
+    <>
+      {/* ── TOP UTILITY BAR (Mobile & Desktop) ── */}
+      <div className="bg-slate-50 md:bg-white border-b border-slate-100 block">
+        <div className="max-w-[1280px] mx-auto px-4 md:px-8 py-2 md:py-2 flex items-center justify-between">
+          
+          {/* Left: contact info */}
+          <div className="flex items-center gap-2 md:gap-6 text-[12px] font-medium text-slate-600">
+            <a href="tel:+919311656688" className="flex items-center gap-0 hover:text-orange-600 transition-colors">
+              <img src="https://img.icons8.com/color/48/teacher.png" alt="headset" className="w-[30px] h-[30px] md:hidden object-contain mr-1" />
+              <span className="hidden md:flex w-7 h-7 rounded-full bg-orange-100 items-center justify-center mr-2">
+                <HiOutlinePhone className="text-orange-600 text-[15px] md:text-sm" />
+              </span>
+              <span className="hidden md:inline">Talk with us{' '}<span className="font-bold text-slate-900">+91 9311656688</span></span>
+            </a>
+            <a href="mailto:education@e-tuitions.com" className="flex items-center gap-0 hover:text-orange-600 transition-colors">
+              <img src="https://img.icons8.com/color/48/gmail-new.png" alt="email" className="w-[28px] h-[28px] md:hidden object-contain mr-1" />
+              <span className="hidden md:flex w-7 h-7 rounded-full bg-red-100 items-center justify-center mr-2">
+                <MdEmail className="text-red-500 text-[15px] md:text-sm" />
+              </span>
+              <span className="hidden md:inline">Mail Us{' '}<span className="font-bold text-slate-900">education@e-tuitions.com</span></span>
+            </a>
+          </div>
 
-        <div className="hidden lg:flex items-center gap-10">
-          <Link to="/" className="font-bold text-slate-600 hover:text-indigo-600 transition-colors">Home</Link>
-          <Link to="/courses" className="font-bold text-slate-600 hover:text-indigo-600 transition-colors">Courses</Link>
-          <Link to="/about" className="font-bold text-slate-600 hover:text-indigo-600 transition-colors">About Mye3</Link>
-        </div>
-
-        <div className="flex items-center gap-6">
-          {userInfo ? (
-            <div className="flex items-center gap-4">
-              <Link 
-                to={userInfo.role.toLowerCase() === 'admin' ? '/admin/dashboard' : userInfo.role.toLowerCase() === 'teacher' ? '/teacher/dashboard' : '/student/dashboard'}
-                className="px-6 py-3 bg-slate-100 text-slate-900 rounded-xl font-black text-sm hover:bg-slate-200 transition-all"
-              >
-                Dashboard
-              </Link>
-              <button 
-                onClick={handleLogout}
-                className="font-bold text-slate-400 hover:text-red-500 transition-colors text-sm"
-              >
+          {/* Right: book demo / login */}
+          <div className="flex items-center text-[12px] font-medium text-slate-500 md:text-slate-600 text-right">
+            <Link to="/register" className="hover:text-orange-600 transition-colors flex flex-col items-center md:flex-row leading-[1.2] md:leading-normal mr-2">
+              <span className="whitespace-nowrap">Book a Free Demo</span>
+              <span className="md:ml-1">class</span>
+            </Link>
+            <span className="text-slate-300 md:font-normal font-light">|</span>
+            {userInfo ? (
+              <button onClick={handleLogout} className="hover:text-red-500 transition-colors shrink-0 ml-2">
                 Logout
               </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-4">
-              <Link to="/login" className="font-black text-slate-900 hover:text-indigo-600 transition-colors text-sm">Login</Link>
-              <Link to="/register" className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-indigo-200 hover:bg-indigo-700 hover:-translate-y-0.5 transition-all">
-                Get Started Free
+            ) : (
+              <Link to="/login" className="hover:text-orange-600 transition-colors shrink-0 ml-2">
+                Login
               </Link>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
-    </nav>
+
+      {/* ── MAIN NAVBAR ── */}
+      <nav className="bg-white border-b border-slate-100 sticky top-0 z-[100]" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+        <div className="max-w-[1280px] mx-auto px-4 md:px-6 h-[68px] flex items-center justify-between gap-4">
+
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2 shrink-0 group">
+            <img
+              src={logoGif}
+              alt="e-Tuitions Logo"
+              className="h-14 w-auto group-hover:scale-105 transition-transform"
+            />
+          </Link>
+
+          {/* Desktop Nav Links */}
+          <div className="hidden xl:flex items-center gap-8 2xl:gap-10 flex-1 justify-center">
+            {NAV_ITEMS.map((item, i) => (
+              <NavDropdown key={i} item={item} />
+            ))}
+          </div>
+
+          {/* Right CTA */}
+          <div className="flex items-center gap-3 shrink-0">
+            {userInfo ? (
+              <Link
+                to={
+                  userInfo.role.toLowerCase() === 'admin'
+                    ? '/admin/dashboard'
+                    : userInfo.role.toLowerCase() === 'teacher'
+                    ? '/teacher/dashboard'
+                    : '/student/dashboard'
+                }
+                className="w-10 h-10 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center hover:bg-orange-100 hover:text-orange-600 transition-all border border-slate-200"
+              >
+                <HiOutlineUserCircle className="text-2xl" />
+              </Link>
+            ) : (
+              <Link
+                to="/register"
+                className="hidden md:flex items-center px-5 py-2.5 text-white text-[13px] font-bold rounded-lg shadow-md hover:opacity-90 active:scale-95 transition-all"
+                style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)', boxShadow: '0 4px 14px rgba(249,115,22,0.4)' }}
+              >
+                Enrol Now
+              </Link>
+            )}
+
+            {/* Hamburger - Styled to look like e-tuitions.com */}
+            <button
+              onClick={() => setMobileOpen((v) => !v)}
+              className="xl:hidden w-[42px] h-[34px] bg-white text-[#f36b21] rounded-sm border-[1.5px] border-[#f36b21] flex items-center justify-center"
+            >
+              {mobileOpen ? <HiX className="text-[22px]" /> : <HiMenuAlt3 className="text-[22px]" />}
+            </button>
+          </div>
+        </div>
+
+        {/* ── MOBILE MENU ── */}
+        {mobileOpen && (
+          <div className="xl:hidden bg-white border-t border-slate-100 max-h-[80vh] overflow-y-auto">
+            <div className="px-4 py-3 space-y-1">
+              {/* Contact info */}
+              <div className="flex flex-col gap-1 py-3 px-2 bg-slate-50 rounded-lg mb-3">
+                <a href="tel:+919311656688" className="text-[12px] font-medium text-slate-600 flex items-center gap-2">
+                  <HiOutlinePhone className="text-orange-500" /> +91 9311656688
+                </a>
+                <a href="mailto:education@e-tuitions.com" className="text-[12px] font-medium text-slate-600 flex items-center gap-2">
+                  <HiOutlineMail className="text-orange-500" /> education@e-tuitions.com
+                </a>
+              </div>
+
+              {NAV_ITEMS.map((item, i) =>
+                item.dropdown ? (
+                  <div key={i}>
+                    <button
+                      onClick={() =>
+                        setMobileExpanded(mobileExpanded === i ? null : i)
+                      }
+                      className="w-full flex items-center justify-between py-3 px-2 text-[13px] font-semibold text-slate-700 hover:text-orange-600 border-b border-slate-50"
+                    >
+                      <span className="flex items-center gap-2">
+                        {item.label}
+                        {item.isNew && (
+                          <span className="text-[9px] font-black bg-orange-500 text-white px-1 rounded-sm uppercase">New</span>
+                        )}
+                      </span>
+                      <HiChevronDown className={`transition-transform ${mobileExpanded === i ? 'rotate-180' : ''}`} />
+                    </button>
+                    {mobileExpanded === i && (
+                      <div className="pl-4 py-1 bg-slate-50 rounded-lg mb-1">
+                        {item.dropdown.map((sub, j) => (
+                          <Link
+                            key={j}
+                            to={sub.to}
+                            onClick={() => setMobileOpen(false)}
+                            className="block py-2 px-2 text-[12px] text-slate-600 hover:text-orange-600"
+                          >
+                            {sub.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    key={i}
+                    to={item.to}
+                    onClick={() => setMobileOpen(false)}
+                    className="block py-3 px-2 text-[13px] font-semibold text-slate-700 hover:text-orange-600 border-b border-slate-50"
+                  >
+                    {item.label}
+                  </Link>
+                )
+              )}
+
+              {/* Mobile CTA */}
+              <div className="pt-3 space-y-2">
+                <Link
+                  to="/register"
+                  onClick={() => setMobileOpen(false)}
+                  className="block w-full text-center py-3 text-white font-bold text-[13px] rounded-lg"
+                  style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)' }}
+                >
+                  Enrol Now
+                </Link>
+                <Link
+                  to="/register"
+                  onClick={() => setMobileOpen(false)}
+                  className="block w-full text-center py-3 text-orange-600 font-bold text-[13px] rounded-lg border-2 border-orange-200 hover:bg-orange-50"
+                >
+                  Book Free Demo
+                </Link>
+                {userInfo ? (
+                  <button
+                    onClick={() => { handleLogout(); setMobileOpen(false); }}
+                    className="block w-full text-center py-3 text-red-500 font-bold text-[13px] rounded-lg border border-red-100"
+                  >
+                    Logout
+                  </button>
+                ) : (
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="block w-full text-center py-3 text-slate-700 font-bold text-[13px] rounded-lg border border-slate-200 hover:bg-slate-50"
+                  >
+                    Login
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* Floating WhatsApp Button */}
+      <a
+        href="https://wa.me/919876543210"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-8 right-8 z-[1000] w-14 h-14 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform cursor-pointer"
+        style={{ background: '#25D366' }}
+      >
+        <FaWhatsapp className="text-3xl" />
+      </a>
+
+      {/* Floating Connect With Us Button */}
+      <ConnectButton />
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-6px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.15s ease-out; }
+      `}</style>
+    </>
   );
 };
 

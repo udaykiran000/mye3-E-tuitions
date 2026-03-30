@@ -12,31 +12,35 @@ const ClassBundle = require('../models/ClassBundle');
 // @access  Student
 exports.getCatalog = async (req, res, next) => {
   try {
+    console.log('--- START getCatalog ---');
     const [classes, subjects] = await Promise.all([
       ClassBundle.find({ isActive: true }).sort({ className: 1 }),
       Subject.find({ isActive: true }).sort({ classLevel: 1 })
     ]);
+    console.log('Catalog Found:', { classes: classes.length, subjects: subjects.length });
 
     const catalog = [
       ...classes.map(c => ({
         id: c._id,
-        name: `${c.className} (Full Course)`,
+        name: `${c.className || 'Unknown Class'} (Full Course)`,
         type: 'bundle',
-        price: c.price,
-        classLevel: c.className,
-        subjects: c.subjects // [{ name, singleSubjectPrice }]
+        price: c.price || 0,
+        classLevel: c.className || 'Unknown',
+        subjects: c.subjects || []
       })),
       ...subjects.map(s => ({
         id: s._id,
-        name: s.subjectName || s.name,
+        name: s.subjectName || s.name || 'Unknown Subject',
         type: 'subject',
-        price: s.price,
-        classLevel: `Class ${s.classLevel}`
+        price: s.price || 0,
+        classLevel: `Class ${s.classLevel || 'N/A'}`
       }))
     ];
 
     res.status(200).json(catalog);
+    console.log('--- END getCatalog Success ---');
   } catch (error) {
+    console.error('CATALOG ERROR FAIL:', error);
     next(error);
   }
 };

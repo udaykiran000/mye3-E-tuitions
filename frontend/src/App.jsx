@@ -55,11 +55,12 @@ const ProtectedRoute = ({ children, role }) => {
 
 function AppContent() {
   const location = useLocation();
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
   const isDashboardRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/teacher') || location.pathname.startsWith('/student');
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans selection:bg-indigo-100 selection:text-indigo-900">
-      {!isDashboardRoute && <Navbar />}
+    <div className={isAuthPage ? '' : 'min-h-screen bg-slate-50 font-sans selection:bg-indigo-100 selection:text-indigo-900'}>
+      {!isDashboardRoute && !isAuthPage && <Navbar />}
       <main>
             <Routes>
               {/* Public Routes */}
@@ -126,7 +127,7 @@ function AppContent() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
-          {!isDashboardRoute && <Footer />}
+          {!isDashboardRoute && !isAuthPage && <Footer />}
           <ViewSwitcher />
         </div>
   );

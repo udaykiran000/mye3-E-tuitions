@@ -1,77 +1,235 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
+import {
+  HiOutlinePhone,
+  HiOutlineMail,
+  HiOutlineLocationMarker,
+  HiArrowRight,
+} from 'react-icons/hi';
+import logoGif from '../../assets/loader-logo (1).gif';
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaLinkedinIn,
+  FaYoutube,
+  FaTwitter,
+} from 'react-icons/fa';
 
 const Footer = () => {
+  const [email, setEmail] = useState('');
+
   return (
-    <footer className="bg-slate-900 text-white pt-20 pb-10">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-          {/* Brand & About */}
-          <div className="space-y-6">
-            <Link to="/" className="text-3xl font-black flex items-center gap-3 tracking-tighter">
-              <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-xl rotate-3 shadow-lg shadow-indigo-500/50">e3</div>
-              Mye3
-            </Link>
-            <p className="text-slate-400 font-medium leading-relaxed">
-              India's leading platform for personalized online tuition. Empowering students with expert guidance and premium resources for academic excellence.
-            </p>
-            <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center hover:bg-indigo-600 transition-all"><FaFacebook /></a>
-              <a href="#" className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center hover:bg-indigo-600 transition-all"><FaTwitter /></a>
-              <a href="#" className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center hover:bg-indigo-600 transition-all"><FaInstagram /></a>
-              <a href="#" className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center hover:bg-indigo-600 transition-all"><FaLinkedin /></a>
+    <footer className="bg-white border-t border-slate-100">
+
+      {/* ── Scrolling Rating Ticker ── */}
+      <div
+        className="w-full py-3 overflow-hidden"
+        style={{ background: 'linear-gradient(90deg,#f97316,#ea580c)' }}
+      >
+        <div className="flex whitespace-nowrap" style={{ animation: 'marquee 14s linear infinite' }}>
+          {/* Duplicate the list twice for seamless loop */}
+          {[...Array(2)].map((_, rep) => (
+            <div key={rep} className="flex shrink-0 items-center">
+              {[
+                'QUALITY TEACHER ⭐ 4.9/5',
+                'PUNCTUALITY AND PROFESSIONALISM ⭐ 4.8/5',
+                'STUDENT SATISFACTION ⭐ 4.9/5',
+                'SEAMLESS LEARNING EXPERIENCE ⭐ 5/5',
+                'PERSONALIZED ATTENTION ⭐ 4.7/5',
+                'ENGAGING TEACHING ⭐ 5/5',
+              ].map((text, i) => (
+                <span key={i} className="flex items-center gap-6">
+                  <span className="text-white font-black text-[12px] md:text-[13px] uppercase tracking-widest px-8">
+                    {text}
+                  </span>
+                  <span className="text-white/40 text-lg">|</span>
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes marquee {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
+
+      {/* ── Logo + Tagline Row ── */}
+      <div className="max-w-[1280px] mx-auto px-6 md:px-10 pt-10 pb-6 border-b border-slate-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        {/* Logo */}
+        <Link to="/" className="flex items-center shrink-0">
+          <img
+            src={logoGif}
+            alt="e-Tuitions Logo"
+            className="h-14 w-auto hover:scale-105 transition-transform"
+          />
+        </Link>
+
+        {/* Tagline */}
+        <p className="text-slate-500 font-medium text-[14px] max-w-md leading-relaxed">
+          We dream to find the solution to every challenge which students come across,
+          while taking online classes.
+        </p>
+      </div>
+
+      {/* ── Main Columns ── */}
+      <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-10 grid grid-cols-2 md:grid-cols-4 gap-10">
+
+        {/* Column 1: Links */}
+        <div>
+          <h4 className="text-[14px] font-black text-slate-800 mb-5">Links</h4>
+          <ul className="space-y-3">
+            {[
+              { label: 'Book Classes', to: '/register' },
+              { label: 'Online Classes', to: '/courses' },
+              { label: 'Explore Teachers', to: '/courses' },
+              { label: 'Contact Us', to: '/about' },
+              { label: 'How To Register', to: '/register' },
+              { label: 'Join As Teacher', to: '/register' },
+              { label: 'Teacher Memberships', to: '/register' },
+            ].map((item, i) => (
+              <li key={i}>
+                <Link
+                  to={item.to}
+                  className="text-[13px] text-slate-500 hover:text-orange-500 transition-colors font-medium"
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Column 2: Quick Links */}
+        <div>
+          <h4 className="text-[14px] font-black text-slate-800 mb-5">Quick Links</h4>
+          <ul className="space-y-3">
+            {[
+              { label: 'About Us', to: '/about' },
+              { label: 'Privacy Policy', to: '/' },
+              { label: 'Refund Policy', to: '/' },
+              { label: 'Terms & Conditions', to: '/' },
+              { label: 'Disclaimer', to: '/' },
+              { label: 'Sitemap', to: '/' },
+              { label: 'Blogs', to: '/' },
+            ].map((item, i) => (
+              <li key={i}>
+                <Link
+                  to={item.to}
+                  className="text-[13px] text-slate-500 hover:text-orange-500 transition-colors font-medium"
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Column 3: Our Services + Quick Connect */}
+        <div className="space-y-8">
+          <div>
+            <h4 className="text-[14px] font-black text-slate-800 mb-5">Our Services</h4>
+            <ul className="space-y-3">
+              {[
+                { label: 'Group Classes', to: '/courses' },
+                { label: 'Offline Classes', to: '/courses' },
+                { label: 'Private Classes', to: '/courses' },
+              ].map((item, i) => (
+                <li key={i}>
+                  <Link
+                    to={item.to}
+                    className="text-[13px] text-slate-500 hover:text-orange-500 transition-colors font-medium"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Social icons */}
+          <div>
+            <h4 className="text-[14px] font-black text-slate-800 mb-4">Quick Connect</h4>
+            <div className="flex items-center gap-2 flex-wrap">
+              {[
+                { Icon: FaFacebookF, color: '#1877f2', href: '#' },
+                { Icon: FaInstagram, color: '#e1306c', href: '#' },
+                { Icon: FaTwitter, color: '#1da1f2', href: '#' },
+                { Icon: FaLinkedinIn, color: '#0077b5', href: '#' },
+                { Icon: FaYoutube, color: '#ff0000', href: '#' },
+              ].map(({ Icon, color, href }, i) => (
+                <a
+                  key={i}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-white hover:opacity-80 hover:-translate-y-1 transition-all text-[14px]"
+                  style={{ background: color }}
+                >
+                  <Icon />
+                </a>
+              ))}
             </div>
           </div>
-
-          {/* Quick Links */}
-          <div className="space-y-6">
-            <h4 className="text-lg font-bold">Quick Links</h4>
-            <ul className="space-y-4 text-slate-400 font-medium">
-              <li><Link to="/" className="hover:text-indigo-400 transition-colors">Home</Link></li>
-              <li><Link to="/about" className="hover:text-indigo-400 transition-colors">About Mye3</Link></li>
-              <li><Link to="/courses" className="hover:text-indigo-400 transition-colors">Our Courses</Link></li>
-              <li><Link to="/login" className="hover:text-indigo-400 transition-colors">Account Login</Link></li>
-            </ul>
-          </div>
-
-          {/* Programs */}
-          <div className="space-y-6">
-            <h4 className="text-lg font-bold">Programs</h4>
-            <ul className="space-y-4 text-slate-400 font-medium">
-              <li><Link to="/courses" className="hover:text-indigo-400 transition-colors">Classes 6-10 (Bundles)</Link></li>
-              <li><Link to="/courses" className="hover:text-indigo-400 transition-colors">Classes 11-12 (Subjects)</Link></li>
-              <li><Link to="/about" className="hover:text-indigo-400 transition-colors">Free Resources</Link></li>
-              <li><Link to="/register" className="hover:text-indigo-400 transition-colors">Join as Student</Link></li>
-            </ul>
-          </div>
-
-          {/* Contact Info */}
-          <div className="space-y-6">
-            <h4 className="text-lg font-bold">Contact Us</h4>
-            <ul className="space-y-4 text-slate-400 font-medium">
-              <li className="flex items-center gap-3">
-                <FaPhone className="text-indigo-400" /> +91 98765 43210
-              </li>
-              <li className="flex items-center gap-3">
-                <FaEnvelope className="text-indigo-400" /> support@mye3elearning.com
-              </li>
-              <li className="flex items-start gap-3">
-                <FaMapMarkerAlt className="text-indigo-400 mt-1" /> 123 Education Hub, Jubilee Hills, Hyderabad - 500033
-              </li>
-            </ul>
-          </div>
         </div>
 
-        <div className="pt-10 border-t border-slate-800 flex flex-col md:row items-center justify-between gap-6">
-          <p className="text-slate-500 text-sm font-medium">
-            © {new Date().getFullYear()} Mye3-Elearning. All rights reserved.
-          </p>
-          <div className="flex gap-8 text-slate-500 text-sm font-medium">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+        {/* Column 4: Contact Us */}
+        <div>
+          <h4 className="text-[14px] font-black text-slate-800 mb-5">Contact Us</h4>
+          <ul className="space-y-4">
+            <li className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: '#fff3e0' }}>
+                <HiOutlinePhone className="text-orange-500 text-[15px]" />
+              </div>
+              <div className="text-[13px] text-slate-600 font-medium leading-relaxed">
+                +91 9311656688<br />+91 9289439711
+              </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: '#fff3e0' }}>
+                <HiOutlineMail className="text-orange-500 text-[15px]" />
+              </div>
+              <span className="text-[13px] text-slate-600 font-medium">education@e-tuitions.com</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: '#fff3e0' }}>
+                <HiOutlineLocationMarker className="text-orange-500 text-[15px]" />
+              </div>
+              <span className="text-[13px] text-slate-600 font-medium leading-relaxed">
+                FIEE Complex, A-55, Okhla Phase II,<br />
+                Okhla Industrial Estate,<br />
+                New Delhi, Delhi 110020
+              </span>
+            </li>
+          </ul>
+
+          {/* Email subscribe */}
+          <div className="mt-6 flex items-center border border-slate-200 rounded-lg overflow-hidden">
+            <input
+              type="email"
+              placeholder="Your email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              className="flex-1 px-3 py-2.5 text-[13px] text-slate-600 outline-none bg-white placeholder-slate-400"
+            />
+            <button
+              className="px-3 py-2.5 text-white flex items-center justify-center hover:opacity-90 transition-opacity"
+              style={{ background: 'linear-gradient(135deg,#f97316,#ea580c)' }}
+            >
+              <HiArrowRight className="text-lg" />
+            </button>
           </div>
         </div>
+      </div>
+
+      {/* ── Bottom Bar ── */}
+      <div className="border-t border-slate-100 py-5 px-6 md:px-10 text-center">
+        <p className="text-[12px] text-slate-500 font-medium">
+          © Copyright 2020 - {new Date().getFullYear()} | e-Tuitions Learning Pvt Ltd | All Rights Reserved
+        </p>
       </div>
     </footer>
   );

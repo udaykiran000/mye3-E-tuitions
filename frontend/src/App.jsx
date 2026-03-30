@@ -11,6 +11,10 @@ import StudentDashboard from './pages/student/StudentDashboard';
 import StudentStore from './pages/student/StudentStore';
 import AdminDashboard from './pages/AdminDashboard';
 import About from './pages/About';
+import Blog from './pages/Blog';
+import FAQs from './pages/FAQs';
+import ContactUs from './pages/ContactUs';
+import Teachers from './pages/Teachers';
 import Store from './pages/student/StudentStore'; // Unified Store
 import Footer from './components/shared/Footer';
 import AdminLayout from './components/admin/AdminLayout';
@@ -56,7 +60,13 @@ const ProtectedRoute = ({ children, role }) => {
 function AppContent() {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
-  const isDashboardRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/teacher') || location.pathname.startsWith('/student');
+  const isDashboardRoute = 
+    location.pathname.startsWith('/admin/') || 
+    location.pathname.startsWith('/teacher/') || 
+    location.pathname.startsWith('/student/') ||
+    location.pathname === '/admin' ||
+    location.pathname === '/teacher' ||
+    location.pathname === '/student';
 
   return (
     <div className={isAuthPage ? '' : 'min-h-screen bg-slate-50 font-sans selection:bg-indigo-100 selection:text-indigo-900'}>
@@ -124,6 +134,10 @@ function AppContent() {
               } />
 
               <Route path="/about" element={<About />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/faqs" element={<FAQs />} />
+              <Route path="/contact-us" element={<ContactUs />} />
+              <Route path="/teachers" element={<Teachers />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>

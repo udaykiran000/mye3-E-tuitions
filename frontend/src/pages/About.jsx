@@ -1,116 +1,175 @@
-import { HiCheckCircle, HiLightBulb, HiSun, HiShieldCheck, HiGlobeAlt, HiAcademicCap } from 'react-icons/hi';
-import { FaGraduationCap, FaUserTie, FaRocket } from 'react-icons/fa';
+import React from 'react';
+import { 
+  HiOutlineAcademicCap,
+  HiOutlineOfficeBuilding,
+  HiOutlineIdentification
+} from 'react-icons/hi';
+import { 
+  FiAward, 
+  FiSettings, 
+  FiFileText,
+  FiSearch 
+} from 'react-icons/fi';
+import { 
+  FaFacebookF, 
+  FaTwitter, 
+  FaGooglePlusG, 
+  FaYoutube, 
+  FaWhatsapp 
+} from 'react-icons/fa';
 
 const About = () => {
+  const features = [
+    {
+      icon: <FiAward className="w-[45px] h-[45px] text-[#222]" strokeWidth="1.2" />,
+      title: 'Awards',
+      desc: 'Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Morbi bibendum imperdiet bibendum.',
+    },
+    {
+      icon: <FiSettings className="w-[45px] h-[45px] text-[#222]" strokeWidth="1.2" />,
+      title: 'Research',
+      desc: 'Etiam eget enim non magna vestibulum malesuada ut et lectus. Curabitur egestas risus massa, a malesuada erat ultrices non.',
+    },
+    {
+      icon: <HiOutlineAcademicCap className="w-[48px] h-[48px] text-[#222]" />,
+      title: 'Educations',
+      desc: 'Maecenas venenatis, turpis ac tincidunt convallis, leo enim ultrices tortor, at faucibus neque sapien ac elit. Curabitur ut ipsum odio.',
+    },
+    {
+      icon: <FiFileText className="w-[45px] h-[45px] text-[#222]" strokeWidth="1.2" />,
+      title: 'Alumni',
+      desc: 'Aliquam malesuada commodo lectus, at fermentum ligula finibus eu. Morbi nisi neque, suscipit non pulvinar vitae.',
+    },
+    {
+      icon: <HiOutlineOfficeBuilding className="w-[45px] h-[45px] text-[#222]" />,
+      title: 'Facilities',
+      desc: 'Maecenas venenatis, turpis ac tincidunt convallis, leo enim ultrices tortor, at faucibus neque sapien ac elit. Curabitur ut ipsum odio.',
+    },
+    {
+      icon: <HiOutlineIdentification className="w-[45px] h-[45px] text-[#222]" />,
+      title: 'Departments',
+      desc: 'Maecenas venenatis, turpis ac tincidunt convallis, leo enim ultrices tortor, at faucibus neque sapien ac elit. Curabitur ut ipsum odio.',
+    },
+  ];
+
   return (
-    <div className="space-y-32 pb-32">
-      {/* HERO SECTION */}
-      <section className="relative py-32 bg-indigo-600 rounded-[60px] text-white overflow-hidden text-center px-10">
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="/assets/img/about_hero.png" 
-            alt="About Mye3 Hero" 
-            className="w-full h-full object-cover opacity-30"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-900 via-indigo-700/80 to-emerald-900/40"></div>
+    <div className="bg-white font-sans w-full flex flex-col">
+      {/* Search Bar Strip */}
+      <div className="bg-[#002147] py-[16px] px-4 w-full border-b border-[#001b3a]">
+        <div className="max-w-[750px] mx-auto flex h-[52px] shadow-sm">
+          <div className="flex-1 relative flex items-center bg-white rounded-l-sm overflow-hidden">
+            <FiSearch className="text-[#999] w-[18px] h-[18px] ml-5 flex-shrink-0" />
+            <input 
+              type="text" 
+              placeholder="Search Course And Discount Courses"
+              className="w-full py-2 px-4 text-[15px] text-[#555] outline-none h-full bg-transparent placeholder-[#999]"
+            />
+          </div>
+          <button className="bg-[#f16126] text-white px-8 md:px-10 h-full text-[14px] font-semibold uppercase tracking-wide rounded-r-sm hover:bg-[#de551e] transition-colors flex-shrink-0">
+            Search Course
+          </button>
         </div>
-        <div className="relative z-10 max-w-4xl mx-auto space-y-8">
-           <h1 className="text-6xl md:text-8xl font-black leading-[1.1]">Transforming <br /> Online Education</h1>
-           <p className="text-2xl font-bold text-white/80 leading-relaxed max-w-2xl mx-auto">
-              Mye3-Elearning is India's premier online tuition platform where every student gets the personalized attention they deserve.
-           </p>
+      </div>
+
+      {/* Main About Section */}
+      <div className="max-w-[1140px] mx-auto px-4 py-20 pb-24">
+        
+        {/* Header */}
+        <div className="text-center mb-20 mt-4 space-y-5">
+          <h1 className="text-[40px] font-bold tracking-tight">
+            <span className="text-[#002147]">About </span>
+            <span className="text-[#f16126]">Mye3-e-Tuitions</span>
+          </h1>
+          <p className="text-[#64748b] max-w-4xl mx-auto text-[16px] leading-relaxed text-center">
+            Mye3-e-Tuitions is a leading online platform dedicated to providing high-quality education and personalized learning experiences for students worldwide.
+          </p>
         </div>
-      </section>
 
-      {/* CORE VISION */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-         <div className="space-y-8">
-            <h2 className="text-sm font-black text-indigo-600 uppercase tracking-[0.3em]">Our Mission</h2>
-            <p className="text-5xl font-black text-slate-900 leading-tight">Empowering Students Through Personalized Focus</p>
-            <p className="text-xl text-slate-500 font-semibold leading-relaxed">
-               We believe that education is not a "one size fits all" process. Every student has a unique learning pace and style. At Mye3, we bridge the gap between classroom teaching and individual understanding.
-            </p>
-            <div className="space-y-6">
-               {[
-                 { title: "Personalized 1:1 Care", desc: "No more getting lost in large classrooms. Each student is our priority." },
-                 { title: "Expert Tutors", desc: "Hand-picked educators from top universities with passion for teaching." },
-                 { title: "Premium Resources", desc: "High-quality notes and practice sets to ensure concept clarity." }
-               ].map((item, i) => (
-                 <div key={i} className="flex gap-6 p-6 rounded-3xl hover:bg-indigo-50 transition-all border border-transparent hover:border-indigo-100">
-                    <div className="w-14 h-14 bg-indigo-600 text-white rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 animate-pulse">
-                       <HiCheckCircle />
-                    </div>
-                    <div>
-                       <h4 className="text-xl font-black text-slate-900 mb-1">{item.title}</h4>
-                       <p className="text-slate-500 font-bold text-sm leading-relaxed">{item.desc}</p>
-                    </div>
-                 </div>
-               ))}
-            </div>
-         </div>
-         
-         <div className="grid grid-cols-2 gap-8">
-            <div className="space-y-8 mt-12">
-               <div className="premium-card p-10 bg-indigo-50 border-none rounded-[40px] shadow-2xl shadow-indigo-200">
-                  <FaGraduationCap className="text-5xl text-indigo-600 mb-6" />
-                  <h3 className="text-2xl font-black text-slate-900 leading-tight">Academic <br /> Integrity</h3>
-               </div>
-               <div className="premium-card p-10 bg-emerald-50 border-none rounded-[40px] shadow-2xl shadow-emerald-200">
-                  <HiSun className="text-5xl text-emerald-600 mb-6" />
-                  <h3 className="text-2xl font-black text-slate-900 leading-tight">Positive <br /> Environment</h3>
-               </div>
-            </div>
-            <div className="space-y-8">
-               <div className="premium-card p-10 bg-amber-50 border-none rounded-[40px] shadow-2xl shadow-amber-200">
-                  <FaUserTie className="text-5xl text-amber-600 mb-6" />
-                  <h3 className="text-2xl font-black text-slate-900 leading-tight">Professional <br /> Mentors</h3>
-               </div>
-               <div className="premium-card p-10 bg-rose-50 border-none rounded-[40px] shadow-2xl shadow-rose-200">
-                  <HiLightBulb className="text-5xl text-rose-600 mb-6" />
-                  <h3 className="text-2xl font-black text-slate-900 leading-tight">Creative <br /> Solutions</h3>
-               </div>
-            </div>
-         </div>
-      </section>
-
-      {/* THE Mye3 PROMISE */}
-      <section className="bg-slate-900 text-white rounded-[80px] p-16 lg:p-32 text-center space-y-20 relative overflow-hidden">
-         <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-indigo-500/10 to-transparent"></div>
-         
-         <div className="max-w-3xl mx-auto space-y-6 relative z-10">
-            <HiShieldCheck className="text-8xl text-indigo-400 mx-auto" />
-            <h2 className="text-5xl font-black leading-tight">The Mye3 Promise</h2>
-            <p className="text-xl text-slate-400 font-medium">
-               We don't just teach; we mentor. Our commitment is to ensure that every student who joins us feels more confident in their subjects after every single session.
-            </p>
-         </div>
-
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10">
-            {[
-              { icon: FaRocket, val: "100%", label: "Curriculum Coverage" },
-              { icon: HiGlobeAlt, val: "24/7", label: "Dashboard Access" },
-              { icon: HiAcademicCap, val: "500+", label: "Expert Educators" }
-            ].map((stat, i) => (
-              <div key={i} className="space-y-4">
-                 <stat.icon className="text-5xl text-indigo-400 mx-auto mb-4" />
-                 <p className="text-5xl font-black text-white">{stat.val}</p>
-                 <p className="text-xs font-black text-slate-500 uppercase tracking-widest">{stat.label}</p>
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 max-w-[1140px] mx-auto">
+          {features.map((feature, idx) => {
+            const isRightBorder = idx % 3 !== 2;
+            const isBottomBorder = idx < 3;
+            return (
+              <div 
+                key={idx} 
+                className={`
+                  p-[35px] flex gap-[25px] border-[#eaeaea] hover:bg-[#fcfcfc] transition-colors
+                  ${idx === features.length - 1 ? 'border-b-0 md:border-b-0' : 'border-b'}
+                  ${!isBottomBorder ? 'md:border-b-0' : ''}
+                  ${isRightBorder ? 'md:border-r' : ''}
+                `}
+              >
+                <div className="flex-shrink-0 mt-1">
+                  {feature.icon}
+                </div>
+                <div className="flex flex-col items-start text-left">
+                  <h3 className="text-[20px] font-bold text-[#111] mb-2">{feature.title}</h3>
+                  <p className="text-[14px] text-[#666] mb-5 leading-[1.6]">
+                    {feature.desc}
+                  </p>
+                  <button className="bg-[#002147] text-white px-[18px] py-[8px] text-[12px] font-semibold rounded-sm hover:bg-[#001530] transition-colors tracking-wide">
+                    Read more
+                  </button>
+                </div>
               </div>
-            ))}
-         </div>
-      </section>
+            );
+          })}
+        </div>
+      </div>
 
-      {/* MEET OUR TUTORS CTA */}
-      <section className="py-20 text-center space-y-12">
-         <h2 className="text-5xl font-black text-slate-900">Experience the Difference Today</h2>
-         <p className="text-xl text-slate-500 max-w-2xl mx-auto font-bold leading-relaxed">
-            Join thousands of students who have already taken the first step towards academic freedom and excellence.
-         </p>
-         <div className="flex flex-col sm:flex-row justify-center items-center gap-8">
-            <button className="btn-primary px-16 py-6 text-xl">Book a Free Session</button>
-            <button className="text-indigo-600 font-black text-lg underline underline-offset-8">View Tutoring Plans</button>
-         </div>
-      </section>
+      {/* Orange Banner Section */}
+      <div className="bg-[#f06522] py-[55px] px-4">
+        <div className="max-w-[1140px] mx-auto flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
+          
+          <div className="flex items-center gap-6 md:gap-14 md:w-3/4">
+            
+            {/* Perfectly matched bulb icon from reference */}
+            <div className="relative flex-shrink-0 w-[80px] h-[80px] flex items-center justify-center">
+              {/* Rays (8 Lines) */}
+              <div className="absolute inset-0">
+                {[0, 45, 90, 135, 180, 225, 270, 315].map((degree) => (
+                  <div 
+                    key={degree}
+                    className="absolute top-1/2 left-1/2 w-[12px] h-[2.5px] bg-[#fbc02d] rounded-full"
+                    style={{ 
+                      transform: `translate(-50%, -50%) rotate(${degree}deg) translate(32px)` 
+                    }}
+                  ></div>
+                ))}
+              </div>
+              
+              {/* Bulb SVG - precise shape with glare and base */}
+              <div className="relative z-10 flex flex-col items-center">
+                <div className="w-[42px] h-[42px] bg-[#fbc02d] rounded-full relative">
+                  {/* Glare */}
+                  <div className="absolute top-[6px] left-[8px] w-[8px] h-[12px] border-l-[3px] border-t-[3px] border-white/40 rounded-tl-full"></div>
+                </div>
+                <div className="w-[18px] h-[12px] bg-[#34495e] mt-[-3px] flex flex-col gap-[2px] items-center py-[1px] rounded-b-sm">
+                  <div className="w-full h-[2px] bg-black/20"></div>
+                  <div className="w-[80%] h-[2px] bg-black/20"></div>
+                  <div className="w-[60%] h-[2px] bg-black/20"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="text-white">
+              <h2 className="text-[20px] md:text-[27px] font-bold uppercase mb-2 tracking-wide text-white">
+                Therefore Always Free From Repetition
+              </h2>
+              <p className="text-white/95 text-[14px] md:text-[15px] leading-relaxed max-w-2xl">
+                There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour.
+              </p>
+            </div>
+          </div>
+          
+          <div className="md:w-1/4 flex md:justify-end w-full pl-24 md:pl-0">
+            <button className="border-[1.5px] border-white text-white font-medium px-8 py-[12px] text-[14.5px] rounded-[30px] hover:bg-white hover:text-[#f06522] transition-colors shadow-sm tracking-wide whitespace-nowrap">
+              Book This Course
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

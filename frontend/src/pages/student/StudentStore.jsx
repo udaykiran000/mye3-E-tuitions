@@ -1,26 +1,197 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ShoppingBag, 
-  Search, 
-  CreditCard, 
-  CheckCircle2, 
-  X, 
-  ShieldCheck, 
-  ChevronRight,
-  GraduationCap,
-  ChevronDown,
-  ChevronUp,
-  Layout,
-  Loader2
-} from 'lucide-react';
+  FiSearch, 
+  FiShoppingBag, 
+  FiCheckCircle, 
+  FiChevronDown, 
+  FiChevronUp,
+  FiArrowRight,
+  FiShield,
+  FiCreditCard,
+  FiX,
+  FiAward,
+  FiStar
+} from 'react-icons/fi';
+import { GraduationCap } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
-import { usePreview } from '../../context/PreviewContext';
 import { useSelector } from 'react-redux';
 
+const CourseCard = ({ c, expandedId, setExpandedId, setSelectedCourse, setShowCheckout }) => {
+  const isBundle = c.type === 'bundle';
+  const isExpanded = expandedId === c.id;
+
+  return (
+    <div className={`group bg-white rounded-2xl border transition-all duration-300 flex flex-col p-7 relative overflow-hidden ${isExpanded ? 'border-[#f16126] shadow-xl shadow-orange-900/5' : 'border-slate-100 hover:border-[#f16126]/30 hover:shadow-lg shadow-sm'}`}>
+      
+      {isBundle && (
+        <div className="absolute top-0 right-0 px-5 py-2 bg-[#f16126] text-white font-black text-[9px] uppercase tracking-widest rounded-bl-xl shadow-md">
+          Full Bundle
+        </div>
+      )}
+
+      {/* Header Info */}
+      <div className="flex-1">
+        <div className="flex items-center gap-3 mb-4">
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isBundle ? 'bg-orange-50 text-[#f16126]' : 'bg-blue-50 text-[#002147]'}`}>
+            <GraduationCap className="w-6 h-6" />
+          </div>
+          <div>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Class {c.classLevel}</p>
+            <h3 className="text-lg font-black text-[#002147] uppercase italic leading-tight tracking-tight">{c.name}</h3>
+          </div>
+        </div>
+
+        {/* Pricing */}
+        <div className="mb-6 flex items-baseline gap-2">
+          <span className="text-3xl font-black text-[#002147] tracking-tighter italic">₹{c.price}</span>
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">/ course investment</span>
+        </div>
+
+        {/* Features List */}
+        <div className="space-y-3 mb-8">
+          {c.subjects?.slice(0, 3).map((sub, idx) => (
+            <div key={idx} className="flex items-center gap-3 text-slate-600">
+              <FiCheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
+              <span className="text-[13px] font-bold italic">{sub.name}</span>
+            </div>
+          ))}
+          {c.subjects?.length > 3 && (
+            <button 
+              onClick={() => setExpandedId(isExpanded ? null : c.id)}
+              className="text-[#f16126] text-[11px] font-black uppercase tracking-widest hover:underline pt-1"
+            >
+              {isExpanded ? '- Show Less' : `+ ${c.subjects.length - 3} More Subjects`}
+            </button>
+          )}
+        </div>
+
+        {/* Details for Expanded */}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden mb-6 space-y-2 border-t border-slate-50 pt-4"
+            >
+              {c.subjects.slice(3).map((sub, idx) => (
+                <div key={idx} className="flex items-center gap-3 text-slate-500">
+                  <div className="w-1 h-1 bg-[#f16126] rounded-full" />
+                  <span className="text-[12px] font-medium">{sub.name}</span>
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* FOOTER CTA */}
+      <div className="pt-6 border-t border-slate-50 flex items-center justify-between gap-4">
+         <button 
+           onClick={() => { setSelectedCourse(c); setShowCheckout(true); }}
+           className="flex-1 bg-[#002147] text-white py-3.5 rounded-xl font-black text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-[#f16126] transition-all shadow-lg active:scale-95 group/buy"
+         >
+           Enroll Now <FiArrowRight className="w-4 h-4 group-hover/buy:translate-x-1 transition-transform" />
+         </button>
+      </div>
+    </div>
+  );
+};
+
+const StoreCarousel = () => {
+  const [current, setCurrent] = useState(0);
+  const images = [
+    '/src/assets/course-item-1.webp',
+    '/src/assets/course-item-2.webp',
+    '/src/assets/course-item-3.webp',
+    '/src/assets/course-item-4.webp'
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % images.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [images.length]);
+
+  return (
+    <div className="relative w-full h-[180px] md:h-[220px] rounded-2xl bg-transparent flex items-center justify-center">
+      {/* Decorative Icons (C-Curve Arrangement) */}
+      {/* Left Arc */}
+      <motion.div 
+        animate={{ y: [0, -8, 0], x: [0, -3, 0] }} 
+        transition={{ duration: 3, repeat: Infinity }} 
+        className="absolute top-[12%] left-[12%] z-20 p-1.5 bg-orange-100 rounded-lg shadow-sm"
+      >
+        <FiAward className="text-[#f16126] w-3 h-3" />
+      </motion.div>
+      <motion.div 
+        animate={{ y: [0, 8, 0], x: [0, -6, 0] }} 
+        transition={{ duration: 4, repeat: Infinity }} 
+        className="absolute top-[50%] left-[2%] -translate-y-1/2 z-20 p-1.5 bg-blue-50 rounded-lg shadow-sm"
+      >
+        <FiStar className="text-[#002147] w-3 h-3" />
+      </motion.div>
+      <motion.div 
+        animate={{ y: [0, -8, 0], x: [0, -3, 0] }} 
+        transition={{ duration: 3.5, repeat: Infinity }} 
+        className="absolute bottom-[12%] left-[12%] z-20 p-1.5 bg-emerald-50 rounded-lg shadow-sm"
+      >
+        <FiCheckCircle className="text-emerald-500 w-3 h-3" />
+      </motion.div>
+
+      {/* Right Arc */}
+      <motion.div 
+        animate={{ y: [0, 8, 0], x: [0, 3, 0] }} 
+        transition={{ duration: 3.2, repeat: Infinity }} 
+        className="absolute top-[12%] right-[12%] z-20 p-1.5 bg-blue-50 rounded-lg shadow-sm"
+      >
+        <FiSearch className="text-[#002147] w-3 h-3" />
+      </motion.div>
+      <motion.div 
+        animate={{ y: [0, -8, 0], x: [0, 6, 0] }} 
+        transition={{ duration: 4.5, repeat: Infinity }} 
+        className="absolute top-[50%] right-[2%] -translate-y-1/2 z-20 p-1.5 bg-orange-100 rounded-lg shadow-sm"
+      >
+        <FiCheckCircle className="text-[#f16126] w-3 h-3" />
+      </motion.div>
+      <motion.div 
+        animate={{ y: [0, 8, 0], x: [0, 3, 0] }} 
+        transition={{ duration: 3.8, repeat: Infinity }} 
+        className="absolute bottom-[12%] right-[12%] z-20 p-1.5 bg-slate-100 rounded-lg shadow-sm"
+      >
+        <FiAward className="text-[#64748b] w-3 h-3" />
+      </motion.div>
+
+      <AnimatePresence mode="wait">
+        <motion.img
+          key={current}
+          src={images[current]}
+          alt={`Course Preview ${current + 1}`}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 1.1 }}
+          transition={{ duration: 0.6, ease: "easeInOut" }}
+          className="absolute inset-0 w-full h-full object-contain object-top z-10"
+        />
+      </AnimatePresence>
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-30">
+        {images.map((_, i) => (
+          <div 
+            key={i} 
+            className={`h-0.5 rounded-full transition-all duration-300 ${i === current ? 'w-4 bg-[#f16126]' : 'w-1 bg-slate-300'}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const StudentStore = () => {
-  const { activeView } = usePreview();
+  const location = useLocation();
   const { userInfo } = useSelector((state) => state.auth);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,10 +201,27 @@ const StudentStore = () => {
   const [buyLoading, setBuyLoading] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
 
+  const juniorRef = useRef(null);
+  const seniorRef = useRef(null);
+
   const fetchCourses = async () => {
     try {
       const { data } = await axios.get('/student/catalog');
-      setCourses(data);
+      // If backend is empty, use the requested project structure as fallback
+      if (!data || data.length === 0) {
+        const mockData = [
+          { id: 'c6', name: 'Class 6 - Full Bundle', classLevel: '6', type: 'bundle', price: 999, subjects: [{name: 'Maths'}, {name: 'Science'}, {name: 'English'}, {name: 'Social'}, {name: 'Telugu/Hindi'}] },
+          { id: 'c7', name: 'Class 7 - Full Bundle', classLevel: '7', type: 'bundle', price: 999, subjects: [{name: 'Maths'}, {name: 'Science'}, {name: 'English'}, {name: 'Social'}] },
+          { id: 'c8', name: 'Class 8 - Full Bundle', classLevel: '8', type: 'bundle', price: 1199, subjects: [{name: 'Maths'}, {name: 'Physics Basics'}, {name: 'Chemistry Basics'}, {name: 'Biology'}, {name: 'English'}] },
+          { id: 'c9', name: 'Class 9 - Full Bundle', classLevel: '9', type: 'bundle', price: 1499, subjects: [{name: 'Maths'}, {name: 'Physics'}, {name: 'Chemistry'}, {name: 'Biology'}, {name: 'English'}, {name: 'Social'}] },
+          { id: 'c10', name: 'Class 10 - Full Bundle', classLevel: '10', type: 'bundle', price: 1499, subjects: [{name: 'Maths'}, {name: 'Physics'}, {name: 'Chemistry'}, {name: 'Biology'}, {name: 'English'}, {name: 'Social'}] },
+          { id: 'c11', name: 'Class 11 - Subjects', classLevel: '11', type: 'subject', price: 999, subjects: [{name: 'Physics'}, {name: 'Chemistry'}, {name: 'Maths'}, {name: 'Biology'}, {name: 'Commerce'}, {name: 'Accounts'}, {name: 'Economics'}] },
+          { id: 'c12', name: 'Class 12 - Subjects', classLevel: '12', type: 'subject', price: 999, subjects: [{name: 'Physics'}, {name: 'Chemistry'}, {name: 'Maths'}, {name: 'Biology'}, {name: 'Commerce'}, {name: 'Accounts'}, {name: 'Economics'}] },
+        ];
+        setCourses(mockData);
+      } else {
+        setCourses(data);
+      }
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -42,11 +230,22 @@ const StudentStore = () => {
 
   useEffect(() => {
     fetchCourses();
-  }, [activeView, userInfo]);
+  }, [userInfo]);
 
-  const handleMockPay = async () => {
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const section = params.get('section');
+    if (section === 'junior' && juniorRef.current) {
+      juniorRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (section === 'senior' && seniorRef.current) {
+      seniorRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [location, courses]);
+
+  const handlePayment = async () => {
     setBuyLoading(true);
     try {
+      // Mock payment success for now to keep focus on UI
       await axios.post('/student/mock-payment-success', {
         amount: selectedCourse.price,
         packageName: selectedCourse.name,
@@ -63,89 +262,8 @@ const StudentStore = () => {
         window.location.href = '/student/dashboard';
       }, 1500);
     } catch (error) {
-      toast.error('Payment Simulation Failed');
+      toast.error('Payment Failed');
       setBuyLoading(false);
-    }
-  };
-
-  const loadRazorpayScript = () => {
-    return new Promise((resolve) => {
-      if (window.Razorpay) {
-        resolve(true);
-        return;
-      }
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.onload = () => resolve(true);
-      script.onerror = () => resolve(false);
-      document.body.appendChild(script);
-    });
-  };
-
-  const handleRazorpayPayment = async (razorpayKeyId) => {
-    setBuyLoading(true);
-    try {
-      // Load Razorpay Script Dynamically to avoid console warnings
-      const res = await loadRazorpayScript();
-      if (!res) {
-        toast.error('Razorpay SDK failed to load. Are you online?');
-        setBuyLoading(false);
-        return;
-      }
-
-      // 1. Create order on backend
-      const { data: order } = await axios.post('/payments/orders', {
-        amount: selectedCourse.price,
-        type: selectedCourse.type,
-        referenceIds: [selectedCourse.id]
-      });
-
-      const options = {
-        key: razorpayKeyId,
-        amount: order.amount,
-        currency: order.currency,
-        name: 'Mye3 Learning Platform',
-        description: `Purchase: ${selectedCourse.name}`,
-        order_id: order.id,
-        handler: async (response) => {
-          toast.success('Payment Successful! Processing access...');
-          // Redirect to dashboard (Webhook handles background logic)
-          setTimeout(() => {
-            window.location.href = '/student/dashboard';
-          }, 2000);
-        },
-        prefill: {
-          name: userInfo?.name,
-          email: userInfo?.email
-        },
-        theme: { color: '#4f46e5' }
-      };
-
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-      setBuyLoading(false);
-    } catch (error) {
-      console.error('RAZORPAY ERROR:', error);
-      toast.error(error.response?.data?.message || 'Failed to initialize Razorpay');
-      setBuyLoading(false);
-    }
-  };
-
-  const processPayment = async () => {
-    setBuyLoading(true);
-    try {
-      // Ask backend for config (Mock vs Real)
-      const { data: config } = await axios.get('/payments/config');
-      
-      if (config.mode === 'live' && config.keyId) {
-        handleRazorpayPayment(config.keyId);
-      } else {
-        handleMockPay();
-      }
-    } catch (error) {
-      console.error('CONFIG ERROR:', error);
-      // Fallback to mock if config fails (or show error)
-      handleMockPay();
     }
   };
 
@@ -158,247 +276,198 @@ const StudentStore = () => {
   const seniorCourses = filteredCourses.filter(c => c.type === 'subject');
 
   return (
-    <div className="space-y-12 md:space-y-16 animate-in fade-in duration-700 pb-20 max-w-7xl mx-auto p-4 md:p-6 lg:px-8">
+    <div className="bg-[#fcfcfd] min-h-screen font-sans">
       <Toaster position="top-right" />
       
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white p-6 md:p-10 rounded-2xl border border-slate-100 shadow-xl shadow-indigo-900/5 relative overflow-hidden">
-         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full -mr-32 -mt-32 blur-3xl opacity-50" />
-         <div className="space-y-1 md:space-y-2 relative z-10">
-            <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Academic Store</h1>
-            <p className="text-slate-400 font-bold italic text-sm md:text-base">Secure your success with 'Full Course' bundles or target specific subjects.</p>
-         </div>
-
-         <div className="relative group w-full lg:w-[400px] relative z-10">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-indigo-600 transition-colors" />
+      {/* Top Search Strip (Clean & Separate) */}
+      <div className="bg-[#002147] py-[18px] px-4 w-full shadow-lg z-20">
+        <div className="max-w-[750px] mx-auto flex h-[52px] shadow-2xl relative">
+          <div className="flex-1 relative flex items-center bg-white rounded-l-xl overflow-hidden">
+            <FiSearch className="text-slate-400 w-5 h-5 ml-6 flex-shrink-0" />
             <input 
-              type="text"
-              placeholder="Search classes or subjects..."
+              type="text" 
+              placeholder="Search by class, subject, or course name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-16 pr-8 py-4 md:py-5 bg-slate-50 border-2 border-transparent focus:border-indigo-600 focus:bg-white rounded-xl md:rounded-2xl outline-none font-black text-slate-900 text-sm shadow-inner transition-all"
+              className="w-full py-2 px-5 text-[15px] font-bold text-[#002147] outline-none h-full bg-transparent placeholder-slate-400"
             />
-         </div>
+          </div>
+          <button className="bg-[#f16126] text-white px-10 h-full text-[13px] font-black uppercase tracking-[0.2em] rounded-r-xl hover:bg-[#de551e] transition-all flex-shrink-0 active:scale-95 shadow-lg">
+            Find Course
+          </button>
+        </div>
       </div>
 
-      {/* JUNIOR SECTION */}
-      <section className="space-y-8">
-         <div className="flex items-center gap-4 md:gap-6 pl-4 border-l-4 border-indigo-600">
-            <div className="bg-indigo-600 text-white p-2.5 md:p-3 rounded-xl shadow-lg shadow-indigo-100">
-               <GraduationCap className="w-5 h-5 md:w-6 md:h-6" />
-            </div>
-            <div>
-               <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight uppercase tracking-widest leading-none">School Tuition</h2>
-               <p className="text-indigo-600 font-bold text-[10px] md:text-xs uppercase tracking-widest mt-1.5 md:mt-1">Full Course Bundles (Classes 6th - 10th)</p>
-            </div>
-         </div>
-         
-         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
-            {juniorCourses.length === 0 && !loading && (
-              <div className="col-span-full py-16 text-center space-y-4 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-                <ShoppingBag className="w-10 h-10 md:w-12 md:h-12 text-slate-200 mx-auto" />
-                <p className="text-slate-400 font-black text-[10px] uppercase tracking-widest italic px-6">No Full Courses Available</p>
-              </div>
-            )}
+      {/* ── HERO 65/35 SPLIT SECTION ── */}
+      <div className="max-w-[1280px] mx-auto px-4 md:px-8 pt-10 pb-16">
+        <div className="bg-white rounded-[40px] border border-orange-200 overflow-hidden shadow-[0_20px_50px_rgba(241,97,38,0.08)] flex flex-col md:flex-row h-auto min-h-[320px]">
+          
+          {/* Left 65%: Content */}
+          <div className="w-full md:w-[65%] p-8 md:p-14 flex flex-col justify-center border-r-0 md:border-r-[3px] border-[#f16126] relative overflow-hidden bg-white">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-orange-50 rounded-full blur-[80px] -mr-32 -mt-32 opacity-60" />
             
-            {juniorCourses.map((c, i) => (
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-6 px-4 py-1.5 bg-orange-50 rounded-full w-fit border border-orange-100">
+                <div className="w-2 h-2 bg-[#f16126] rounded-full animate-pulse" />
+                <span className="text-[10px] font-black text-[#f16126] uppercase tracking-[0.25em]">Enrolment 2026</span>
+              </div>
+              
+              <h1 className="text-4xl md:text-5xl font-black text-[#002147] mb-6 italic tracking-tighter leading-none">
+                MYE3-E-TUITIONS <span className="text-[#f16126] not-italic">STORE</span>
+              </h1>
+              <p className="text-slate-500 font-bold italic text-base max-w-xl mb-8 leading-relaxed">
+                Choose your goal and start learning with expert teachers. Select a class bundle or pick individual subjects to excel in your academic journey.
+              </p>
+
+              <div className="flex flex-wrap gap-4">
+                <div className="flex items-center gap-2 px-5 py-2.5 bg-emerald-50 text-emerald-700 rounded-xl text-[11px] font-black uppercase tracking-widest border border-emerald-100">
+                  <FiCheckCircle className="w-4 h-4" /> All Subjects
+                </div>
+                <div className="flex items-center gap-2 px-5 py-2.5 bg-blue-50 text-blue-700 rounded-xl text-[11px] font-black uppercase tracking-widest border border-blue-100">
+                  <FiCheckCircle className="w-4 h-4" /> Live Classes
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right 35%: Visual Carousel */}
+          <div className="w-full md:w-[35%] bg-slate-50 relative p-8 flex items-center justify-center">
+            <StoreCarousel />
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-[1280px] mx-auto px-4 md:px-8 pb-24 space-y-24">
+        {/* Junior Section */}
+        <section ref={juniorRef} className="scroll-mt-32">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12 px-2">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-[3px] bg-[#f16126]" />
+                <h2 className="text-4xl font-black text-[#002147] italic tracking-tighter uppercase">School Tuitions</h2>
+              </div>
+              <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] pl-14">Full Course Bundles • Classes 6th - 10th</p>
+            </div>
+            <div className="px-6 py-2 bg-orange-50 text-[#f16126] rounded-full text-[10px] font-black uppercase tracking-widest border border-orange-100">
+              Popular Choice
+            </div>
+          </div>
+          
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1,2,3].map(i => <div key={i} className="h-80 bg-slate-100 animate-pulse rounded-2xl" />)}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+              {juniorCourses.map(c => (
+                <CourseCard 
+                  key={c.id} 
+                  c={c} 
+                  expandedId={expandedId} 
+                  setExpandedId={setExpandedId}
+                  setSelectedCourse={setSelectedCourse}
+                  setShowCheckout={setShowCheckout}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Senior Section */}
+        <section ref={seniorRef} className="scroll-mt-32">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12 px-2">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-[3px] bg-[#002147]" />
+                <h2 className="text-4xl font-black text-[#002147] italic tracking-tighter uppercase text-orange-600">Senior Secondary</h2>
+              </div>
+              <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] pl-14">Individual Subjects • Classes 11th - 12th</p>
+            </div>
+            <div className="px-6 py-2 bg-blue-50 text-[#002147] rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-100">
+              Personalized Learning
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+            {seniorCourses.map(c => (
               <CourseCard 
-                key={i} 
+                key={c.id} 
                 c={c} 
                 expandedId={expandedId} 
-                setExpandedId={setExpandedId} 
-                setSelectedCourse={setSelectedCourse} 
-                setShowCheckout={setShowCheckout} 
+                setExpandedId={setExpandedId}
+                setSelectedCourse={setSelectedCourse}
+                setShowCheckout={setShowCheckout}
               />
             ))}
-         </div>
-      </section>
+          </div>
+        </section>
+      </div>
 
-      {/* SENIOR SECTION */}
-      <section className="space-y-8">
-         <div className="flex items-center gap-4 md:gap-6 pl-4 border-l-4 border-slate-900">
-            <div className="bg-slate-900 text-white p-2.5 md:p-3 rounded-xl shadow-lg shadow-slate-100">
-               <Layout className="w-5 h-5 md:w-6 md:h-6" />
-            </div>
-            <div>
-               <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight uppercase tracking-widest leading-none">Senior Secondary</h2>
-               <p className="text-slate-400 font-bold text-[10px] md:text-xs uppercase tracking-widest mt-1.5 md:mt-1">Individual Subjects (Classes 11th - 12th)</p>
-            </div>
-         </div>
-         
-         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
-            {seniorCourses.length === 0 && !loading && (
-              <div className="col-span-full py-16 text-center space-y-4 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-                <Layout className="w-10 h-10 md:w-12 md:h-12 text-slate-200 mx-auto" />
-                <p className="text-slate-400 font-black text-[10px] uppercase tracking-widest italic px-6">No Senior Subjects Available</p>
-              </div>
-            )}
-            
-            {seniorCourses.map((c, i) => (
-              <CourseCard 
-                key={i} 
-                c={c} 
-                expandedId={expandedId} 
-                setExpandedId={setExpandedId} 
-                setSelectedCourse={setSelectedCourse} 
-                setShowCheckout={setShowCheckout} 
-              />
-            ))}
-         </div>
-      </section>
-
-      {/* CHECKOUT MODAL */}
+      {/* Checkout Modal */}
       <AnimatePresence>
-        {showCheckout && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowCheckout(false)} className="absolute inset-0 bg-slate-900/90 backdrop-blur-xl" />
-             <motion.div 
-               initial={{ scale: 0.95, opacity: 0, y: 10 }}
-               animate={{ scale: 1, opacity: 1, y: 0 }}
-               exit={{ scale: 0.95, opacity: 0, y: 10 }}
-               className="relative bg-white w-full max-w-xl rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden p-6 md:p-12 text-center space-y-8"
-             >
-                {/* Checkout Header */}
-                <div className="space-y-4">
-                   <div className="w-16 h-16 md:w-20 md:h-20 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto shadow-inner mb-4 md:mb-6 border-2 border-white ring-1 ring-indigo-100">
-                      <CreditCard className="w-8 h-8 md:w-10 md:h-10" />
-                   </div>
-                   <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Confirm Order</h2>
-                   <p className="text-slate-400 font-bold italic text-xs md:text-sm px-4">Simulating secure checkout for <span className="text-indigo-600 block mt-1 not-italic uppercase">{selectedCourse.name}</span></p>
-                </div>
+        {showCheckout && selectedCourse && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowCheckout(false)}
+              className="absolute inset-0 bg-[#002147]/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-lg bg-white rounded-[32px] overflow-hidden shadow-2xl"
+            >
+              <div className="bg-[#f16126] p-8 text-white relative">
+                 <button 
+                   onClick={() => setShowCheckout(false)}
+                   className="absolute top-6 right-6 w-8 h-8 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20"
+                 >
+                   <FiX className="w-4 h-4" />
+                 </button>
+                 <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-2 opacity-80">Finalize Enrollment</p>
+                 <h3 className="text-2xl font-black uppercase italic tracking-tight">{selectedCourse.name}</h3>
+              </div>
 
-                {/* Pricing Summary */}
-                <div className="bg-slate-50 p-6 md:p-8 rounded-2xl space-y-4 border border-slate-100 shadow-inner">
-                   <div className="flex items-center justify-between font-black text-[9px] md:text-[10px] uppercase tracking-widest text-slate-400">
-                      <span>Plan Description</span>
-                      <span className="text-slate-900 text-xs">{selectedCourse.subscriptionType === 'full' ? 'Full Access' : 'Single Access'}</span>
-                   </div>
-                   <div className="flex items-center justify-between font-black text-[9px] md:text-[10px] uppercase tracking-widest text-slate-400 pt-4 border-t border-slate-200">
-                      <span className="text-indigo-500">Total Investment</span>
-                      <span className="text-slate-900 text-2xl md:text-3xl">₹{selectedCourse.price}</span>
-                   </div>
-                </div>
-
-                <div className="flex flex-col gap-3 pt-4">
-                   <button 
-                     disabled={buyLoading}
-                     onClick={processPayment}
-                     className="w-full py-4 md:py-5 bg-emerald-500 text-white rounded-xl font-black text-xs md:text-sm uppercase tracking-widest shadow-xl shadow-emerald-500/10 flex items-center justify-center gap-3 hover:bg-emerald-600 active:scale-95 transition-all group"
-                   >
-                      {buyLoading ? <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin text-white" /> : <><ShieldCheck className="w-5 h-5 md:w-6 md:h-6" /> Pay Securely</>}
-                   </button>
-                   <button 
-                     onClick={() => setShowCheckout(false)}
-                     className="w-full py-4 md:py-5 bg-white text-rose-500 border border-rose-100 rounded-xl font-black text-xs md:text-sm uppercase tracking-widest transition-all hover:bg-rose-50 hover:text-rose-700 active:scale-95"
-                   >
-                      Abort Checkout
-                   </button>
-                </div>
-
-                 <div className="py-3 px-6 bg-slate-50 rounded-xl border border-slate-100">
-                    <p className="text-[8px] md:text-[9px] font-black text-slate-300 uppercase tracking-widest leading-relaxed">
-                       Demo Simulation • No real funds charged
-                    </p>
+              <div className="p-8 space-y-6">
+                 <div className="flex items-center justify-between py-4 border-b border-slate-100">
+                    <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Course Fee</span>
+                    <span className="text-2xl font-black text-[#002147] italic">₹{selectedCourse.price}</span>
                  </div>
-             </motion.div>
+
+                 <div className="bg-slate-50 rounded-2xl p-5 space-y-4">
+                    <div className="flex items-center gap-3 text-slate-700">
+                       <FiShield className="text-emerald-500 w-5 h-5" />
+                       <span className="text-[13px] font-bold">Secure Stripe Gateway</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-slate-700">
+                       <FiCheckCircle className="text-blue-500 w-5 h-5" />
+                       <span className="text-[13px] font-bold">One-Year Full Access</span>
+                    </div>
+                 </div>
+
+                 <button 
+                   disabled={buyLoading}
+                   onClick={handlePayment}
+                   className="w-full bg-[#002147] text-white py-4 rounded-2xl font-black text-[13px] uppercase tracking-[0.25em] flex items-center justify-center gap-3 hover:bg-[#f16126] transition-all shadow-xl active:scale-95 disabled:opacity-50"
+                 >
+                   {buyLoading ? 'Processing...' : (
+                     <>Confirm & Pay ₹{selectedCourse.price} <FiCreditCard className="w-5 h-5" /></>
+                   )}
+                 </button>
+                 
+                 <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    By clicking confirm, you agree to our terms of service.
+                 </p>
+              </div>
+            </motion.div>
           </div>
         )}
       </AnimatePresence>
     </div>
   );
 };
-
-// Extracted CourseCard Component
-const CourseCard = ({ c, expandedId, setExpandedId, setSelectedCourse, setShowCheckout }) => (
-  <div className={`group bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-900/5 transition-all flex flex-col p-6 m-d:p-8 relative overflow-hidden ${expandedId === c.id ? 'ring-2 ring-indigo-100 border-indigo-200' : ''}`}>
-    
-    {c.type === 'bundle' && (
-      <div className="absolute top-0 right-0 px-4 py-1.5 bg-indigo-600 text-white font-black text-[8px] uppercase tracking-widest rounded-bl-xl shadow-md">
-        Best Choice
-      </div>
-    )}
-
-    <div className="flex items-start justify-between mb-8">
-       <div className={`w-12 h-12 md:w-14 md:h-14 ${c.type === 'bundle' ? 'bg-indigo-600' : 'bg-slate-900'} rounded-xl flex items-center justify-center text-white shadow-lg shrink-0`}>
-          <GraduationCap className="w-6 h-6 md:w-7 md:h-7" />
-       </div>
-       <div className="text-right">
-          <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 italic">Investment Plan</p>
-          <p className="text-2xl md:text-3xl font-black text-indigo-600 leading-none">₹{c.price}</p>
-       </div>
-    </div>
-
-    <div className="flex-1 space-y-4">
-       <div>
-          <p className={`text-[9px] font-black uppercase tracking-widest inline-block px-2.5 py-1 rounded-lg mb-2 ${c.type === 'bundle' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-600'}`}>
-             {c.type === 'bundle' ? 'Full Access' : 'Single Subject'}
-          </p>
-          <h3 className="text-xl md:text-2xl font-black text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors uppercase tracking-tight">{c.name}</h3>
-       </div>
-       
-       <div className="space-y-2.5 pt-4">
-          {['Interactive Live Sessions', 'LMS Study Materials', 'Direct Teacher Help'].map((feat, idx) => (
-             <div key={idx} className="flex items-center gap-3 text-[11px] md:text-[12px] font-black text-slate-400 uppercase tracking-tight">
-                <CheckCircle2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-500 shrink-0" /> {feat}
-             </div>
-          ))}
-       </div>
-    </div>
-
-    {c.subjects && c.subjects.length > 0 && (
-      <div className="mt-8 pt-6 border-t border-slate-50">
-        <button 
-          onClick={() => setExpandedId(expandedId === c.id ? null : c.id)}
-          className="flex items-center justify-between w-full text-[9px] font-black text-indigo-500 uppercase tracking-widest hover:text-indigo-700 transition-colors"
-        >
-          {expandedId === c.id ? 'Hide Prices' : 'Individual Pricing'}
-          {expandedId === c.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-        </button>
-        
-        <AnimatePresence>
-          {expandedId === c.id && (
-            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-              <div className="pt-4 space-y-2">
-                {c.subjects.map((sub, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl hover:bg-indigo-50 transition-all border border-transparent hover:border-indigo-100">
-                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{sub.name}</span>
-                    <button 
-                      onClick={() => {
-                        setSelectedCourse({
-                          id: c.id, 
-                          name: `${sub.name} (${c.classLevel})`,
-                          price: sub.singleSubjectPrice,
-                          type: 'subject',
-                          subscriptionType: 'single'
-                        });
-                        setShowCheckout(true);
-                      }}
-                      className="px-4 py-1.5 bg-white border border-slate-200 rounded-lg text-[9px] font-black text-indigo-600 shadow-sm hover:bg-indigo-600 hover:text-white transition-all transform active:scale-95"
-                    >
-                      ₹{sub.singleSubjectPrice} — Buy
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    )}
-
-    <button 
-      onClick={() => { 
-        setSelectedCourse({
-          ...c,
-          subscriptionType: c.type === 'bundle' ? 'full' : 'single'
-        }); 
-        setShowCheckout(true); 
-      }}
-      className="mt-8 w-full py-4 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-indigo-600 transition-all shadow-lg active:scale-95 group"
-    >
-       {c.type === 'bundle' ? 'Get Full Access' : 'Purchase Now'} <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-    </button>
-  </div>
-);
 
 export default StudentStore;

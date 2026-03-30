@@ -21,65 +21,25 @@ const NAV_ITEMS = [
   {
     label: 'Tuitions',
     dropdown: [
-      { label: 'School Tuitions (1-12)', to: '/courses' },
-      { label: 'CBSE Tuitions', to: '/courses' },
-      { label: 'ICSE Tuitions', to: '/courses' },
-      { label: 'State Board Tuitions', to: '/courses' },
-      { label: 'IIT JEE Preparation', to: '/courses' },
-      { label: 'NEET Preparation', to: '/courses' },
-    ],
-  },
-  {
-    label: 'Tech Courses',
-    isNew: true,
-    dropdown: [
-      { label: 'Coding Classes', to: '/courses' },
-      { label: 'Web Development', to: '/courses' },
-      { label: 'Python Programming', to: '/courses' },
-      { label: 'Data Science', to: '/courses' },
-    ],
-  },
-  {
-    label: 'Curricular Activities',
-    isNew: true,
-    dropdown: [
-      { label: 'Music Classes', to: '/courses' },
-      { label: 'Dance Classes', to: '/courses' },
-      { label: 'Art & Craft', to: '/courses' },
-      { label: 'Yoga & Meditation', to: '/courses' },
-    ],
-  },
-  {
-    label: 'Language',
-    isNew: true,
-    dropdown: [
-      { label: 'English Speaking', to: '/courses' },
-      { label: 'German Language', to: '/courses' },
-      { label: 'French Language', to: '/courses' },
-      { label: 'Spanish Language', to: '/courses' },
-      { label: 'Hindi Language', to: '/courses' },
+      { label: 'School Tuitions (Classes 6-10)', to: '/courses?section=junior' },
+      { label: 'Senior Secondary (Classes 11-12)', to: '/courses?section=senior' },
     ],
   },
   {
     label: 'Crack Exam',
     isNew: true,
     dropdown: [
-      { label: 'Bank Exams', to: '/courses' },
-      { label: 'SSC Preparation', to: '/courses' },
-      { label: 'UPSC Coaching', to: '/courses' },
-      { label: 'CAT Preparation', to: '/courses' },
+      { label: 'IIT-JEE Preparation', to: '/courses' },
+      { label: 'NEET Preparation', to: '/courses' },
+      { label: 'Foundation (8th-10th)', to: '/courses' },
+      { label: 'Olympiad Coaching', to: '/courses' },
     ],
   },
-  { label: 'Teachers', to: '/courses' },
-  {
-    label: 'More',
-    dropdown: [
-      { label: 'About Us', to: '/about' },
-      { label: 'Blog', to: '/' },
-      { label: 'FAQs', to: '/' },
-      { label: 'Contact Us', to: '/' },
-    ],
-  },
+  { label: 'Teachers', to: '/teachers' },
+  { label: 'About Us', to: '/about' },
+  { label: 'Blog', to: '/blog' },
+  { label: 'FAQs', to: '/faqs' },
+  { label: 'Contact Us', to: '/contact-us' },
 ];
 
 // Single dropdown component
@@ -347,14 +307,14 @@ const Navbar = () => {
               <span className="hidden md:flex w-7 h-7 rounded-full bg-orange-100 items-center justify-center mr-2">
                 <HiOutlinePhone className="text-orange-600 text-[15px] md:text-sm" />
               </span>
-              <span className="hidden md:inline">Talk with us{' '}<span className="font-bold text-slate-900">+91 9311656688</span></span>
+              <span className="hidden md:inline">Talk with us{' '}<span className="font-bold text-slate-900">+9876543210</span></span>
             </a>
-            <a href="mailto:education@e-tuitions.com" className="flex items-center gap-0 hover:text-orange-600 transition-colors">
+            <a href="mailto:mye3-e-tuitions@gmail.com" className="flex items-center gap-0 hover:text-orange-600 transition-colors">
               <img src="https://img.icons8.com/color/48/gmail-new.png" alt="email" className="w-[28px] h-[28px] md:hidden object-contain mr-1" />
               <span className="hidden md:flex w-7 h-7 rounded-full bg-red-100 items-center justify-center mr-2">
                 <MdEmail className="text-red-500 text-[15px] md:text-sm" />
               </span>
-              <span className="hidden md:inline">Mail Us{' '}<span className="font-bold text-slate-900">education@e-tuitions.com</span></span>
+              <span className="hidden md:inline">Mail Us{' '}<span className="font-bold text-slate-900">mye3-e-tuitions@gmail.com</span></span>
             </a>
           </div>
 
@@ -440,10 +400,10 @@ const Navbar = () => {
               {/* Contact info */}
               <div className="flex flex-col gap-1 py-3 px-2 bg-slate-50 rounded-lg mb-3">
                 <a href="tel:+919311656688" className="text-[12px] font-medium text-slate-600 flex items-center gap-2">
-                  <HiOutlinePhone className="text-orange-500" /> +91 9311656688
+                  <HiOutlinePhone className="text-orange-500" /> +9876543210
                 </a>
-                <a href="mailto:education@e-tuitions.com" className="text-[12px] font-medium text-slate-600 flex items-center gap-2">
-                  <HiOutlineMail className="text-orange-500" /> education@e-tuitions.com
+                <a href="mailto:mye3-e-tuitions@gmail.com" className="text-[12px] font-medium text-slate-600 flex items-center gap-2">
+                  <HiOutlineMail className="text-orange-500" /> mye3-e-tuitions@gmail.com
                 </a>
               </div>
 

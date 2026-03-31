@@ -31,8 +31,11 @@ instance.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       // Token expired or unauthorized
-      // Prevent redirect loop if already on login
-      if (!window.location.pathname.includes('/login')) {
+      // Only redirect to login if not already there AND not on public pages like courses/catalog
+      const publicPaths = ['/login', '/register', '/', '/courses', '/about', '/contact-us'];
+      const isPublicPath = publicPaths.some(path => window.location.pathname === path);
+      
+      if (!isPublicPath) {
          localStorage.removeItem('userInfo');
          window.location.href = '/login';
       }

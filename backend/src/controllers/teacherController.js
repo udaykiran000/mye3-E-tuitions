@@ -4,6 +4,7 @@ const Recording = require('../models/Recording');
 const Material = require('../models/Material');
 const Class = require('../models/Class');
 const Subject = require('../models/Subject');
+const ClassBundle = require('../models/ClassBundle');
 
 // @desc    Get teacher's assigned classes and subjects
 // @route   GET /api/teacher/my-classes
@@ -12,12 +13,14 @@ exports.getMyClasses = async (req, res, next) => {
   try {
     // Admin bypass: return all classes and subjects
     if (req.user.role === 'admin') {
-      const [classes, subjects] = await Promise.all([
+      const [classes, subjects, bundles] = await Promise.all([
         Class.find({}).sort({ level: 1 }),
-        Subject.find({}).sort({ classLevel: 1 })
+        Subject.find({}).sort({ classLevel: 1 }),
+        ClassBundle.find({ isActive: true }).sort({ className: 1 })
       ]);
       const allAssignments = [
         ...classes.map(c => ({ assignmentType: 'bundle', classLevel: c.name, subjectName: c.name })),
+        ...bundles.map(b => ({ assignmentType: 'bundle', classLevel: b.className, subjectName: b.className })),
         ...subjects.map(s => ({ assignmentType: 'subject', classLevel: `Class ${s.classLevel}`, subjectName: s.name, subjectId: s._id }))
       ];
       return res.status(200).json(allAssignments);
@@ -38,9 +41,10 @@ exports.getMyAssignments = async (req, res, next) => {
   try {
     // Admin bypass: return all classes and subjects formatted for dropdowns
     if (req.user.role === 'admin') {
-      const [classes, subjects] = await Promise.all([
+      const [classes, subjects, bundles] = await Promise.all([
         Class.find({}).sort({ level: 1 }),
-        Subject.find({}).sort({ classLevel: 1 })
+        Subject.find({}).sort({ classLevel: 1 }),
+        ClassBundle.find({ isActive: true }).sort({ className: 1 })
       ]);
       const allAssignments = [
         ...classes.map(c => ({
@@ -49,6 +53,13 @@ exports.getMyAssignments = async (req, res, next) => {
           type: 'bundle',
           classLevel: c.name,
           subjectName: c.name
+        })),
+        ...bundles.map(b => ({
+          id: b._id,
+          name: `${b.className} (Full Course)`,
+          type: 'bundle',
+          classLevel: b.className,
+          subjectName: b.className
         })),
         ...subjects.map(s => ({
           id: s._id,

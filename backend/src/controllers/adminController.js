@@ -141,7 +141,9 @@ exports.deleteSubject = async (req, res, next) => {
 // @access  Admin
 exports.getTeachersList = async (req, res, next) => {
   try {
-    const teachers = await User.find({ role: 'teacher' }).select('-password').sort({ createdAt: -1 });
+    const teachers = await User.find({ 
+      $or: [{ role: 'teacher' }, { _id: req.user._id }] 
+    }).select('-password').sort({ createdAt: -1 });
     res.status(200).json(teachers);
   } catch (error) {
     next(error);
@@ -199,7 +201,9 @@ exports.removeAssignmentFromTeacher = async (req, res, next) => {
 // @access  Admin
 exports.getStudentsList = async (req, res, next) => {
   try {
-    const students = await User.find({ role: 'student' }).select('-password').sort({ createdAt: -1 });
+    const students = await User.find({ 
+      $or: [{ role: 'student' }, { _id: req.user._id }] 
+    }).select('-password').sort({ createdAt: -1 });
     res.status(200).json(students);
   } catch (error) {
     next(error);

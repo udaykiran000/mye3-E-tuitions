@@ -17,6 +17,39 @@ axios.defaults.baseURL = (isLocal || !backendUrl)
 
 axios.defaults.withCredentials = true;
 
+// Add a request interceptor to include the Bearer token
+axios.interceptors.request.use(
+  (config) => {
+    const userInfo = localStorage.getItem('userInfo');
+    if (userInfo) {
+      try {
+        const parsed = JSON.parse(userInfo);
+        if (parsed.token) {
+          config.headers.Authorization = `Bearer ${parsed.token}`;
+        }
+      } catch (err) {
+        // Corrupt localStorage
+      }
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Add a response interceptor to handle 401 Unauthorized (MATCHING YOUR SCREENSHOT)
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      if (!window.location.pathname.includes('/login')) {
+         localStorage.removeItem('userInfo');
+         window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <Provider store={store}>

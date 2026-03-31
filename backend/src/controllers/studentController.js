@@ -114,6 +114,19 @@ exports.processMockPayment = async (req, res, next) => {
 // @access  Student
 exports.getMySubscriptions = async (req, res, next) => {
   try {
+    // Admin bypass: return all active class bundles and subjects for testing
+    if (req.user.role === 'admin') {
+      const [classes, subjects] = await Promise.all([
+        ClassBundle.find({ isActive: true }),
+        Subject.find({ isActive: true })
+      ]);
+      const allSubs = [
+        ...classes.map(c => ({ name: c.className, type: 'bundle', subscriptionType: 'full', expiryDate: new Date('2099-12-31') })),
+        ...subjects.map(s => ({ name: s.name, type: 'subject', subscriptionType: 'single', expiryDate: new Date('2099-12-31') }))
+      ];
+      return res.status(200).json(allSubs);
+    }
+
     const student = await User.findById(req.user._id);
     if (!student) return res.status(404).json({ message: 'Student not found' });
 
@@ -128,6 +141,19 @@ exports.getMySubscriptions = async (req, res, next) => {
 // @access  Student
 exports.getMyLearning = async (req, res, next) => {
   try {
+    // Admin bypass: return all active learning items for testing
+    if (req.user.role === 'admin') {
+      const [classes, subjects] = await Promise.all([
+        ClassBundle.find({ isActive: true }),
+        Subject.find({ isActive: true })
+      ]);
+      const allLearning = [
+        ...classes.map(c => ({ name: c.className, type: 'bundle', subscriptionType: 'full', expiryDate: new Date('2099-12-31'), isExpired: false })),
+        ...subjects.map(s => ({ name: s.name, type: 'subject', subscriptionType: 'single', expiryDate: new Date('2099-12-31'), isExpired: false }))
+      ];
+      return res.status(200).json(allLearning);
+    }
+
     const student = await User.findById(req.user._id);
     if (!student) return res.status(404).json({ message: 'Student not found' });
 
@@ -148,6 +174,12 @@ exports.getMyLearning = async (req, res, next) => {
 // @access  Student
 exports.getLiveAlerts = async (req, res, next) => {
   try {
+    // Admin bypass: return all live sessions for testing
+    if (req.user.role === 'admin') {
+      const liveSessions = await LiveSession.find({ status: 'live' }).populate('teacherId', 'name');
+      return res.status(200).json(liveSessions);
+    }
+
     const student = await User.findById(req.user._id);
     if (!student) return res.status(404).json({ message: 'Student not found' });
 

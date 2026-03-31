@@ -155,7 +155,9 @@ exports.uploadRecording = async (req, res, next) => {
 // @access  Teacher
 exports.getRecordings = async (req, res, next) => {
   try {
-    const recordings = await Recording.find({ teacherId: req.user._id }).sort({ createdAt: -1 });
+    // Admin bypass: see all recordings
+    const query = req.user.role === 'admin' ? {} : { teacherId: req.user._id };
+    const recordings = await Recording.find(query).sort({ createdAt: -1 });
     res.status(200).json(recordings);
   } catch (error) {
     next(error);

@@ -23,7 +23,9 @@ const ViewSwitcher = () => {
     else if (location.pathname.startsWith('/student')) setActiveView('student');
   }, [location.pathname, setActiveView]);
 
-  if (userInfo?.role !== 'admin') return null;
+  const isEnabled = import.meta.env.VITE_ENABLE_VIEW_SWITCHER === 'true';
+
+  if (userInfo?.role !== 'admin' || !isEnabled) return null;
 
   const handleSwitch = (id) => {
     setActiveView(id);

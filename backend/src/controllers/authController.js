@@ -3,16 +3,9 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const crypto = require('crypto');
 
-const generateToken = (res, userId, deviceToken) => {
-  const token = jwt.sign({ userId, deviceToken }, process.env.JWT_SECRET, {
+const generateToken = (userId, deviceToken) => {
+  return jwt.sign({ userId, deviceToken }, process.env.JWT_SECRET, {
     expiresIn: '30d',
-  });
-
-  res.cookie('jwt', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', 
-    sameSite: 'none',
-    maxAge: 30 * 24 * 60 * 60 * 1000,
   });
 };
 
@@ -27,17 +20,18 @@ const authUser = async (req, res, next) => {
         user.currentDeviceToken = deviceToken;
         await user.save();
 
-        generateToken(res, user._id, deviceToken);
+        const token = generateToken(user._id, deviceToken);
 
         return res.json({
           _id: user._id,
           name: user.name,
           email: user.email,
           role: user.role,
+          token,
         });
       }
     }
-    
+
     res.status(401).json({ message: 'Invalid email or password' });
   } catch (error) {
     next(error);
@@ -65,13 +59,14 @@ const registerUser = async (req, res, next) => {
       user.currentDeviceToken = deviceToken;
       await user.save();
 
-      generateToken(res, user._id, deviceToken);
+      const token = generateToken(user._id, deviceToken);
 
       res.status(201).json({
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
+        token,
       });
     } else {
       res.status(400).json({ message: 'Invalid user data' });
@@ -87,10 +82,10 @@ const logoutUser = async (req, res, next) => {
       httpOnly: true,
       expires: new Date(0),
     });
-    
+
     if (req.user) {
-        req.user.currentDeviceToken = null;
-        await req.user.save();
+      req.user.currentDeviceToken = null;
+      await req.user.save();
     }
     res.status(200).json({ message: 'Logged out successfully' });
   } catch (error) {

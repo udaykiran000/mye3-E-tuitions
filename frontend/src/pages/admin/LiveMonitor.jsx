@@ -32,7 +32,7 @@ const LiveMonitor = () => {
         <div className="space-y-10 p-6 md:p-10">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase">Live Class Audit</h1>
+                    <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase">Live & Schedule Class</h1>
                     <p className="text-slate-400 font-bold uppercase text-xs tracking-widest mt-2">Real-time surveillance of ongoing educational sessions</p>
                 </div>
                 <div className="flex items-center gap-4 bg-emerald-50 text-emerald-600 px-6 py-4 rounded-2xl border border-emerald-100">
@@ -48,7 +48,11 @@ const LiveMonitor = () => {
                 {sessions.length > 0 ? sessions.map((s, i) => (
                     <div key={i} className="premium-card overflow-hidden bg-white group hover:border-indigo-500 transition-all">
                         <div className="bg-slate-900 p-6 text-white flex items-center justify-between">
-                            <span className="px-3 py-1 bg-indigo-600 text-[10px] font-black rounded-lg uppercase tracking-widest">LIVE NOW</span>
+                            <span className={`px-3 py-1 text-[10px] font-black rounded-lg uppercase tracking-widest ${
+                                s.status === 'live' ? 'bg-rose-600 animate-pulse' : 'bg-indigo-600'
+                            }`}>
+                                {s.status === 'live' ? 'LIVE NOW' : 'UPCOMING'}
+                            </span>
                             <div className="flex items-center gap-2">
                                 <Users className="w-4 h-4 text-emerald-400" />
                                 <span className="text-xs font-black">AUDIT READY</span>
@@ -80,18 +84,15 @@ const LiveMonitor = () => {
                                 </div>
                             </div>
 
-                            <div className="pt-4 border-t border-slate-50 grid grid-cols-2 gap-4">
+                            <div className="pt-4 border-t border-slate-50">
                                 <a 
                                   href={s.link} 
                                   target="_blank" 
                                   rel="noopener noreferrer"
-                                  className="py-4 text-center bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all"
+                                  className="w-full py-5 text-center bg-slate-900 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-black transition-all flex items-center justify-center gap-3 active:scale-95"
                                 >
-                                  Join Audit
+                                  Join Audit Room
                                 </a>
-                                <button className="py-4 text-center bg-rose-50 text-rose-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-100 transition-all">
-                                  End Session
-                                </button>
                             </div>
                         </div>
                     </div>

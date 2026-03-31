@@ -126,15 +126,44 @@ exports.createLiveSession = async (req, res, next) => {
   }
 };
 
-// @desc    Get teacher's live sessions
+// @desc    Get teacher's live sessions (Grouped by Status)
 // @route   GET /api/teacher/live-sessions
 // @access  Teacher
 exports.getLiveSessions = async (req, res, next) => {
   try {
     // Admin sees ALL sessions; Teacher sees only their own
     const query = req.user.role === 'admin' ? {} : { teacherId: req.user._id };
-    const sessions = await LiveSession.find(query).sort({ startTime: -1 });
+    const sessions = await LiveSession.find(query).sort({ startTime: -1, createdAt: -1 });
     res.status(200).json(sessions);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update live session status (Start/End Class)
+// @route   PUT /api/teacher/live-sessions/:id/status
+// @access  Teacher
+exports.updateSessionStatus = async (req, res, next) => {
+  try {
+    const { status } = req.body;
+    if (!['live', 'ended'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status update' });
+    }
+
+    const session = await LiveSession.findOne({ 
+      _id: req.params.id, 
+      teacherId: req.user.role === 'admin' ? { $exists: true } : req.user._id 
+    });
+
+    if (!session) return res.status(404).json({ message: 'Session not found' });
+
+    session.status = status;
+    await session.save();
+
+    res.status(200).json({
+      message: `Session ${status === 'live' ? 'started' : 'ended'} successfully!`,
+      session
+    });
   } catch (error) {
     next(error);
   }
@@ -190,7 +219,7 @@ exports.uploadMaterial = async (req, res, next) => {
       path: req.file.path
     } : 'NO FILE');
 
-    const { classLevel, subjectName, title, fileUrl: externalUrl, type, assignmentId } = req.body;
+    const { classLevel, subjectName, title, fileUrl: externalUrl, type, assignmentId, sessionId } = req.body;
     
     // If a file was uploaded via multer, use that path. Otherwise use the provided URL.
     const finalFileUrl = req.file ? `/uploads/${req.file.filename}` : externalUrl;
@@ -203,6 +232,7 @@ exports.uploadMaterial = async (req, res, next) => {
     const material = await Material.create({
       teacherId: req.user._id,
       assignmentId,
+      sessionId: sessionId || null,
       classLevel,
       subjectName,
       title,

@@ -61,9 +61,9 @@ const MyLearning = () => {
          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full -mr-32 -mt-32 blur-3xl opacity-50" />
          <div className="space-y-1 md:space-y-2 relative z-10">
             <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-              <MonitorPlay className="w-6 h-6 md:w-8 md:h-8 text-indigo-600" /> My Learning Hub
+              <BookOpen className="w-6 h-6 md:w-8 md:h-8 text-indigo-600" /> My Classes Hub
             </h1>
-            <p className="text-slate-400 font-bold italic text-sm md:text-base">Manage your active enrollments and access classrooms.</p>
+            <p className="text-slate-400 font-bold italic text-sm md:text-base">Quick access to your enrolled curriculum and academic materials.</p>
          </div>
 
          <div className="relative group w-full lg:w-[400px] relative z-10">

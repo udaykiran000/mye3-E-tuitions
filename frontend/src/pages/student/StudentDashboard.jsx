@@ -13,16 +13,19 @@ import {
   Trophy,
   ArrowUpRight,
   MonitorPlay,
-  Play
+  Play,
+  CheckCircle2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePreview } from '../../context/PreviewContext';
+import SessionRecapModal from '../../components/student/SessionRecapModal';
 
 const StudentDashboard = () => {
   const { activeView } = usePreview();
   const [learning, setLearning] = useState([]);
   const [liveAlerts, setLiveAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [recapModal, setRecapModal] = useState({ open: false, session: null });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,51 +58,113 @@ const StudentDashboard = () => {
   return (
     <div className="space-y-8 md:space-y-12 animate-in fade-in duration-700 pb-20 p-4 md:p-8 lg:px-10">
       
-      {/* 1. LIVE NOW ALERT (PREMIUM REDESIGN) */}
-      <AnimatePresence>
-        {liveAlerts.length > 0 && (
-          <motion.div 
-            initial={{ height: 0, opacity: 0, y: -20 }}
-            animate={{ height: 'auto', opacity: 1, y: 0 }}
-            exit={{ height: 0, opacity: 0, y: -20 }}
-            className="overflow-hidden"
-          >
-            <div className="bg-[#002147] rounded-[24px] p-6 md:p-10 text-white relative flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_20px_50px_rgba(0,33,71,0.2)] border-t-4 border-[#f16126]">
-               <div className="absolute top-0 right-0 w-80 h-80 bg-[#f16126]/5 rounded-full blur-3xl -mr-40 -mt-40 pointer-events-none" />
-               
-               <div className="flex items-center gap-6 md:gap-8 relative z-10 text-center md:text-left flex-col md:flex-row">
-                  <div className="relative">
-                    <div className="w-16 h-16 md:w-20 md:h-20 bg-white/5 rounded-2xl flex items-center justify-center backdrop-blur-xl border border-white/10 shadow-2xl">
-                       <Video className="w-8 h-8 md:w-10 h-10 text-[#f16126]" />
+      {/* 1. LIVE SESSIONS SECTION (LIVE, UPCOMING, RECENT) */}
+      <div className="space-y-6">
+        {/* LIVE NOW ALERT (IF ANY) */}
+        <AnimatePresence mode="wait">
+          {liveAlerts.filter(s => s.status === 'live').map((s, i) => (
+            <motion.div 
+              key={`live-${s._id}`}
+              initial={{ height: 0, opacity: 0, y: -20 }}
+              animate={{ height: 'auto', opacity: 1, y: 0 }}
+              exit={{ height: 0, opacity: 0, y: -20 }}
+              className="overflow-hidden mb-6"
+            >
+              <div className="bg-[#002147] rounded-[24px] p-6 md:p-10 text-white relative flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_20px_50px_rgba(0,33,71,0.2)] border-t-4 border-[#f16126]">
+                 <div className="absolute top-0 right-0 w-80 h-80 bg-[#f16126]/5 rounded-full blur-3xl -mr-40 -mt-40 pointer-events-none" />
+                 
+                 <div className="flex items-center gap-6 md:gap-8 relative z-10 text-center md:text-left flex-col md:flex-row">
+                    <div className="relative">
+                      <div className="w-16 h-16 md:w-20 md:h-20 bg-white/5 rounded-2xl flex items-center justify-center backdrop-blur-xl border border-white/10 shadow-2xl">
+                         <Video className="w-8 h-8 md:w-10 h-10 text-[#f16126]" />
+                      </div>
+                      <motion.div 
+                        animate={{ scale: [1, 1.5, 1], opacity: [1, 0, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="absolute -top-1 -right-1 w-4 h-4 bg-[#f16126] rounded-full border-2 border-[#002147] shadow-[0_0_15px_#f16126]"
+                      />
                     </div>
-                    <motion.div 
-                      animate={{ scale: [1, 1.5, 1], opacity: [1, 0, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="absolute -top-1 -right-1 w-4 h-4 bg-[#f16126] rounded-full border-2 border-[#002147] shadow-[0_0_15px_#f16126]"
-                    />
-                  </div>
-                  <div>
-                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#f16126]/20 rounded-full mb-3 border border-[#f16126]/30">
-                        <span className="w-1.5 h-1.5 bg-[#f16126] rounded-full animate-pulse" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#f16126]">Broadcast Active</span>
-                     </div>
-                     <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight leading-none italic">Session <span className="text-[#f16126]">Live!</span></h2>
-                     <p className="text-slate-400 font-bold italic text-sm md:text-lg mt-2">Professional training with {liveAlerts[0].teacherId?.name}.</p>
-                  </div>
-               </div>
+                    <div>
+                       <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#f16126]/20 rounded-full mb-3 border border-[#f16126]/30">
+                          <span className="w-1.5 h-1.5 bg-[#f16126] rounded-full animate-pulse" />
+                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#f16126]">Broadcast Active</span>
+                       </div>
+                       <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight leading-none italic">
+                         {s.title} <span className="text-[#f16126]">Live!</span>
+                       </h2>
+                       <p className="text-slate-400 font-bold italic text-sm md:text-lg mt-2">Professional training with {s.teacherId?.name}.</p>
+                    </div>
+                 </div>
 
-               <a 
-                 href={liveAlerts[0].link}
-                 target="_blank"
-                 rel="noopener noreferrer"
-                 className="w-full md:w-auto px-10 py-5 bg-[#f16126] text-white rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-[0_10px_30px_rgba(241,97,38,0.3)] hover:bg-white hover:text-[#002147] transition-all flex items-center justify-center gap-4 group relative z-10 scale-100 active:scale-95"
-               >
-                  Join Classroom <Play className="w-4 h-4 fill-current group-hover:translate-x-1 transition-transform" />
-               </a>
-            </div>
-          </motion.div>
+                 <a 
+                   href={s.link}
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   className="w-full md:w-auto px-10 py-5 bg-[#f16126] text-white rounded-2xl font-black text-xs uppercase tracking-[0.25em] shadow-[0_10px_30px_rgba(241,97,38,0.3)] hover:bg-white hover:text-[#002147] transition-all flex items-center justify-center gap-4 group relative z-10 scale-100 active:scale-95"
+                 >
+                    Join Classroom <Play className="w-4 h-4 fill-current group-hover:translate-x-1 transition-transform" />
+                 </a>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+
+        {/* UPCOMING & RECENT GRID */}
+        {(liveAlerts.some(s => s.status !== 'live')) && (
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* UPCOMING CLASSES */}
+              <div className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm">
+                 <h3 className="text-xs font-black uppercase tracking-widest text-[#002147] mb-4 flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-[#f16126]" /> Upcoming Schedule
+                 </h3>
+                 <div className="space-y-4">
+                    {liveAlerts.filter(s => s.status === 'upcoming').length > 0 ? (
+                      liveAlerts.filter(s => s.status === 'upcoming').slice(0, 3).map((s, i) => (
+                        <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-transparent hover:border-[#f16126]/20 transition-all">
+                           <div className="space-y-1">
+                              <p className="font-black text-[#002147] text-sm leading-tight">{s.title}</p>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+                                {new Date(s.startTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} • {new Date(s.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                           </div>
+                           <div className="bg-teal-50 text-teal-600 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest">Scheduled</div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest py-4">No upcoming classes scheduled.</p>
+                    )}
+                 </div>
+              </div>
+
+              {/* RECENTLY COMPLETED */}
+              <div className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm">
+                 <h3 className="text-xs font-black uppercase tracking-widest text-[#002147] mb-4 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Session Recaps
+                 </h3>
+                 <div className="space-y-4">
+                    {liveAlerts.filter(s => s.status === 'ended').length > 0 ? (
+                      liveAlerts.filter(s => s.status === 'ended').slice(0, 3).map((s, i) => (
+                        <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                           <div className="space-y-1">
+                              <p className="font-black text-[#002147] text-sm leading-tight">{s.title}</p>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Available in Recordings</p>
+                           </div>
+                           <Link 
+                             to={`/student/classes/${s.classLevel}`}
+                             className="text-[#f16126] font-black text-[9px] uppercase tracking-widest hover:underline hover:scale-105 transition-all outline-none"
+                           >
+                              View Notes
+                           </Link>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest py-4">No recent sessions found.</p>
+                    )}
+                 </div>
+              </div>
+           </div>
         )}
-      </AnimatePresence>
+      </div>
 
       {/* 2. STATS ROW (NAVY THEME) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
@@ -195,6 +260,11 @@ const StudentDashboard = () => {
             ))}
          </div>
       </div>
+      <SessionRecapModal 
+        isOpen={recapModal.open}
+        onClose={() => setRecapModal({ open: false, session: null })}
+        session={recapModal.session}
+      />
     </div>
   );
 };

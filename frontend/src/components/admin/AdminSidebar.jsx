@@ -9,6 +9,7 @@ import {
   UserSquare2, 
   CreditCard, 
   Settings,
+  Activity,
   LogOut,
   X
 } from 'lucide-react';
@@ -28,6 +29,7 @@ const AdminSidebar = ({ onClose }) => {
     { icon: IndianRupee, label: 'Fees Control', path: '/admin/pricing' },
     { icon: UserSquare2, label: 'Teachers', path: '/admin/teachers' },
     { icon: Users, label: 'Students', path: '/admin/students' },
+    { icon: Activity, label: 'Live & Schedule Class', path: '/admin/live-monitor' },
     { icon: CreditCard, label: 'Fee Payments', path: '/admin/transactions' },
     { icon: Settings, label: 'Options', path: '/admin/settings' },
   ];

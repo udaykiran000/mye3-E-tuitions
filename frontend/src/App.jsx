@@ -31,7 +31,8 @@ import LiveMonitor from './pages/admin/LiveMonitor';
 import TeacherLayout from './components/teacher/TeacherLayout';
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
 import MyClasses from './pages/teacher/MyClasses';
-import ScheduleLive from './pages/teacher/ScheduleLive';
+import LiveSchedule from './pages/teacher/LiveSchedule';
+import PastSessions from './pages/teacher/PastSessions';
 import ManageStudents from './pages/admin/ManageStudents'; // Moved up
 
 // Student Pages
@@ -39,6 +40,7 @@ import TeacherMaterials from './pages/teacher/TeacherMaterials';
 import StudentLayout from './components/student/StudentLayout';
 import StudentCourseContent from './pages/student/StudentCourseContent';
 import MyLearning from './pages/student/MyLearning';
+import StudentLiveSchedule from './pages/student/StudentLiveSchedule';
 import ProfileSettings from './pages/shared/ProfileSettings';
 import PaymentHistory from './pages/student/PaymentHistory';
 
@@ -86,7 +88,8 @@ function AppContent() {
                     <Routes>
                       <Route index element={<Navigate to="/student/dashboard" replace />} />
                       <Route path="dashboard" element={<StudentDashboard />} />
-                      <Route path="my-learning" element={<MyLearning />} />
+                      <Route path="classes" element={<MyLearning />} />
+                      <Route path="live-schedule" element={<StudentLiveSchedule />} />
                       <Route path="courses" element={<StudentStore />} />
                       <Route path="classes/:courseName" element={<StudentCourseContent />} />
                       <Route path="materials" element={<div className="text-2xl font-black text-slate-300 italic pt-20 text-center uppercase tracking-widest leading-loose">Materials Hub<br/><span className="text-sm opacity-50">Centralized Resource Archive coming soon...</span></div>} />
@@ -105,7 +108,8 @@ function AppContent() {
                       <Route index element={<TeacherDashboard />} />
                       <Route path="dashboard" element={<TeacherDashboard />} />
                       <Route path="classes" element={<MyClasses />} />
-                      <Route path="schedule-live" element={<ScheduleLive />} />
+                      <Route path="live-schedule" element={<LiveSchedule />} />
+                      <Route path="past-sessions" element={<PastSessions />} />
                       <Route path="materials" element={<TeacherMaterials />} />
                       <Route path="profile" element={<ProfileSettings role="Teacher" />} />
                     </Routes>

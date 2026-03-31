@@ -169,14 +169,16 @@ exports.getMyLearning = async (req, res, next) => {
   }
 };
 
-// @desc    Get active live sessions for enrolled courses
+// @desc    Get active and upcoming live sessions for enrolled courses
 // @route   GET /api/student/live-alerts
 // @access  Student
 exports.getLiveAlerts = async (req, res, next) => {
   try {
-    // Admin bypass: return all live sessions for testing
+    // Admin bypass: return all live and upcoming sessions for testing
     if (req.user.role === 'admin') {
-      const liveSessions = await LiveSession.find({ status: 'live' }).populate('teacherId', 'name');
+      const liveSessions = await LiveSession.find({ 
+        status: { $in: ['live', 'upcoming', 'ended'] } 
+      }).populate('teacherId', 'name').sort({ startTime: -1 });
       return res.status(200).json(liveSessions);
     }
 
@@ -186,16 +188,36 @@ exports.getLiveAlerts = async (req, res, next) => {
     const activeSubs = (student.activeSubscriptions || []).filter(sub => new Date() < new Date(sub.expiryDate));
     const enrolledNames = activeSubs.map(sub => sub.name);
 
-    // Find sessions that are currently 'live' and in student's enrolled subjects/bundles
-    const liveSessions = await LiveSession.find({
-      status: 'live',
-      $or: [
-        { classLevel: { $in: enrolledNames } },
-        { subjectName: { $in: enrolledNames } }
-      ]
-    }).populate('teacherId', 'name');
+    // Find sessions that are 'live' or 'upcoming' and in student's enrolled subjects/bundles
+    // Also include 'ended' sessions from the last 24 hours for recap
+    const yesterday = new Date();
+    yesterday.setHours(yesterday.getHours() - 24);
 
-    res.status(200).json(liveSessions);
+    const liveSessions = await LiveSession.find({
+      $or: [
+        { status: { $in: ['live', 'upcoming'] } },
+        { status: 'ended', updatedAt: { $gte: yesterday } }
+      ],
+      $and: [
+        {
+          $or: [
+            { classLevel: { $in: enrolledNames } },
+            { subjectName: { $in: enrolledNames } }
+          ]
+        }
+      ]
+    }).populate('teacherId', 'name').sort({ status: 1, startTime: 1 }); 
+
+    // Fetch materials for each session
+    const sessionsWithMaterials = await Promise.all(liveSessions.map(async (session) => {
+      const materials = await Material.find({ sessionId: session._id });
+      return {
+        ...session.toObject(),
+        materials
+      };
+    }));
+
+    res.status(200).json(sessionsWithMaterials);
   } catch (error) {
     next(error);
   }

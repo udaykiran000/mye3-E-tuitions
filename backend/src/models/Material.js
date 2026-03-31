@@ -10,6 +10,11 @@ const materialSchema = new mongoose.Schema({
     type: String, // Can be classLevel or subjectId
     required: true
   },
+  sessionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'LiveSession',
+    default: null
+  },
   classLevel: {
     type: String,
     required: true

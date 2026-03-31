@@ -274,7 +274,9 @@ exports.getDashboardStats = async (req, res, next) => {
     const teacherCount = await User.countDocuments({ role: 'teacher' });
     console.log('Counts:', { studentCount, teacherCount });
 
-    const liveSessions = await LiveSession.find({ status: 'live' }).populate('teacherId', 'name').sort({ createdAt: -1 });
+    const liveSessions = await LiveSession.find({ 
+      status: { $in: ['live', 'upcoming'] } 
+    }).populate('teacherId', 'name').sort({ status: 1, startTime: 1 });
     const liveCount = liveSessions.length;
     console.log('Live Count:', liveCount);
     

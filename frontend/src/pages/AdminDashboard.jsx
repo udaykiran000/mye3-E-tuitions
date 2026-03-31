@@ -42,10 +42,10 @@ const AdminDashboard = () => {
   );
 
   const stats = [
-    { label: 'Total Revenue', value: statsData?.totalRevenue ? `₹${Number(statsData.totalRevenue).toLocaleString('en-IN')}` : '₹0', icon: IndianRupee, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Total Students', value: statsData?.totalStudents?.toString() || '0', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    { label: 'Active Teachers', value: statsData?.totalTeachers?.toString() || '0', icon: Activity, color: 'text-amber-600', bg: 'bg-amber-50' },
-    { label: 'Live Now', value: statsData?.liveSessionsCount?.toString() || '0', icon: TrendingUp, color: 'text-rose-600', bg: 'bg-rose-50' },
+    { label: 'Total Revenue', value: statsData?.totalRevenue ? `₹${Number(statsData.totalRevenue).toLocaleString('en-IN')}` : '₹0', icon: IndianRupee, color: 'text-emerald-600', bg: 'bg-emerald-50', path: '/admin/transactions' },
+    { label: 'Total Students', value: statsData?.totalStudents?.toString() || '0', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50', path: '/admin/students' },
+    { label: 'Active Teachers', value: statsData?.totalTeachers?.toString() || '0', icon: Activity, color: 'text-amber-600', bg: 'bg-amber-50', path: '/admin/teachers' },
+    { label: 'Live Now', value: statsData?.liveSessionsCount?.toString() || '0', icon: TrendingUp, color: 'text-rose-600', bg: 'bg-rose-50', path: '/admin/live-monitor' },
   ];
 
   return (
@@ -66,7 +66,11 @@ const AdminDashboard = () => {
         {stats.map((stat, idx) => {
           const Icon = stat.icon;
           return (
-            <div key={idx} className="premium-card bg-white p-8 flex items-center gap-6 border-none shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] group hover:scale-[1.02] transition-all">
+            <Link 
+              key={idx} 
+              to={stat.path}
+              className="premium-card bg-white p-8 flex items-center gap-6 border-none shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] group hover:scale-[1.02] transition-all"
+            >
               <div className={`w-16 h-16 rounded-2xl ${stat.bg} ${stat.color} flex items-center justify-center text-3xl group-hover:rotate-6 transition-transform`}>
                 <Icon className="w-8 h-8" />
               </div>
@@ -74,7 +78,7 @@ const AdminDashboard = () => {
                 <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">{stat.label}</p>
                 <p className="text-3xl font-black text-slate-900 mt-1">{stat.value}</p>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>

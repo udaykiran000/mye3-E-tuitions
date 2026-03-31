@@ -5,6 +5,7 @@ const {
   getMyAssignments,
   createLiveSession, 
   getLiveSessions, 
+  updateSessionStatus,
   uploadRecording, 
   getRecordings,
   getMaterials,
@@ -23,6 +24,7 @@ router.get('/my-classes', getMyClasses);
 router.get('/my-assignments', getMyAssignments);
 router.post('/schedule-live', createLiveSession);
 router.get('/live-sessions', getLiveSessions);
+router.put('/live-sessions/:id/status', updateSessionStatus);
 router.post('/recordings', uploadRecording);
 router.get('/recordings', getRecordings);
 router.get('/materials', getMaterials);

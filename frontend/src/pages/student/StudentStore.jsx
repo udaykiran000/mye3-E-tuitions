@@ -18,6 +18,10 @@ import {
 import { GraduationCap } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import { useSelector } from 'react-redux';
+import courseItem1 from '../../assets/course-item-1.webp';
+import courseItem2 from '../../assets/course-item-2.webp';
+import courseItem3 from '../../assets/course-item-3.webp';
+import courseItem4 from '../../assets/course-item-4.webp';
 
 const CourseCard = ({ c, expandedId, setExpandedId, setSelectedCourse, setShowCheckout }) => {
   const isBundle = c.type === 'bundle';
@@ -104,10 +108,10 @@ const CourseCard = ({ c, expandedId, setExpandedId, setSelectedCourse, setShowCh
 const StoreCarousel = () => {
   const [current, setCurrent] = useState(0);
   const images = [
-    '/src/assets/course-item-1.webp',
-    '/src/assets/course-item-2.webp',
-    '/src/assets/course-item-3.webp',
-    '/src/assets/course-item-4.webp'
+    courseItem1,
+    courseItem2,
+    courseItem3,
+    courseItem4
   ];
 
   useEffect(() => {

@@ -36,7 +36,7 @@ const MyLearning = () => {
 
         if (isStaff && data.length === 0) {
           setLearning([
-            { name: 'Class 10 (Full Course)', type: 'bundle', expiryDate: new Date(Date.now() + 30 * 86400000), isExpired: false },
+            { name: 'Class 10 (All Subjects)', type: 'bundle', expiryDate: new Date(Date.now() + 30 * 86400000), isExpired: false },
             { name: 'Physics (Class 12)', type: 'subject', expiryDate: new Date(Date.now() + 15 * 86400000), isExpired: false },
             { name: 'Mathematics (Class 11)', type: 'subject', expiryDate: new Date(Date.now() - 5 * 86400000), isExpired: true }
           ]);
@@ -63,7 +63,7 @@ const MyLearning = () => {
             <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
               <BookOpen className="w-6 h-6 md:w-8 md:h-8 text-indigo-600" /> My Classes Hub
             </h1>
-            <p className="text-slate-400 font-bold italic text-sm md:text-base">Quick access to your enrolled curriculum and academic materials.</p>
+            <p className="text-slate-400 font-bold italic text-sm md:text-base">Quick access to your enrolled curriculum and academic notes.</p>
          </div>
 
          <div className="relative group w-full lg:w-[400px] relative z-10">

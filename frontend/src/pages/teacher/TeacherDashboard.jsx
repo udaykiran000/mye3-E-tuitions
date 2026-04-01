@@ -37,7 +37,7 @@ const TeacherDashboard = () => {
   };
 
   const stats = [
-    { label: 'Assigned Classes', value: assignedCount, icon: BookOpen, color: 'text-teal-600', bg: 'bg-teal-50', path: '/teacher/classes' },
+    { label: 'My Classes', value: assignedCount, icon: BookOpen, color: 'text-teal-600', bg: 'bg-teal-50', path: '/teacher/classes' },
     { label: 'Class', value: sessions.filter(s => s.status !== 'ended').length, icon: Video, color: 'text-rose-600', bg: 'bg-rose-50', path: '/teacher/classes' },
     { label: 'Past Sessions', value: sessions.filter(s => s.status === 'ended').length, icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-50', path: '/teacher/past-sessions' },
     { label: 'Active Students', value: '245', icon: GraduationCap, color: 'text-emerald-600', bg: 'bg-emerald-50' },

@@ -10,7 +10,8 @@ import {
   Home,
   User,
   X,
-  History
+  History,
+  FileText
 } from 'lucide-react';
 
 const TeacherSidebar = ({ onClose }) => {
@@ -25,8 +26,9 @@ const TeacherSidebar = ({ onClose }) => {
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/teacher/dashboard' },
-    { icon: BookOpen, label: 'Assigned Classes', path: '/teacher/classes' },
-    { icon: Video, label: 'Live & Schedule Class', path: '/teacher/live-schedule' },
+    { icon: BookOpen, label: 'My Classes', path: '/teacher/classes' },
+    { icon: FileText, label: 'Notes', path: '/teacher/materials' },
+    { icon: Video, label: 'Live Classes', path: '/teacher/live-schedule' },
     { icon: History, label: 'Past Sessions', path: '/teacher/past-sessions' },
     { icon: User, label: 'Profile', path: '/teacher/profile' },
   ];

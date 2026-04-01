@@ -49,17 +49,15 @@ exports.getMyAssignments = async (req, res, next) => {
       const allAssignments = [
         ...classes.map(c => ({
           id: c._id,
-          name: `${c.name} (Full Bundle)`,
+          name: `${c.name} (All Subjects)`,
           type: 'bundle',
           classLevel: c.name,
           subjectName: c.name
         })),
         ...bundles.map(b => ({
           id: b._id,
-          name: `${b.className} (Full Course)`,
-          type: 'bundle',
-          classLevel: b.className,
-          subjectName: b.className
+          subjectName: b.className,
+          name: `${b.className} (All Subjects)`
         })),
         ...subjects.map(s => ({
           id: s._id,
@@ -78,11 +76,11 @@ exports.getMyAssignments = async (req, res, next) => {
     const assignments = (teacher.assignedSubjects || []).map(item => {
       let label = '';
       if (item.assignmentType === 'bundle') {
-        label = `${item.classLevel} (Full Bundle)`;
+        label = `${item.subjectName} (${item.classLevel} - All Subjects)`;
       } else {
         label = `${item.subjectName} (${item.classLevel})`;
       }
-
+ 
       return {
         id: item.subjectId || item.classLevel,
         name: label,
@@ -116,6 +114,10 @@ exports.createLiveSession = async (req, res, next) => {
       startTime,
       status: 'upcoming'
     });
+
+    // Emit socket event for real-time notification
+    const io = req.app.get('io');
+    if (io) io.emit('live-session-update', { type: 'create', session });
 
     res.status(201).json({
       message: 'Live class scheduled successfully! Notifications sent to students.',
@@ -159,6 +161,10 @@ exports.updateSessionStatus = async (req, res, next) => {
 
     session.status = status;
     await session.save();
+
+    // Emit socket event for real-time status update
+    const io = req.app.get('io');
+    if (io) io.emit('live-session-update', { type: 'status', session });
 
     res.status(200).json({
       message: `Session ${status === 'live' ? 'started' : 'ended'} successfully!`,

@@ -20,7 +20,7 @@ exports.getCatalog = async (req, res, next) => {
     const catalog = [
       ...classes.map(c => ({
         id: c._id,
-        name: `${c.className || 'Unknown Class'} (Full Course)`,
+        name: `${c.className || 'Unknown Class'} (All Subjects)`,
         type: 'bundle',
         price: c.price || 0,
         classLevel: c.className || 'Unknown',
@@ -179,7 +179,15 @@ exports.getLiveAlerts = async (req, res, next) => {
     if (!student) return res.status(404).json({ message: 'Student not found' });
 
     const activeSubs = (student.activeSubscriptions || []).filter(sub => new Date() < new Date(sub.expiryDate));
-    const enrolledNames = activeSubs.map(sub => sub.name);
+    // Normalize names to match LiveSessions (e.g., "Class 10 (All Subjects)" -> "Class 10")
+    const enrolledNames = activeSubs.map(sub => {
+      const clean = sub.name
+        .replace(' (All Subjects)', '')
+        .replace(' (Full Course)', '')
+        .replace(' (Full Bundle)', '')
+        .replace(' - Full Bundle', ''); // Handling various legacy/mock formats
+      return [sub.name, clean];
+    }).flat();
 
     // Find sessions that are 'live' or 'upcoming' and in student's enrolled subjects/bundles
     // Also include 'ended' sessions from the last 24 hours for recap
@@ -226,15 +234,18 @@ exports.getCourseContent = async (req, res, next) => {
     
     if (!student) return res.status(404).json({ message: 'Student not found' });
 
-    // Clean names (e.g., "Class 10 (Full Course)" -> "Class 10")
-    const cleanName = courseName.replace(' (Full Course)', '');
+    // Clean names (e.g., "Class 10 (All Subjects)" -> "Class 10")
+    const cleanName = courseName
+      .replace(' (Full Course)', '')
+      .replace(' (All Subjects)', '')
+      .replace(' (Full Bundle)', '');
     const classLevelMatch = courseName.match(/Class \d+/i)?.[0];
 
     // Access Logic:
-    // 1. Check for Active "Full Course" for this grade
+    // 1. Check for Active "Full Course" or "All Subjects" for this grade
     const fullCourseSub = student.activeSubscriptions.find(sub => 
-      (sub.name === cleanName || sub.name === courseName || sub.name === classLevelMatch) && 
-      sub.subscriptionType === 'full' && 
+      (sub.name === cleanName || sub.name === courseName || sub.name === classLevelMatch || sub.name.includes(cleanName)) && 
+      (sub.subscriptionType === 'full' || sub.name.includes('All Subjects')) && 
       new Date() < new Date(sub.expiryDate)
     );
 
@@ -250,7 +261,7 @@ exports.getCourseContent = async (req, res, next) => {
 
     if (!fullCourseSub && !singleSubjectSub && !isBypass) {
       return res.status(403).json({ 
-        message: 'No active subscription found. Subscribe to the Full Course or this individual subject to unlock.', 
+        message: 'No active subscription found. Subscribe to the All Subjects package or this individual subject to unlock.', 
         type: 'buy' 
       });
     }

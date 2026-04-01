@@ -32,7 +32,7 @@ const CourseCard = ({ c, expandedId, setExpandedId, setSelectedCourse, setShowCh
       
       {isBundle && (
         <div className="absolute top-0 right-0 px-5 py-2 bg-[#f16126] text-white font-black text-[9px] uppercase tracking-widest rounded-bl-xl shadow-md">
-          Full Bundle
+          All Subjects
         </div>
       )}
 
@@ -214,11 +214,11 @@ const StudentStore = () => {
       // If backend is empty, use the requested project structure as fallback
       if (!data || data.length === 0) {
         const mockData = [
-          { id: 'c6', name: 'Class 6 - Full Bundle', classLevel: '6', type: 'bundle', price: 999, subjects: [{name: 'Maths'}, {name: 'Science'}, {name: 'English'}, {name: 'Social'}, {name: 'Telugu/Hindi'}] },
-          { id: 'c7', name: 'Class 7 - Full Bundle', classLevel: '7', type: 'bundle', price: 999, subjects: [{name: 'Maths'}, {name: 'Science'}, {name: 'English'}, {name: 'Social'}] },
-          { id: 'c8', name: 'Class 8 - Full Bundle', classLevel: '8', type: 'bundle', price: 1199, subjects: [{name: 'Maths'}, {name: 'Physics Basics'}, {name: 'Chemistry Basics'}, {name: 'Biology'}, {name: 'English'}] },
-          { id: 'c9', name: 'Class 9 - Full Bundle', classLevel: '9', type: 'bundle', price: 1499, subjects: [{name: 'Maths'}, {name: 'Physics'}, {name: 'Chemistry'}, {name: 'Biology'}, {name: 'English'}, {name: 'Social'}] },
-          { id: 'c10', name: 'Class 10 - Full Bundle', classLevel: '10', type: 'bundle', price: 1499, subjects: [{name: 'Maths'}, {name: 'Physics'}, {name: 'Chemistry'}, {name: 'Biology'}, {name: 'English'}, {name: 'Social'}] },
+          { id: 'c6', name: 'Class 6 - All Subjects', classLevel: '6', type: 'bundle', price: 999, subjects: [{name: 'Maths'}, {name: 'Science'}, {name: 'English'}, {name: 'Social'}, {name: 'Telugu/Hindi'}] },
+          { id: 'c7', name: 'Class 7 - All Subjects', classLevel: '7', type: 'bundle', price: 999, subjects: [{name: 'Maths'}, {name: 'Science'}, {name: 'English'}, {name: 'Social'}] },
+          { id: 'c8', name: 'Class 8 - All Subjects', classLevel: '8', type: 'bundle', price: 1199, subjects: [{name: 'Maths'}, {name: 'Physics Basics'}, {name: 'Chemistry Basics'}, {name: 'Biology'}, {name: 'English'}] },
+          { id: 'c9', name: 'Class 9 - All Subjects', classLevel: '9', type: 'bundle', price: 1499, subjects: [{name: 'Maths'}, {name: 'Physics'}, {name: 'Chemistry'}, {name: 'Biology'}, {name: 'English'}, {name: 'Social'}] },
+          { id: 'c10', name: 'Class 10 - All Subjects', classLevel: '10', type: 'bundle', price: 1499, subjects: [{name: 'Maths'}, {name: 'Physics'}, {name: 'Chemistry'}, {name: 'Biology'}, {name: 'English'}, {name: 'Social'}] },
           { id: 'c11', name: 'Class 11 - Subjects', classLevel: '11', type: 'subject', price: 999, subjects: [{name: 'Physics'}, {name: 'Chemistry'}, {name: 'Maths'}, {name: 'Biology'}, {name: 'Commerce'}, {name: 'Accounts'}, {name: 'Economics'}] },
           { id: 'c12', name: 'Class 12 - Subjects', classLevel: '12', type: 'subject', price: 999, subjects: [{name: 'Physics'}, {name: 'Chemistry'}, {name: 'Maths'}, {name: 'Biology'}, {name: 'Commerce'}, {name: 'Accounts'}, {name: 'Economics'}] },
         ];
@@ -350,7 +350,7 @@ const StudentStore = () => {
                 <div className="w-10 h-[3px] bg-[#f16126]" />
                 <h2 className="text-4xl font-black text-[#002147] italic tracking-tighter uppercase">School Tuitions</h2>
               </div>
-              <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] pl-14">Full Course Bundles • Classes 6th - 10th</p>
+              <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] pl-14">All Subjects Packages • Classes 6th - 10th</p>
             </div>
             <div className="px-6 py-2 bg-orange-50 text-[#f16126] rounded-full text-[10px] font-black uppercase tracking-widest border border-orange-100">
               Popular Choice

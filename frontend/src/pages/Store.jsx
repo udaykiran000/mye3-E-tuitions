@@ -87,7 +87,7 @@ const Store = () => {
                             </div>
                          </div>
                          <h4 className="text-xl font-black text-slate-900 mb-1">{sub.name}</h4>
-                         <p className="text-xs font-bold text-slate-400">Expert Instruction + PDF Material</p>
+                         <p className="text-xs font-bold text-slate-400">Expert Instruction + PDF Notes</p>
                          <div className="mt-auto pt-6 flex items-baseline gap-1">
                             <span className="text-2xl font-black text-slate-900">₹{sub.price}</span>
                             <span className="text-[10px] font-bold text-slate-400 capitalize">/ month / subject</span>

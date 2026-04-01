@@ -18,15 +18,28 @@ const ScheduleLiveModal = ({ isOpen, onClose, selectedClass }) => {
     link: '',
     startTime: ''
   });
+  
+  const [groupedClasses, setGroupedClasses] = useState({});
+  const [selectedGrade, setSelectedGrade] = useState('');
 
   useEffect(() => {
     const fetchAssigned = async () => {
       try {
         const { data } = await axios.get('/teacher/my-assignments');
+        
+        // Group by classLevel
+        const grouped = data.reduce((acc, curr) => {
+          if (!acc[curr.classLevel]) acc[curr.classLevel] = [];
+          acc[curr.classLevel].push(curr);
+          return acc;
+        }, {});
+
+        setGroupedClasses(grouped);
         setClasses(data);
         
         // If a class was passed from the card, pre-select it
         if (selectedClass) {
+          setSelectedGrade(selectedClass.classLevel);
           const matchingClass = data.find(c => 
             c.classLevel === selectedClass.classLevel && 
             c.subjectName === selectedClass.subjectName
@@ -100,27 +113,47 @@ const ScheduleLiveModal = ({ isOpen, onClose, selectedClass }) => {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-8">
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <CustomSelect 
-                    label="Select Subject"
-                    icon={GraduationCap}
-                    placeholder="Which class is this for?"
-                    options={classes.map(cls => ({ ...cls, label: cls.name, value: JSON.stringify(cls) }))}
-                    value={formData.courseString}
-                    onChange={(val) => setFormData({ ...formData, courseString: val })}
-                  />
+                   {/* STEP 1: SELECT GRADE */}
+                   <CustomSelect 
+                     label="Select Grade"
+                     icon={GraduationCap}
+                     placeholder="Choose Class Level..."
+                     options={Object.keys(groupedClasses).map(grade => ({ value: grade, label: grade }))}
+                     value={selectedGrade}
+                     onChange={(val) => {
+                       setSelectedGrade(val);
+                       setFormData({ ...formData, courseString: '' });
+                     }}
+                   />
 
-                  <CustomSelect 
-                    label="Class Link Platform"
-                    icon={Video}
-                    placeholder="Zoom or Google Meet?"
-                    options={[
-                      { label: 'Zoom Meeting', value: 'Zoom' },
-                      { label: 'Google Meet', value: 'Google Meet' },
-                      { label: 'YouTube Live', value: 'YouTube Live' },
-                    ]}
-                    value={formData.platform}
-                    onChange={(val) => setFormData({ ...formData, platform: val })}
-                  />
+                   {/* STEP 2: SELECT SUBJECT */}
+                   <div className={`transition-all duration-500 ${!selectedGrade ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}>
+                     <CustomSelect 
+                       label="Select Subject"
+                       icon={Target}
+                       placeholder={selectedGrade ? "Which Subject?" : "Select Grade First"}
+                       options={(groupedClasses[selectedGrade] || []).map(item => ({ 
+                         value: JSON.stringify(item), 
+                         label: item.subjectName 
+                       }))}
+                       value={formData.courseString}
+                       onChange={(val) => setFormData({ ...formData, courseString: val })}
+                     />
+                   </div>
+
+                   <CustomSelect 
+                     label="Class Link Platform"
+                     icon={Video}
+                     placeholder="Zoom or Google Meet?"
+                     options={[
+                       { label: 'Zoom Meeting', value: 'Zoom' },
+                       { label: 'Google Meet', value: 'Google Meet' },
+                       { label: 'YouTube Live', value: 'YouTube Live' },
+                       { label: 'Other', value: 'Other' }
+                     ]}
+                     value={formData.platform}
+                     onChange={(val) => setFormData({ ...formData, platform: val })}
+                   />
 
                   <div className="md:col-span-2 space-y-2">
                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1 flex items-center gap-2">

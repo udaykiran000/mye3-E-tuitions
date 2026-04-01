@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Activity, ShieldCheck, Users, Clock, AlertCircle, Loader2 } from 'lucide-react';
+import { Activity, ShieldCheck, Users, Clock, AlertCircle, Loader2, BookOpen } from 'lucide-react';
 
 const LiveMonitor = () => {
     const [sessions, setSessions] = useState([]);
@@ -54,14 +54,22 @@ const LiveMonitor = () => {
                                 {s.status === 'live' ? 'LIVE NOW' : 'UPCOMING'}
                             </span>
                             <div className="flex items-center gap-2">
-                                <Users className="w-4 h-4 text-emerald-400" />
-                                <span className="text-xs font-black">AUDIT READY</span>
+                                <Activity className="w-4 h-4 text-emerald-400" />
+                                <span className="text-xs font-black">ACTIVE MONITOR</span>
                             </div>
                         </div>
                         <div className="p-8 space-y-6">
                             <div>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Activity className="w-4 h-4 text-indigo-500" />
+                                    <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest border-b border-indigo-100 pb-0.5">
+                                        {s.classLevel ? `Target: ${s.classLevel}` : 'Global Enrollment'}
+                                    </span>
+                                </div>
                                 <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight leading-tight">{s.title}</h3>
-                                <p className="text-slate-400 font-bold mt-1 uppercase text-[10px] tracking-widest">Subject: {s.subjectName}</p>
+                                <p className="text-slate-400 font-bold mt-1 uppercase text-[10px] tracking-widest flex items-center gap-2">
+                                    Subject: <span className="text-slate-900">{s.subjectName}</span>
+                                </p>
                             </div>
 
                             <div className="space-y-3">
@@ -89,9 +97,9 @@ const LiveMonitor = () => {
                                   href={s.link} 
                                   target="_blank" 
                                   rel="noopener noreferrer"
-                                  className="w-full py-5 text-center bg-slate-900 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-black transition-all flex items-center justify-center gap-3 active:scale-95"
+                                  className="w-full py-5 text-center bg-slate-900 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-black transition-all flex items-center justify-center gap-3 active:scale-95 shadow-xl shadow-slate-900/10"
                                 >
-                                  Join Audit Room
+                                  Join Classroom
                                 </a>
                             </div>
                         </div>

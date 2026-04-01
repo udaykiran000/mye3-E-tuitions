@@ -32,8 +32,12 @@ const ManageStudents = () => {
         axios.get('/subjects')
       ]);
       setStudents(studentRes.data);
-      setBundles(bundleRes.data);
-      setSubjects(subjectRes.data);
+      setBundles(bundleRes.data.sort((a, b) => {
+        const numB = parseInt(b.className.replace(/\D/g, '')) || 0;
+        const numA = parseInt(a.className.replace(/\D/g, '')) || 0;
+        return numA - numB;
+      }));
+      setSubjects(subjectRes.data.sort((a, b) => (a.classLevel || 0) - (b.classLevel || 0)));
       setLoading(false);
     } catch (error) {
       toast.error('Failed to sync data with server');

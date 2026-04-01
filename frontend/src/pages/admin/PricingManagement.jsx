@@ -7,8 +7,6 @@ import {
   ToggleLeft, 
   Save, 
   ShieldCheck, 
-  UserPlus, 
-  Search, 
   Loader2, 
   ChevronRight, 
   BookOpen, 
@@ -16,8 +14,6 @@ import {
   ChevronUp, 
   Mail, 
   CheckCircle2, 
-  Calendar, 
-  Database,
   Info,
   X
 } from 'lucide-react';
@@ -46,7 +42,7 @@ const PricingManagement = () => {
         axios.get('/admin/subjects')
       ]);
       setJuniorClasses(resClasses.data);
-      setSeniorSubjects(resSubjects.data);
+      setSeniorSubjects(resSubjects.data.sort((a,b) => (a.classLevel || 0) - (b.classLevel || 0)));
       setLoading(false);
     } catch (error) {
       toast.error('Failed to load data');
@@ -71,7 +67,7 @@ const PricingManagement = () => {
   const handleUpdateJuniorPrice = async (id, payload) => {
     try {
       await axios.put(`/admin/classes/${id}`, payload);
-      toast.success('Junior pricing updated!');
+      toast.success('Pricing updated!');
       fetchData();
     } catch (error) {
       toast.error('Update failed');
@@ -81,7 +77,7 @@ const PricingManagement = () => {
   const handleUpdateSeniorPrice = async (id, updatedSubject) => {
     try {
       await axios.put(`/admin/subjects/${id}`, updatedSubject);
-      toast.success('Senior pricing updated!');
+      toast.success('Pricing updated!');
       fetchData();
     } catch (error) {
       toast.error('Update failed');
@@ -105,8 +101,14 @@ const PricingManagement = () => {
     </div>
   );
 
+  const classLevels = juniorClasses.sort((a, b) => {
+    const numA = parseInt(a.className.replace(/\D/g, '')) || 0;
+    const numB = parseInt(b.className.replace(/\D/g, '')) || 0;
+    return numA - numB;
+  });
+
   return (
-    <div className="space-y-12 pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+    <div className="space-y-12 pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 font-sans">
       <Toaster position="top-right" />
       
       {/* Page Header */}
@@ -114,9 +116,9 @@ const PricingManagement = () => {
          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full -mr-32 -mt-32 blur-3xl opacity-50" />
          <div className="space-y-2 relative z-10">
             <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-               <Settings className="w-8 h-8 md:w-10 md:h-10 text-slate-900" /> Update Course Fees
+               <Settings className="w-8 h-8 md:w-10 md:h-10 text-slate-900" /> Update Fees
             </h1>
-            <p className="text-slate-500 font-bold italic text-sm md:text-base">Change the fees for all courses and subjects.</p>
+            <p className="text-slate-500 font-bold italic text-sm md:text-base">Manage subscription fees and course pricing.</p>
          </div>
       </div>
 
@@ -126,7 +128,7 @@ const PricingManagement = () => {
             <div className="px-5 py-2 bg-indigo-600 text-white rounded-xl font-black text-[10px] md:text-xs uppercase tracking-widest shadow-lg shadow-indigo-100">
                Classes 6 - 10
             </div>
-            <h2 className="text-lg md:text-xl font-black text-slate-900">Current Course Fees</h2>
+            <h2 className="text-lg md:text-xl font-black text-slate-900">Junior Course Pricing</h2>
          </div>
 
          <div className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/10 overflow-hidden">
@@ -135,13 +137,13 @@ const PricingManagement = () => {
                   <thead className="bg-slate-50/50 border-b border-slate-100">
                      <tr className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">
                         <th className="px-6 md:px-10 py-6">Grade</th>
-                        <th className="px-6 md:px-10 py-6">Course Fee</th>
+                        <th className="px-6 md:px-10 py-6">Course Fee (Total)</th>
                         <th className="px-6 md:px-10 py-6">Status</th>
                         <th className="px-6 md:px-10 py-6 text-right">Settings</th>
                      </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
-                     {juniorClasses.map((cls) => (
+                     {classLevels.map((cls) => (
                        <React.Fragment key={cls._id}>
                          <tr className={`hover:bg-slate-50/50 transition-all ${expandedId === cls._id ? 'bg-indigo-50/30' : ''}`}>
                             <td className="px-6 md:px-10 py-8">
@@ -156,14 +158,28 @@ const PricingManagement = () => {
                                </div>
                             </td>
                             <td className="px-6 md:px-10 py-8">
-                               <div className="flex items-center gap-2 group max-w-[140px]">
-                                  <IndianRupee className="w-4 h-4 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
-                                  <input 
-                                    type="number"
-                                    defaultValue={cls.price}
-                                    onBlur={(e) => handleUpdateJuniorPrice(cls._id, { ...cls, price: e.target.value })}
-                                    className="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500 rounded-lg px-3 py-2 font-black text-slate-900 outline-none transition-all text-sm"
-                                  />
+                               <div className="flex items-center gap-3 group max-w-[180px]">
+                                  <div className="relative flex-1">
+                                    <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
+                                    <input 
+                                      id={`total-price-${cls._id}`}
+                                      type="number"
+                                      defaultValue={cls.price}
+                                      className="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500 rounded-xl pl-9 pr-3 py-2.5 font-black text-slate-900 outline-none transition-all text-sm shadow-inner"
+                                    />
+                                  </div>
+                                  <button 
+                                    onClick={() => {
+                                      const val = Number(document.getElementById(`total-price-${cls._id}`).value);
+                                      // Auto-zero out individual subjects for Classes 6-10 if total package is set
+                                      const zeroedSubjects = cls.subjects.map(s => ({ ...s, singleSubjectPrice: 0 }));
+                                      handleUpdateJuniorPrice(cls._id, { price: val, subjects: zeroedSubjects });
+                                    }}
+                                    className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-600 hover:text-white transition-all shadow-sm border border-emerald-100"
+                                    title="Update Total Fee"
+                                  >
+                                     <Save className="w-4 h-4" />
+                                  </button>
                                </div>
                             </td>
                             <td className="px-6 md:px-10 py-8">
@@ -181,7 +197,7 @@ const PricingManagement = () => {
                                  className="p-3 md:p-4 bg-slate-50 text-slate-400 rounded-xl hover:bg-white hover:text-indigo-600 hover:shadow-xl transition-all border border-transparent hover:border-indigo-50"
                                >
                                   {expandedId === cls._id ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                               </button>
+                                </button>
                             </td>
                          </tr>
                          {expandedId === cls._id && (
@@ -190,7 +206,7 @@ const PricingManagement = () => {
                                <div className="bg-white rounded-2xl border border-slate-100 p-6 md:p-8 shadow-inner space-y-6">
                                   <div className="flex items-center justify-between">
                                      <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] flex items-center gap-2">
-                                        <BookOpen className="w-4 h-4 text-indigo-500" /> Individual Subject Fees
+                                        <BookOpen className="w-4 h-4 text-indigo-500" /> Linked Subjects
                                      </h4>
                                   </div>
                                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -198,27 +214,17 @@ const PricingManagement = () => {
                                        <div key={idx} className="p-5 bg-slate-50 rounded-xl border border-slate-100 group border-transparent focus-within:border-indigo-600 transition-all relative">
                                           <button 
                                             onClick={() => {
-                                              const updatedSubjects = cls.subjects.filter((_, i) => i !== idx);
-                                              handleUpdateJuniorPrice(cls._id, { subjects: updatedSubjects });
+                                              if (window.confirm('Remove this subject?')) {
+                                                const updatedSubjects = cls.subjects.filter((_, i) => i !== idx);
+                                                handleUpdateJuniorPrice(cls._id, { subjects: updatedSubjects });
+                                              }
                                             }}
                                             className="absolute top-2 right-2 p-1.5 bg-white text-rose-300 hover:text-rose-600 hover:shadow-lg rounded-lg opacity-0 group-hover:opacity-100 transition-all border border-rose-50"
                                           >
                                              <X className="w-3 h-3" />
                                           </button>
-                                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">{sub.name}</label>
-                                          <div className="flex items-center gap-2">
-                                             <div className="p-2 bg-indigo-600 text-white rounded-lg"><IndianRupee className="w-3 h-3" /></div>
-                                             <input 
-                                               type="number"
-                                               defaultValue={sub.singleSubjectPrice}
-                                               onBlur={(e) => {
-                                                 const updatedSubjects = [...cls.subjects];
-                                                 updatedSubjects[idx].singleSubjectPrice = Number(e.target.value);
-                                                 handleUpdateJuniorPrice(cls._id, { subjects: updatedSubjects });
-                                               }}
-                                               className="w-full bg-white rounded-lg px-4 py-2 font-black text-slate-900 outline-none shadow-sm text-sm"
-                                             />
-                                          </div>
+                                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">{sub.name}</label>
+                                          <div className="mt-2 text-[10px] font-bold text-indigo-500/50 uppercase tracking-tight italic">Part of Full Package</div>
                                        </div>
                                      ))}
                                      
@@ -230,34 +236,23 @@ const PricingManagement = () => {
                                               <input 
                                                 id={`new-sub-name-${cls._id}`}
                                                 type="text" 
-                                                placeholder="Link Subject Name..."
+                                                placeholder="Enter Subject Name..."
                                                 className="w-full bg-transparent border-b-2 border-indigo-100 focus:border-indigo-600 outline-none py-1 font-black text-slate-900 text-xs placeholder:text-indigo-200"
-                                              />
-                                           </div>
-                                           <div className="flex items-center gap-2">
-                                              <div className="w-7 h-7 bg-emerald-600 text-white rounded-lg flex items-center justify-center shrink-0"><IndianRupee className="w-3.5 h-3.5" /></div>
-                                              <input 
-                                                id={`new-sub-price-${cls._id}`}
-                                                type="number" 
-                                                placeholder="Single Price (₹)"
-                                                className="w-full bg-transparent border-b-2 border-emerald-100 focus:border-emerald-600 outline-none py-1 font-black text-slate-900 text-xs placeholder:text-emerald-200"
                                               />
                                            </div>
                                         </div>
                                         <button 
                                           onClick={() => {
                                             const nameInput = document.getElementById(`new-sub-name-${cls._id}`);
-                                            const priceInput = document.getElementById(`new-sub-price-${cls._id}`);
                                             const name = nameInput.value;
-                                            const price = Number(priceInput.value);
                                             
                                             if (!name) return toast.error('Enter subject name');
                                             
-                                            const updatedSubjects = [...cls.subjects, { name, singleSubjectPrice: price }];
+                                            // Individual price defaults to 0 for Junior Classes
+                                            const updatedSubjects = [...cls.subjects, { name, singleSubjectPrice: 0 }];
                                             handleUpdateJuniorPrice(cls._id, { subjects: updatedSubjects });
                                             
                                             nameInput.value = '';
-                                            priceInput.value = '';
                                           }}
                                           className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-100 hover:shadow-indigo-200 transition-all"
                                         >
@@ -307,13 +302,23 @@ const PricingManagement = () => {
                                 </div>
                              </td>
                              <td className="px-6 md:px-8 py-6">
-                                <div className="flex items-center gap-2 max-w-[120px]">
+                                <div className="flex items-center gap-3">
                                    <input 
+                                     id={`senior-price-${sub._id}`}
                                      type="number"
                                      defaultValue={sub.price}
-                                     onBlur={(e) => handleUpdateSeniorPrice(sub._id, { ...sub, price: e.target.value })}
-                                     className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-600 rounded-lg px-3 py-2 font-black text-slate-900 outline-none transition-all text-sm"
+                                     className="w-full max-w-[100px] bg-slate-50 border-2 border-transparent focus:border-indigo-600 rounded-lg px-3 py-2 font-black text-slate-900 outline-none transition-all text-sm"
                                    />
+                                   <button 
+                                      onClick={() => {
+                                        const val = document.getElementById(`senior-price-${sub._id}`).value;
+                                        handleUpdateSeniorPrice(sub._id, { ...sub, price: val });
+                                      }}
+                                      className="p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white transition-all shadow-sm border border-indigo-100"
+                                      title="Update"
+                                   >
+                                      <Save className="w-4 h-4" />
+                                   </button>
                                 </div>
                              </td>
                              <td className="px-6 md:px-8 py-6 text-right">
@@ -411,19 +416,13 @@ const PricingManagement = () => {
          {/* MANUAL OVERRIDE SECTION */}
          <section className="space-y-6">
             <div className="flex items-center gap-4 pl-4 border-l-4 border-indigo-600">
-               <h2 className="text-xl font-black text-slate-900 tracking-tight">Direct Access Control</h2>
+               <h2 className="text-xl font-black text-slate-900 tracking-tight">Access Control</h2>
             </div>
             
             <div className="bg-slate-900 text-white rounded-2xl p-8 md:p-10 shadow-2xl relative overflow-hidden group">
                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full -mr-16 -mt-16 blur-3xl group-hover:scale-150 transition-transform duration-1000" />
                
                <div className="relative z-10 space-y-8">
-                  <div className="space-y-2">
-                      <p className="inline-flex px-3 py-1 bg-white/10 text-white text-[9px] font-black uppercase tracking-widest rounded-lg">Admin Tool</p>
-                      <h3 className="text-2xl font-black leading-tight">Grant Course Access</h3>
-                      <p className="text-indigo-400 font-bold text-xs">Enter a student's email to give them free access.</p>
-                  </div>
-
                   <form onSubmit={handleGrantAccess} className="space-y-5">
                      <div className="space-y-2">
                         <label className="text-[10px] font-black text-indigo-300 uppercase tracking-widest ml-1">Student Email</label>
@@ -441,7 +440,7 @@ const PricingManagement = () => {
                      </div>
 
                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-indigo-300 uppercase tracking-widest ml-1">Course Assignment</label>
+                        <label className="text-[10px] font-black text-indigo-300 uppercase tracking-widest ml-1">Assignment</label>
                         <select 
                            required
                            className="w-full bg-slate-800 border border-white/10 focus:border-indigo-400 rounded-xl px-6 py-3.5 md:py-4 font-bold outline-none appearance-none text-sm"
@@ -456,13 +455,13 @@ const PricingManagement = () => {
                              });
                            }}
                         >
-                           <option value="">Select Target Course...</option>
-                           <optgroup label="Full Courses (6-10)" className="bg-slate-800">
+                           <option value="">Enroll Student...</option>
+                           <optgroup label="Packages (6-10)">
                              {juniorClasses.map(c => (
                                <option key={c._id} value={JSON.stringify({id: c._id, name: c.className, type: 'bundle'})}>{c.className}</option>
                              ))}
                            </optgroup>
-                           <optgroup label="Senior Subjects (11-12)" className="bg-slate-800">
+                           <optgroup label="Subjects (11-12)">
                              {seniorSubjects.map(s => (
                                <option key={s._id} value={JSON.stringify({id: s._id, name: s.subjectName, type: 'subject'})}>{s.subjectName} ({s.classLevel})</option>
                              ))}
@@ -470,15 +469,8 @@ const PricingManagement = () => {
                         </select>
                      </div>
 
-                     <div className="p-4 bg-indigo-500/10 rounded-xl border border-indigo-500/20 flex gap-4">
-                        <Info className="w-5 h-5 text-indigo-400 mt-1 shrink-0" />
-                        <p className="text-[10px] font-bold text-indigo-300 leading-relaxed uppercase tracking-wide">
-                           Manual grants expire in 1 year by default.
-                        </p>
-                     </div>
-
                      <button type="submit" className="w-full py-4 md:py-5 bg-indigo-500 text-white rounded-xl font-black text-[10px] md:text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-white hover:text-slate-900 transition-all flex items-center justify-center gap-3 active:scale-95">
-                        <ShieldCheck className="w-5 h-5" /> Activate Access
+                        <ShieldCheck className="w-5 h-5" /> Activate
                      </button>
                   </form>
                </div>

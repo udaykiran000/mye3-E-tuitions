@@ -352,7 +352,7 @@ exports.getDashboardStats = async (req, res, next) => {
       totalRevenue,
       expiringSoon: expiringSoonCount,
       liveSessionsCount: liveCount,
-      activeSessions: liveSessions.slice(0, 2),
+      activeSessions: liveSessions.slice(0, 5),
       recentTransactions,
       revenueChartData: chartData
     });
@@ -493,7 +493,7 @@ exports.getMaterials = async (req, res, next) => {
     next(error);
   }
 };
-// @desc    Update pricing for a class (Full Course + Individual Subjects)
+// @desc    Update pricing for a class (All Subjects + Individual Subjects)
 // @route   PUT /api/admin/classes/:id
 // @access  Admin
 exports.updateClassPricing = async (req, res, next) => {
@@ -509,7 +509,7 @@ exports.updateClassPricing = async (req, res, next) => {
       { new: true, runValidators: true }
     );
 
-    if (!bundle) return res.status(404).json({ message: 'Full Course not found' });
+    if (!bundle) return res.status(404).json({ message: 'All Subjects package not found' });
     res.status(200).json(bundle);
   } catch (error) {
     next(error);
@@ -573,6 +573,11 @@ exports.grantManualAccess = async (req, res, next) => {
       type: type,
       date: new Date()
     });
+
+    // Emit global update for Admin Dashboard
+    if (req.app.get('io')) {
+      req.app.get('io').emit('admin-stats-update');
+    }
 
     res.status(200).json({ message: `Access granted to ${student.name} successfully!` });
   } catch (error) {

@@ -19,6 +19,7 @@ import {
 import { Link } from 'react-router-dom';
 import { usePreview } from '../../context/PreviewContext';
 import SessionRecapModal from '../../components/student/SessionRecapModal';
+import { useCallback } from 'react';
 
 const StudentDashboard = () => {
   const { activeView } = usePreview();
@@ -27,33 +28,40 @@ const StudentDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [recapModal, setRecapModal] = useState({ open: false, session: null });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [lRes, aRes] = await Promise.all([
-          axios.get('/student/my-learning'),
-          axios.get('/student/live-alerts')
-        ]);
-        
-        setLearning(lRes.data);
-        setLiveAlerts(aRes.data);
+  const fetchData = useCallback(async () => {
+    try {
+      const [lRes, aRes] = await Promise.all([
+        axios.get('/student/my-learning'),
+        axios.get('/student/live-alerts')
+      ]);
+      
+      setLearning(lRes.data);
+      setLiveAlerts(aRes.data);
 
-        // MOCK DATA FOR ADMIN PREVIEW
-        if ((activeView === 'admin' || activeView === 'teacher') && lRes.data.length === 0) {
-          setLearning([
-            { name: 'Class 10 Bundle', type: 'bundle', expiryDate: new Date(Date.now() + 30 * 86400000), isExpired: false },
-            { name: 'Physics (Class 12)', type: 'subject', expiryDate: new Date(Date.now() + 15 * 86400000), isExpired: false }
-          ]);
-        }
-        
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching dashboard data');
-        setLoading(false);
+      // MOCK DATA FOR ADMIN PREVIEW
+      if ((activeView === 'admin' || activeView === 'teacher') && lRes.data.length === 0) {
+        setLearning([
+          { name: 'Class 10 Bundle', type: 'bundle', expiryDate: new Date(Date.now() + 30 * 86400000), isExpired: false },
+          { name: 'Physics (Class 12)', type: 'subject', expiryDate: new Date(Date.now() + 15 * 86400000), isExpired: false }
+        ]);
       }
-    };
-    fetchData();
+      
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching dashboard data');
+      setLoading(false);
+    }
   }, [activeView]);
+
+  useEffect(() => {
+    fetchData();
+
+    // Listen for custom refresh events from Layout (Socket updates)
+    window.addEventListener('refresh-student-data', fetchData);
+    return () => {
+      window.removeEventListener('refresh-student-data', fetchData);
+    };
+  }, [fetchData]);
 
   return (
     <div className="space-y-8 md:space-y-12 animate-in fade-in duration-700 pb-20 p-4 md:p-8 lg:px-10">

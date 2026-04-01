@@ -11,6 +11,21 @@ import {
   Tooltip, 
   ResponsiveContainer 
 } from 'recharts';
+import io from 'socket.io-client';
+
+const getSocketUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL.replace('/api', '').replace(/\/$/, '');
+  }
+  return `${window.location.protocol}//${window.location.hostname}:5000`;
+};
+
+const socket = io(getSocketUrl(), {
+  transports: ['polling', 'websocket'],
+  reconnection: true,
+  reconnectionAttempts: 10,
+  reconnectionDelay: 2000
+});
 
 const AdminDashboard = () => {
   const [statsData, setStatsData] = useState(null);
@@ -30,9 +45,24 @@ const AdminDashboard = () => {
     };
     fetchStats();
 
+    // Real-time updates via Socket.io
+    socket.on('live-session-update', () => {
+      console.log('Admin Dashboard: Live session update received, re-fetching...');
+      fetchStats();
+    });
+
+    socket.on('admin-stats-update', () => {
+      console.log('Admin Dashboard: Global stats update, re-fetching...');
+      fetchStats();
+    });
+
     // The Universal Fix for Recharts dimension warnings:
     const timer = setTimeout(() => setIsChartReady(true), 150);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      socket.off('live-session-update');
+      socket.off('admin-stats-update');
+    };
   }, []);
 
   if (loading) return (

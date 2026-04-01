@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import StudentSidebar from './StudentSidebar';
 import { HiBell, HiMenuAlt2 } from 'react-icons/hi';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
+import { io } from 'socket.io-client';
 import { logout } from '../../store/slices/authSlice';
 import { UserCircle, GraduationCap, LogOut } from 'lucide-react';
 
@@ -11,6 +13,64 @@ const StudentLayout = ({ children }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [alerts, setAlerts] = useState([]);
+
+  // Determine socket URL based on environment
+  // Determine socket URL dynamically
+  const getSocketUrl = () => {
+    if (import.meta.env.VITE_API_URL) {
+      return import.meta.env.VITE_API_URL.replace('/api', '').replace(/\/$/, '');
+    }
+    // Fallback to current hostname to support local IP testing (mobile)
+    return `${window.location.protocol}//${window.location.hostname}:5000`;
+  };
+
+  const socketUrl = getSocketUrl();
+
+  useEffect(() => {
+    // 1. Initial Fetch
+    const fetchAlerts = async () => {
+      try {
+        const { data } = await axios.get('/student/live-alerts');
+        setAlerts(data || []);
+      } catch (err) {
+        console.error('ALERT_FETCH_FAIL');
+      }
+    };
+    fetchAlerts();
+
+    // 2. Socket Connection (Real-time)
+    const socket = io(socketUrl, {
+      withCredentials: true,
+      transports: ['polling', 'websocket'], // Start with polling for dev stability
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 2000
+    });
+
+    socket.on('connect', () => {
+      console.log('✅ Student Socket Link Active - ID:', socket.id);
+    });
+    
+    // Listen for live class updates
+    socket.on('live-session-update', (data) => {
+      console.log('🔔 Real-time Session Update Received:', data.type);
+      fetchAlerts(); // Re-sync alerts instantly
+      window.dispatchEvent(new Event('refresh-student-data'));
+    });
+
+    socket.on('connect_error', (err) => {
+      // Use warn instead of error for transient connection attempts
+      console.warn('⚠️ Socket Connection Note:', err.message);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [socketUrl]);
+
+  const hasLive = alerts.some(a => a.status === 'live');
+  const alertCount = alerts.filter(a => a.status === 'live' || a.status === 'upcoming').length;
 
   const handleLogout = () => {
     dispatch(logout());
@@ -51,10 +111,21 @@ const StudentLayout = ({ children }) => {
            </div>
 
            <div className="flex items-center gap-3 md:gap-6">
-              <button className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:bg-indigo-50 hover:text-indigo-600 transition-all relative">
-                 <HiBell className="text-xl" />
-                 <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white"></span>
-              </button>
+              <Link 
+                to="/student/live-schedule"
+                className={`w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center transition-all relative border group
+                  ${hasLive ? 'bg-rose-50 border-rose-100 text-rose-600 shadow-lg shadow-rose-900/10' : alertCount > 0 ? 'bg-indigo-50 border-indigo-100 text-indigo-600' : 'bg-slate-50 border-slate-100 text-slate-400'}
+                `}
+                title={hasLive ? 'Class is LIVE!' : 'View Schedule'}
+              >
+                 <HiBell className="text-xl group-hover:scale-110 transition-transform" />
+                 {(alertCount > 0 || hasLive) && (
+                   <>
+                     <span className={`absolute top-2.5 right-2.5 w-2.5 h-2.5 rounded-full border-2 border-white ${hasLive ? 'bg-rose-500' : 'bg-indigo-500'}`}></span>
+                     {hasLive && <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-rose-500 rounded-full animate-ping opacity-75"></span>}
+                   </>
+                 )}
+              </Link>
 
               <div className="h-8 w-px bg-slate-100 hidden sm:block"></div>
 
@@ -62,7 +133,7 @@ const StudentLayout = ({ children }) => {
                  <div className="text-right hidden sm:block">
                     <p className="text-sm font-black text-slate-900 leading-tight">{userInfo?.name || 'Student'}</p>
                     <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">
-                       {userInfo?.classLevel || 'Class 10'}
+                       {userInfo?.classLevel || userInfo?.role || 'Portal'}
                     </p>
                  </div>
                  <div className="w-10 h-10 md:w-12 md:h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-lg shadow-lg shadow-indigo-100 cursor-pointer">

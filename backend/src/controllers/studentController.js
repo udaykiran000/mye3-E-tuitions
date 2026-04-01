@@ -12,12 +12,10 @@ const ClassBundle = require('../models/ClassBundle');
 // @access  Student
 exports.getCatalog = async (req, res, next) => {
   try {
-    console.log('--- START getCatalog ---');
     const [classes, subjects] = await Promise.all([
       ClassBundle.find({ isActive: true }).sort({ className: 1 }),
       Subject.find({ isActive: true }).sort({ classLevel: 1 })
     ]);
-    console.log('Catalog Found:', { classes: classes.length, subjects: subjects.length });
 
     const catalog = [
       ...classes.map(c => ({
@@ -38,7 +36,7 @@ exports.getCatalog = async (req, res, next) => {
     ];
 
     res.status(200).json(catalog);
-    console.log('--- END getCatalog Success ---');
+    res.status(200).json(catalog);
   } catch (error) {
     console.error('CATALOG ERROR FAIL:', error);
     next(error);
@@ -51,7 +49,6 @@ exports.getCatalog = async (req, res, next) => {
 exports.processMockPayment = async (req, res, next) => {
   try {
     const { amount, packageName, referenceId, type } = req.body;
-    console.log('MOCK PAYMENT STARTED:', { body: req.body, user: req.user._id });
 
     const student = await User.findById(req.user._id);
     if (!student) return res.status(404).json({ message: 'Student not found' });
@@ -69,7 +66,6 @@ exports.processMockPayment = async (req, res, next) => {
       type,
       status: 'success'
     });
-    console.log('TRANSACTION CREATED:', transaction._id);
 
     // Update student's subscriptions
     if (!student.activeSubscriptions) student.activeSubscriptions = [];
@@ -78,10 +74,8 @@ exports.processMockPayment = async (req, res, next) => {
     const existingSubIndex = student.activeSubscriptions.findIndex(sub => sub.name === packageName);
     
     if (existingSubIndex > -1) {
-      console.log('EXTENDING EXISTING SUB:', packageName);
       student.activeSubscriptions[existingSubIndex].expiryDate = expiryDate;
     } else {
-      console.log('ADDING NEW SUB:', packageName);
       student.activeSubscriptions.push({
         name: packageName,
         type,
@@ -95,7 +89,6 @@ exports.processMockPayment = async (req, res, next) => {
     // Explicitly mark modified for mixed/array types
     student.markModified('activeSubscriptions');
     await student.save();
-    console.log('STUDENT SAVED SUCCESSFULLY');
 
     res.status(200).json({
       success: true,

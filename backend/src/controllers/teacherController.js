@@ -209,15 +209,6 @@ exports.getRecordings = async (req, res, next) => {
 // @access  Teacher
 exports.uploadMaterial = async (req, res, next) => {
   try {
-    console.log('--- UPLOAD MATERIAL REQUEST ---');
-    console.log('BODY:', req.body);
-    console.log('FILE:', req.file ? {
-      fieldname: req.file.fieldname,
-      originalname: req.file.originalname,
-      mimetype: req.file.mimetype,
-      size: req.file.size,
-      path: req.file.path
-    } : 'NO FILE');
 
     const { classLevel, subjectName, title, fileUrl: externalUrl, type, assignmentId, sessionId } = req.body;
     

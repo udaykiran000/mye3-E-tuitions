@@ -155,19 +155,30 @@ exports.getTeachersList = async (req, res, next) => {
 // @access  Admin
 exports.assignSubjectToTeacher = async (req, res, next) => {
   try {
-    const { assignmentType, classLevel, subjectName, subjectId } = req.body;
+    const { assignments } = req.body;
     const teacher = await User.findById(req.params.id);
 
     if (!teacher || teacher.role !== 'teacher') {
       return res.status(404).json({ message: 'Teacher not found' });
     }
 
-    // Add new assignment to the array
-    teacher.assignedSubjects.push({ 
-      assignmentType, 
-      classLevel, 
-      subjectName, 
-      subjectId: subjectId || null 
+    // Support both single assignment and batch assignments
+    const assignmentsToAdd = Array.isArray(assignments) ? assignments : [req.body];
+
+    assignmentsToAdd.forEach(a => {
+      // Avoid exact duplicates
+      const exists = teacher.assignedSubjects.some(
+        existing => existing.classLevel === a.classLevel && existing.subjectName === a.subjectName
+      );
+      
+      if (!exists) {
+        teacher.assignedSubjects.push({ 
+          assignmentType: a.assignmentType, 
+          classLevel: a.classLevel, 
+          subjectName: a.subjectName, 
+          subjectId: a.subjectId || null 
+        });
+      }
     });
     
     await teacher.save();
@@ -269,27 +280,22 @@ exports.assignSubscription = async (req, res, next) => {
 // @access  Admin
 exports.getDashboardStats = async (req, res, next) => {
   try {
-    console.log('--- START getDashboardStats ---');
     const studentCount = await User.countDocuments({ role: 'student' });
     const teacherCount = await User.countDocuments({ role: 'teacher' });
-    console.log('Counts:', { studentCount, teacherCount });
 
     const liveSessions = await LiveSession.find({ 
       status: { $in: ['live', 'upcoming'] } 
     }).populate('teacherId', 'name').sort({ status: 1, startTime: 1 });
     const liveCount = liveSessions.length;
-    console.log('Live Count:', liveCount);
     
     // Revenue logic - Sum of all successful payments/transactions
     const [txs, payments] = await Promise.all([
       Transaction.find({ status: 'success' }).populate('studentId', 'name email').sort({ date: -1 }),
       Payment.find({ status: 'captured' }).populate('userId', 'name email').sort({ createdAt: -1 })
     ]);
-    console.log('Records Found:', { txs: txs.length, payments: payments.length });
 
     const totalRevenue = txs.reduce((acc, curr) => acc + (curr.amount || 0), 0) + 
                          payments.reduce((acc, curr) => acc + (curr.amount || 0), 0);
-    console.log('Total Revenue:', totalRevenue);
 
     // --- CHART DATA LOGIC: Last 7 Days ---
     const chartData = [];
@@ -306,7 +312,6 @@ exports.getDashboardStats = async (req, res, next) => {
       
       chartData.push({ name: dateStr, revenue: dailySum });
     }
-    console.log('Chart Data Count:', chartData.length);
 
     // Normalize and take top 5 for "Recent Transactions"
     const normalizedPayments = payments.map(p => ({
@@ -330,7 +335,6 @@ exports.getDashboardStats = async (req, res, next) => {
     const recentTransactions = [...normalizedtxs, ...normalizedPayments]
       .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
       .slice(0, 5);
-    console.log('Recent Tx Count:', recentTransactions.length);
 
     // Expiring soon logic
     const now = new Date();
@@ -341,7 +345,6 @@ exports.getDashboardStats = async (req, res, next) => {
       role: 'student',
       'activeSubscriptions.expiryDate': { $gte: now, $lte: thirtyDaysLater }
     });
-    console.log('Expiring Soon:', expiringSoonCount);
 
     res.status(200).json({
       totalStudents: studentCount,
@@ -353,7 +356,6 @@ exports.getDashboardStats = async (req, res, next) => {
       recentTransactions,
       revenueChartData: chartData
     });
-    console.log('--- END getDashboardStats Success ---');
   } catch (error) {
     console.error('DASHBOARD ERROR FAIL:', error);
     next(error);

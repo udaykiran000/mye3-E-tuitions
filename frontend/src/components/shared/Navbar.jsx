@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import logoGif from '../../assets/loader-logo (1).gif';
+import logoGif from '../../assets/logo_transparent.gif';
 import contactSvg from '../../assets/contact-with-us.svg';
 import { logout } from '../../store/slices/authSlice';
 import {
@@ -340,14 +340,14 @@ const Navbar = () => {
 
       {/* ── MAIN NAVBAR ── */}
       <nav className="bg-white border-b border-slate-100 sticky top-0 z-[100]" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <div className="max-w-[1280px] mx-auto px-4 md:px-6 h-[68px] flex items-center justify-between gap-4">
+        <div className="max-w-[1280px] mx-auto px-4 md:px-6 h-[80px] md:h-[90px] flex items-center justify-between gap-4">
 
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 shrink-0 group">
             <img
               src={logoGif}
               alt="e-Tuitions Logo"
-              className="h-14 w-auto group-hover:scale-105 transition-transform"
+              className="h-20 md:h-24 w-auto object-contain scale-125 md:scale-[1.4] origin-left group-hover:scale-[1.3] md:group-hover:scale-[1.45] transition-transform"
             />
           </Link>
 

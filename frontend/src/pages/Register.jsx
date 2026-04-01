@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { setCredentials } from '../store/slices/authSlice';
 import registerBg from '../assets/ChatGPT Image Mar 30, 2026, 04_09_31 AM.png';
-import logoGif from '../assets/loader-logo (1).gif';
+import logoGif from '../assets/logo_transparent.gif';
 
 const Register = () => {
   const [name, setName]         = useState('');
@@ -123,7 +123,7 @@ const Register = () => {
           top: 6%;             /* Positioned above the girl's head */
           right: 22%;          /* Adjust horizontal position to sit over her head */
           left: auto;          /* Reset left so right takes over */
-          height: 100px;       /* Made it slightly bigger as requested */
+          height: 150px;       /* Made it slightly bigger as requested */
           width: auto;
           z-index: 10;
         }
@@ -278,7 +278,7 @@ const Register = () => {
         /* ── Mobile responsiveness ── */
         .reg-mobile-logo {
           display: none;
-          height: 65px;
+          height: 95px;
           margin: 0 auto 25px auto;
         }
 
@@ -314,7 +314,7 @@ const Register = () => {
           }
           .reg-mobile-logo {
             display: block; /* Show logo above form on mobile */
-            height: 65px;   /* Increased logo size as requested */
+            height: 95px;   /* Increased logo size as requested */
             margin: 0 auto 16px auto;
           }
           

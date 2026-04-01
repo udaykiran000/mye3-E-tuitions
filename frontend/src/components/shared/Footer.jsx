@@ -6,7 +6,7 @@ import {
   HiOutlineLocationMarker,
   HiArrowRight,
 } from 'react-icons/hi';
-import logoGif from '../../assets/loader-logo (1).gif';
+import footerLogo from '../../assets/output-onlinepngtools.png';
 import {
   FaFacebookF,
   FaInstagram,
@@ -57,28 +57,48 @@ const Footer = () => {
         }
       `}</style>
 
-      {/* ── Logo + Tagline Row ── */}
-      <div className="max-w-[1280px] mx-auto px-6 md:px-10 pt-10 pb-6 border-b border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        {/* Logo */}
-        <Link to="/" className="flex items-center shrink-0 bg-white p-3 rounded-xl shadow-lg ring-1 ring-white/10">
-          <img
-            src={logoGif}
-            alt="e-Tuitions Logo"
-            className="h-10 md:h-12 w-auto hover:scale-105 transition-transform"
-          />
-        </Link>
+      {/* ── Main Footer Content ── */}
+      <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-12 md:py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 md:gap-8">
+        
+        {/* Column 1 & 2: Logo, Tagline, Socials */}
+        <div className="lg:col-span-2 space-y-6 lg:pr-10">
+          <Link to="/" className="inline-block">
+            <img
+              src={footerLogo}
+              alt="e-Tuitions Logo"
+              className="w-[200px] md:w-[240px] h-auto drop-shadow-md hover:scale-[1.03] transition-transform origin-left"
+            />
+          </Link>
+          <p className="font-medium text-[14px] leading-relaxed text-indigo-100/70 max-w-md">
+            We dream to find the solution to every challenge which students come across,
+            while taking online classes. Providing quality classes seamlessly.
+          </p>
+          
+          {/* Social icons */}
+          <div className="pt-2">
+            <div className="flex items-center gap-3">
+              {[
+                { Icon: FaFacebookF, href: '#' },
+                { Icon: FaInstagram, href: '#' },
+                { Icon: FaTwitter, href: '#' },
+                { Icon: FaLinkedinIn, href: '#' },
+                { Icon: FaYoutube, href: '#' },
+              ].map(({ Icon, href }, i) => (
+                <a
+                  key={i}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white opacity-80 hover:opacity-100 hover:-translate-y-1 transition-all text-[15px] border border-white/20 hover:border-white/50 bg-white/5 hover:bg-white/10 shadow-sm"
+                >
+                  <Icon />
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
 
-        {/* Tagline */}
-        <p className="font-medium text-[14px] max-w-md leading-relaxed text-indigo-100/70">
-          We dream to find the solution to every challenge which students come across,
-          while taking online classes.
-        </p>
-      </div>
-
-      {/* ── Main Columns ── */}
-      <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-10 grid grid-cols-2 md:grid-cols-4 gap-10">
-
-        {/* Column 1: Links */}
+        {/* Column 3: Links */}
         <div>
           <h4 className="text-[14px] font-black mb-5 uppercase tracking-wider text-white">Links</h4>
           <ul className="space-y-3">
@@ -86,15 +106,14 @@ const Footer = () => {
               { label: 'Book Classes', to: '/register' },
               { label: 'Online Classes', to: '/courses' },
               { label: 'Explore Teachers', to: '/courses' },
+              { label: 'Group & Private Classes', to: '/courses' },
               { label: 'Contact Us', to: '/about' },
-              { label: 'How To Register', to: '/register' },
-              { label: 'Join As Teacher', to: '/register' },
-              { label: 'Teacher Memberships', to: '/register' },
+              { label: 'How To Register', to: '/register' }
             ].map((item, i) => (
               <li key={i}>
                 <Link
                   to={item.to}
-                  className="text-[13px] transition-colors font-medium text-indigo-100/60 hover:text-white"
+                  className="text-[13px] transition-colors font-medium text-indigo-100/60 hover:text-white flex items-center gap-1 group"
                 >
                   {item.label}
                 </Link>
@@ -103,7 +122,7 @@ const Footer = () => {
           </ul>
         </div>
 
-        {/* Column 2: Quick Links */}
+        {/* Column 4: Quick Links */}
         <div>
           <h4 className="text-[14px] font-black mb-5 uppercase tracking-wider text-white">Quick Links</h4>
           <ul className="space-y-3">
@@ -113,13 +132,12 @@ const Footer = () => {
               { label: 'Refund Policy', to: '/' },
               { label: 'Terms & Conditions', to: '/' },
               { label: 'Disclaimer', to: '/' },
-              { label: 'Sitemap', to: '/' },
-              { label: 'Blogs', to: '/' },
+              { label: 'Join As Teacher', to: '/register' }
             ].map((item, i) => (
               <li key={i}>
                 <Link
                   to={item.to}
-                  className="text-[13px] transition-colors font-medium text-indigo-100/60 hover:text-white"
+                  className="text-[13px] transition-colors font-medium text-indigo-100/60 hover:text-white flex items-center gap-1 group"
                 >
                   {item.label}
                 </Link>
@@ -128,96 +146,47 @@ const Footer = () => {
           </ul>
         </div>
 
-        {/* Column 3: Our Services + Quick Connect */}
-        <div className="space-y-8">
-          <div>
-            <h4 className="text-[14px] font-black mb-5 uppercase tracking-wider text-white">Our Services</h4>
-            <ul className="space-y-3">
-              {[
-                { label: 'Group Classes', to: '/courses' },
-                { label: 'Offline Classes', to: '/courses' },
-                { label: 'Private Classes', to: '/courses' },
-              ].map((item, i) => (
-                <li key={i}>
-                  <Link
-                    to={item.to}
-                    className="text-[13px] transition-colors font-medium text-indigo-100/60 hover:text-white"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Social icons */}
-          <div>
-            <h4 className="text-[14px] font-black mb-4 uppercase tracking-wider text-white">Quick Connect</h4>
-            <div className="flex items-center gap-2 flex-wrap">
-              {[
-                { Icon: FaFacebookF, color: '#1877f2', href: '#' },
-                { Icon: FaInstagram, color: '#e1306c', href: '#' },
-                { Icon: FaTwitter, color: '#1da1f2', href: '#' },
-                { Icon: FaLinkedinIn, color: '#0077b5', href: '#' },
-                { Icon: FaYoutube, color: '#ff0000', href: '#' },
-              ].map(({ Icon, color, href }, i) => (
-                <a
-                  key={i}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-white hover:opacity-80 hover:-translate-y-1 transition-all text-[14px] border border-white/20"
-                  style={{ background: 'transparent' }}
-                >
-                  <Icon />
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Column 4: Contact Us */}
+        {/* Column 5: Contact Us */}
         <div>
           <h4 className="text-[14px] font-black mb-5 uppercase tracking-wider text-white">Contact Us</h4>
-          <ul className="space-y-4">
+          <ul className="space-y-4 relative z-10">
             <li className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-white/10">
-                <HiOutlinePhone className="text-indigo-200 text-[15px]" />
+              <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-white/10 text-white shadow-sm border border-white/5">
+                <HiOutlinePhone className="text-[15px]" />
               </div>
-              <div className="text-[13px] font-medium leading-relaxed text-indigo-100/70">
-                +9876543210<br />+91 9289439711
+              <div className="text-[13px] font-medium leading-relaxed text-indigo-100/70 pt-0.5">
+                +91 9289439711<br />+91 9876543210
               </div>
             </li>
-            <li className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-white/10">
-                <HiOutlineMail className="text-indigo-200 text-[15px]" />
+            <li className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-white/10 text-white shadow-sm border border-white/5">
+                <HiOutlineMail className="text-[15px]" />
               </div>
               <span className="text-[13px] font-medium text-indigo-100/70">mye3-e-tuitions@gmail.com</span>
             </li>
             <li className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-white/10">
-                <HiOutlineLocationMarker className="text-indigo-200 text-[15px]" />
+              <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-white/10 text-white shadow-sm border border-white/5">
+                <HiOutlineLocationMarker className="text-[15px]" />
               </div>
-              <span className="text-[13px] font-medium leading-relaxed text-indigo-100/70">
-                FIEE Complex, A-55, Okhla Phase II,<br />
-                Okhla Industrial Estate,<br />
-                New Delhi, Delhi 110020
+              <span className="text-[13px] font-medium leading-relaxed text-indigo-100/70 pt-0.5">
+                FIEE Complex, A-55, Okhla,<br />
+                New Delhi 110020
               </span>
             </li>
           </ul>
 
           {/* Email subscribe */}
-          <div className="mt-6 flex items-center border rounded-lg overflow-hidden border-white/10">
+          <div className="mt-8 flex items-center border rounded-lg overflow-hidden border-white/20 hover:border-white/40 transition-colors shadow-sm bg-black/20 relative z-20">
             <input
               type="email"
-              placeholder="Your email"
+              placeholder="Your email address"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="flex-1 px-3 py-2.5 text-[13px] outline-none placeholder-white/30 bg-white/5 text-white"
+              className="flex-1 px-4 py-3 text-[13px] outline-none placeholder-white/40 bg-transparent text-white w-full min-w-[50px]"
             />
             <button
-              className="px-3 py-2.5 text-white flex items-center justify-center hover:opacity-90 transition-opacity"
-              style={{ background: 'linear-gradient(135deg,#f97316,#ea580c)' }}
+              className="px-4 py-3 text-white flex shrink-0 items-center justify-center hover:opacity-90 transition-opacity"
+              style={{ background: '#f97316' }}
             >
               <HiArrowRight className="text-lg" />
             </button>

@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { setCredentials } from '../store/slices/authSlice';
 import { FcGoogle } from 'react-icons/fc';
-import logoGif from '../assets/loader-logo (1).gif';
+import logoGif from '../assets/logo_transparent.gif';
 import loginImg from '../assets/ChatGPT Image Mar 30, 2026, 01_51_09 AM.png';
 
 const Login = () => {
@@ -44,7 +44,7 @@ const Login = () => {
               <img 
                 src={logoGif} 
                 alt="e-Tuitions Logo" 
-                className="h-16 md:h-20 w-auto object-contain -ml-2"
+                className="h-20 md:h-28 scale-[1.2] md:scale-[1.3] object-contain -ml-2"
               />
             </header>
 

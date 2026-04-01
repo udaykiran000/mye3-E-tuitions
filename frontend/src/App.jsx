@@ -61,6 +61,9 @@ const ProtectedRoute = ({ children, role }) => {
 
 function AppContent() {
   const location = useLocation();
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
   const isDashboardRoute = 
     location.pathname.startsWith('/admin/') || 

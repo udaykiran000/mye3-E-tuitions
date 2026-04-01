@@ -29,6 +29,10 @@ import course1 from '../assets/course-item-1.webp';
 import course2 from '../assets/course-item-2.webp';
 import course3 from '../assets/course-item-3.webp';
 import course4 from '../assets/course-item-4.webp';
+import discCourse1 from '../assets/disc-content-1.webp';
+import discCourse2 from '../assets/disc-content-2.webp';
+import discCourse3 from '../assets/disc-content-3.webp';
+import discCourse4 from '../assets/disc-content-4.webp';
 
 // Slide content data
 const SLIDES = [
@@ -83,11 +87,39 @@ const POPULAR_COURSES = [
   { title: 'School\nClasses', color: '#bae0fe', border: '#93c5fd', shadow: '#3b82f6', img: course4 },
 ];
 
-const CATEGORIES = [
-  { title: 'Language', desc: 'Master new languages with ease.', color: 'from-amber-400 to-orange-500', icon: HiGlobeAlt },
-  { title: 'IT & Skill', desc: 'Future-proof your career.', color: 'from-indigo-500 to-purple-600', icon: HiDeviceMobile },
-  { title: 'Academic', desc: 'Excellence in school subjects.', color: 'from-emerald-400 to-teal-500', icon: HiAcademicCap },
-  { title: 'Extra Curricular', desc: 'Explore your passions.', color: 'from-rose-400 to-pink-500', icon: HiLightBulb },
+const DISCOVER_COURSES = [
+  {
+    topTitle: 'Basic to advance',
+    title: 'Language',
+    desc: 'Learn a foreign language by online native teacher and increase your employability.',
+    bgColor: '#fdf3c7',     
+    btnColor: '#fab500',    
+    img: discCourse1,
+  },
+  {
+    topTitle: 'Mains to Advance',
+    title: 'IIT-JEE',
+    desc: 'Learn From best teachers from home at anytime at affordable prices.',
+    bgColor: '#ffebd9',     
+    btnColor: '#f97316',    
+    img: discCourse2,
+  },
+  {
+    topTitle: 'Basic to advance',
+    title: 'Coding /\nProgramming',
+    desc: 'Find the best tutor for coding and programming classes at affordable prices.',
+    bgColor: '#d4fae4',     
+    btnColor: '#22c55e',    
+    img: discCourse3,
+  },
+  {
+    topTitle: 'Basic to advance',
+    title: 'Curricular\nActivities',
+    desc: 'Get online Interactive extra curricular classes with best trainer.',
+    bgColor: '#e8eeff',     
+    btnColor: '#3b82f6',    
+    img: discCourse4,
+  }
 ];
 
 const Home = () => {
@@ -233,18 +265,28 @@ const Home = () => {
 
         {/* ── Large green RING — right edge only arc visible, behind text column ── */}
         <div className="absolute pointer-events-none hidden md:block" style={{
-          top: '10%', right: '-210px',
-          width: '320px', height: '320px',
+          top: '12%', right: '-140px',
+          width: '280px', height: '280px',
           borderRadius: '50%',
-          border: '28px solid #22c55e',
+          border: '32px solid #22c55e',
           background: 'transparent',
           zIndex: 0,
         }} />
 
         {/* ── Small green RING — bottom right, fully visible ── */}
         <div className="absolute pointer-events-none hidden md:block" style={{
-          bottom: '10%', right: '2%',
-          width: '90px', height: '90px',
+          bottom: '5%', right: '15%',
+          width: '75px', height: '75px',
+          borderRadius: '50%',
+          border: '5px solid #22c55e',
+          background: 'transparent',
+          zIndex: 0,
+        }} />
+
+        {/* ── Small green RING — bottom left, partially visible ── */}
+        <div className="absolute pointer-events-none hidden md:block" style={{
+          bottom: '0%', left: '-50px',
+          width: '100px', height: '100px',
           borderRadius: '50%',
           border: '5px solid #22c55e',
           background: 'transparent',
@@ -252,7 +294,7 @@ const Home = () => {
         }} />
 
         {/* Content above rings */}
-        <div className="relative max-w-[1280px] mx-auto px-4 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center" style={{ zIndex: 2 }}>
+        <div className="relative max-w-[1100px] mx-auto px-4 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center" style={{ zIndex: 2 }}>
 
           {/* ── Left: Image Column ── */}
           <div className="relative ml-0 md:ml-10">
@@ -340,13 +382,13 @@ const Home = () => {
             </div>
 
             {/* Learner count card */}
-            <div className="relative md:absolute mt-6 md:mt-0 md:-bottom-8 md:-left-6 z-20 bg-white rounded-2xl w-[90%] md:w-auto mx-auto px-6 py-4 shadow-xl md:shadow-2xl flex items-center gap-4 border border-slate-100">
-              <div className="w-12 h-12 bg-emerald-50 text-emerald-500 md:text-emerald-600 rounded-full md:rounded-xl flex items-center justify-center text-2xl border border-emerald-100/50">
+            <div className="relative md:absolute mt-6 md:mt-0 md:-bottom-6 md:-left-8 z-20 bg-white rounded-2xl w-[90%] md:w-auto mx-auto px-5 py-3 shadow-xl flex items-center gap-3 border border-slate-50">
+              <div className="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center text-xl border border-emerald-100/50">
                 <HiUserGroup />
               </div>
               <div>
-                <p className="text-[26px] md:text-2xl font-black text-slate-900 leading-none mb-0 md:mb-0.5">20K+</p>
-                <p className="text-[13px] md:text-[10px] font-semibold text-slate-500 md:text-slate-400 capitalize md:uppercase tracking-[0.02em] md:tracking-widest leading-tight">Enrolled Learners</p>
+                <p className="text-[20px] md:text-[22px] font-black text-slate-900 leading-none mb-0.5">20K+</p>
+                <p className="text-[11px] md:text-[10px] font-semibold text-slate-400 capitalize md:uppercase tracking-[0.02em] md:tracking-wider leading-tight">Enrolled Learners</p>
               </div>
               
                {/* Small orange up-trend arrow present on mobile reference */}
@@ -358,15 +400,15 @@ const Home = () => {
           <div className="space-y-7">
             <div>
               <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em]">About Us</span>
-              <h2 className="mt-2 text-3xl md:text-[42px] font-black text-slate-900 leading-tight tracking-tight">
+              <h2 className="mt-2 text-3xl md:text-[36px] font-black text-slate-900 leading-[1.15] tracking-tight">
                 India's best{' '}
                 <span className="text-emerald-500 relative inline-block">
                   online tuition
-                  <svg className="absolute -bottom-1 left-0 w-full h-[18px] text-emerald-500" viewBox="0 0 100 20" preserveAspectRatio="none">
+                  <svg className="absolute -bottom-1 left-0 w-full h-[14px] text-emerald-500" viewBox="0 0 100 20" preserveAspectRatio="none">
                     <path d="M5,15 Q50,0 95,15" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
                   </svg>
                 </span>{' '}
-                website for quality education
+                <br />website for quality <br />education
               </h2>
             </div>
             <p className="text-slate-500 font-medium leading-relaxed max-w-lg mt-8">
@@ -394,22 +436,22 @@ const Home = () => {
       {/* ════════════════════════════════════════════
           STATS BAR
       ════════════════════════════════════════════ */}
-      <section className="bg-slate-50 md:bg-white md:border-t md:border-b border-slate-100 py-10 relative overflow-hidden">
+      <section className="bg-slate-50 py-12 relative overflow-hidden">
         {/* Mobile green left ring */}
         <div className="absolute left-[-30px] top-[40px] w-[90px] h-[90px] rounded-full border-[4px] border-[#22c55e] md:hidden pointer-events-none z-0"></div>
-        <div className="max-w-[1280px] mx-auto px-4 md:px-8 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-5 md:gap-0 md:divide-x-2 md:divide-slate-100">
+        <div className="max-w-[1100px] mx-auto px-4 md:px-12 lg:px-16 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 lg:gap-10">
             {[
               { value: '15496+', label: 'HAPPY PARENTS/STUDENTS', color: '#f5a623' },
               { value: '1.3M',   label: 'CLASS COMPLETED',        color: '#f97316' },
               { value: '100%',   label: 'SATISFACTION RATE',      color: '#10b981' },
               { value: '9875',   label: 'CERTIFIED TUTORS',       color: '#3b82f6' },
             ].map((stat, i) => (
-              <div key={i} className="flex flex-col items-center justify-center py-5 md:py-0 gap-1 text-center bg-white md:bg-transparent rounded-2xl md:rounded-none shadow-[0_4px_20px_rgba(0,0,0,0.06)] md:shadow-none px-4 md:px-0 mx-3 md:mx-0">
-                <span className="text-4xl md:text-5xl font-black" style={{ color: stat.color }}>
+              <div key={i} className="flex flex-col items-center justify-center py-6 md:py-7 gap-1.5 border border-slate-100/50 text-center bg-white rounded-3xl shadow-[0_12px_40px_rgba(0,0,0,0.06)] px-2">
+                <span className="text-4xl md:text-[34px] font-black leading-none" style={{ color: stat.color }}>
                   {stat.value}
                 </span>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1 md:mt-0">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
                   {stat.label}
                 </span>
               </div>
@@ -421,30 +463,49 @@ const Home = () => {
       {/* ════════════════════════════════════════════
           COURSE CATEGORIES
       ════════════════════════════════════════════ */}
-      <section className="py-16 md:py-24 bg-slate-50">
-        <div className="max-w-[1280px] mx-auto px-4 md:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
+      <section className="py-8 md:py-14 bg-white">
+        <div className="max-w-[1024px] mx-auto px-4 md:px-6">
+          <div className="mb-8 md:mb-10 text-center">
+            <h2 className="text-[28px] md:text-[34px] font-bold text-slate-700 tracking-tight">
               Discover Available <span style={{ color: '#f97316' }}>Courses</span>
             </h2>
-            <p className="text-slate-500 font-medium mt-3">From elementary foundational courses to advanced skill development.</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {CATEGORIES.map((cat, i) => (
-              <motion.div
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+            {DISCOVER_COURSES.map((course, i) => (
+              <div
                 key={i}
-                whileHover={{ y: -8 }}
-                className={`p-8 rounded-3xl bg-gradient-to-br ${cat.color} text-white shadow-xl cursor-pointer relative overflow-hidden group`}
+                className="rounded-[24px] overflow-hidden flex flex-col sm:flex-row items-center justify-between p-5 md:px-7 md:py-6 relative"
+                style={{ background: course.bgColor }}
               >
-                <div className="absolute top-0 right-0 w-28 h-28 bg-white/10 rounded-full -mr-12 -mt-12 blur-2xl group-hover:scale-150 transition-transform duration-700" />
-                <cat.icon className="text-5xl mb-5 opacity-80" />
-                <h4 className="text-xl font-black mb-2">{cat.title}</h4>
-                <p className="text-white/80 text-sm font-medium leading-relaxed">{cat.desc}</p>
-                <div className="mt-6 flex items-center gap-2 text-xs font-black uppercase tracking-widest bg-white/20 px-4 py-2 rounded-lg w-fit">
-                  Read more <HiArrowRight />
+                {/* Decorative absolute elements on the CARD level */}
+                {/* Top middle floating outline circle */}
+                <div className="absolute top-5 left-[52%] w-10 h-10 md:w-12 md:h-12 rounded-full border-[3px]" style={{ borderColor: course.btnColor, opacity: 0.5 }}></div>
+                
+                {/* Bottom right thick quarter circle */}
+                <div className="absolute -bottom-4 -right-4 w-20 h-20 md:w-24 md:h-24 rounded-tl-[100px] border-t-[16px] border-l-[16px]" style={{ borderColor: course.btnColor, opacity: 0.4 }}></div>
+
+                {/* Left side text container */}
+                <div className="relative z-10 w-full sm:w-[55%] space-y-2.5 pb-4 sm:pb-0">
+                  <p className="font-bold text-[13px] tracking-wide" style={{ color: course.btnColor }}>{course.topTitle}</p>
+                  <h3 className="text-[24px] md:text-[28px] font-black text-slate-800 leading-[1.1] whitespace-pre-line">{course.title}</h3>
+                  <p className="text-slate-600 text-[12px] md:text-[13px] leading-relaxed max-w-[95%] mb-2 opacity-90">{course.desc}</p>
+                  <button 
+                    className="px-5 py-2 rounded-lg text-white font-bold text-[13px] shadow transition-transform hover:-translate-y-0.5" 
+                    style={{ background: course.btnColor }}
+                  >
+                    Explore Now
+                  </button>
                 </div>
-              </motion.div>
+                
+                {/* Right side image & decor */}
+                <div className="relative z-10 w-full sm:w-[45%] flex justify-end items-end h-[120px] md:h-[140px] mt-4 sm:mt-0 pr-1">
+                  {/* White background circle with thick colored border */}
+                  <div className="relative w-[110px] h-[110px] md:w-[125px] md:h-[125px] bg-white rounded-full flex justify-center items-end mr-2 md:mr-4" style={{ border: `5px solid ${course.btnColor}` }}>
+                    <img src={course.img} alt={course.title} className="max-h-[145%] md:max-h-[150%] w-auto object-contain object-bottom -mb-[1px] relative z-20 pointer-events-none drop-shadow-sm" />
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>

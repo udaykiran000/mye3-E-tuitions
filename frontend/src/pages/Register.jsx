@@ -3,8 +3,8 @@ import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { setCredentials } from '../store/slices/authSlice';
-import registerBg from '../assets/ChatGPT Image Mar 30, 2026, 04_09_31 AM.png';
-import logoGif from '../assets/logo_transparent.gif';
+import registerBg from '../assets/register img.png';
+import logoImg from '../assets/output-onlinepngtools.png';
 
 const Register = () => {
   const [name, setName]         = useState('');
@@ -75,9 +75,9 @@ const Register = () => {
           position: absolute;
           top: 0;
           bottom: 0;
-          left: 62%;             /* Exactly matches .reg-card-left's width */
-          right: -100vw;         /* Bleed massively off the right side */
-          background: #e84c3d;   /* The exact same red background */
+          left: 60%;
+          right: -100vw;
+          background: #002855;   /* Slightly more vibrant Navy Blue */
         }
 
         /* ── The Central Card ── */
@@ -97,9 +97,9 @@ const Register = () => {
         /* ── Image section (Left) ── */
         .reg-card-left {
           position: relative;
-          width: 62%;
+          width: 60%;
           height: 100%;
-          background: #0b1320;
+          background: #002855; 
         }
 
         .reg-left-img {
@@ -107,8 +107,8 @@ const Register = () => {
           inset: 0;
           width: 100%;
           height: 100%;
-          object-fit: cover;
-          object-position: 55% 10%;   /* show face + upper body + thumbs */
+          object-fit: cover; /* Back to cover as requested "sides ki em vadhu" */
+          object-position: center;
           display: block;
         }
 
@@ -117,29 +117,33 @@ const Register = () => {
           display: none;
         }
 
-        /* ── Logo over image ── */
-        .reg-logo {
-          position: absolute;
-          top: 6%;             /* Positioned above the girl's head */
-          right: 22%;          /* Adjust horizontal position to sit over her head */
-          left: auto;          /* Reset left so right takes over */
-          height: 150px;       /* Made it slightly bigger as requested */
-          width: auto;
-          z-index: 10;
+        .reg-form-logo {
+          display: block;
+          height: 140px; /* Increased logo size as requested */
+          margin: 0 auto 10px auto;
+          object-fit: contain;
         }
 
         /* ── Form section (Right) ── */
         .reg-card-right {
           position: relative;
-          width: 38%;
+          width: 40%;
           height: 100%;
-          background: #e84c3d;
+          background: #002855;
           display: flex;
           flex-direction: column;
-          justify-content: center;
+          overflow: hidden; /* No scrolling */
+        }
+
+        /* Inner container - compacted */
+        .reg-form-inner {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
           align-items: center;
-          padding: 0 44px;
-          overflow-y: auto;
+          justify-content: center;
+          padding: 30px 40px; 
         }
 
         /* ── Form content ── */
@@ -149,16 +153,18 @@ const Register = () => {
           color: #fff;
         }
         .reg-form-box h2 {
-          font-size: 34px;
+          font-size: 28px; /* Smaller title */
           font-weight: 400;
-          line-height: 1.22;
-          margin: 0 0 8px 0;
+          line-height: 1.1;
+          margin: 0 0 5px 0;
+          text-align: center;
         }
         .reg-subtitle {
-          font-size: 12px;
+          font-size: 11px;
           color: rgba(255,255,255,0.82);
-          line-height: 1.75;
-          margin: 0 0 30px 0;
+          line-height: 1.5;
+          margin: 0 0 20px 0;
+          text-align: center;
         }
 
         /* error */
@@ -178,7 +184,7 @@ const Register = () => {
         /* input rows */
         .reg-field {
           border-bottom: 1px solid rgba(255,255,255,0.40);
-          margin-bottom: 20px;
+          margin-bottom: 15px; /* Tighter spacing */
           display: flex;
           align-items: center;
         }
@@ -196,7 +202,7 @@ const Register = () => {
         .reg-input:-webkit-autofill,
         .reg-input:-webkit-autofill:hover,
         .reg-input:-webkit-autofill:focus {
-          -webkit-box-shadow: 0 0 0 1000px #e84c3d inset !important;
+          -webkit-box-shadow: 0 0 0 1000px #002855 inset !important;
           -webkit-text-fill-color: #fff !important;
           transition: background-color 9999s ease-in-out 0s;
         }
@@ -214,19 +220,19 @@ const Register = () => {
           -webkit-appearance: none;
           color-scheme: dark;
         }
-        .reg-select option { background: #e84c3d; color: #fff; }
+        .reg-select option { background: #002855; color: #fff; }
 
         /* terms */
         .reg-terms {
           display: flex;
           align-items: center;
           gap: 9px;
-          margin-bottom: 22px;
+          margin-bottom: 18px;
         }
         .reg-terms input[type="checkbox"] {
           width: 14px;
           height: 14px;
-          accent-color: #0b1320;
+          accent-color: #e84c3d;
           cursor: pointer;
           flex-shrink: 0;
         }
@@ -245,7 +251,7 @@ const Register = () => {
         .reg-btn {
           width: 100%;
           padding: 14px;
-          background: #0b1320;
+          background: #e84c3d;
           color: #fff;
           font-size: 11px;
           font-weight: 700;
@@ -256,7 +262,7 @@ const Register = () => {
           cursor: pointer;
           transition: background 0.2s, transform 0.1s;
         }
-        .reg-btn:hover  { background: #060d18; }
+        .reg-btn:hover  { background: #e65100; } /* More orange hover */
         .reg-btn:active { transform: scale(0.98); }
 
         /* login link */
@@ -276,11 +282,6 @@ const Register = () => {
         }
 
         /* ── Mobile responsiveness ── */
-        .reg-mobile-logo {
-          display: none;
-          height: 95px;
-          margin: 0 auto 25px auto;
-        }
 
         @media (max-width: 900px) {
           .reg-page {
@@ -305,16 +306,18 @@ const Register = () => {
           }
           .reg-card-right {
             width: 100%;
-            border-radius: 16px; /* Round all corners for the solo card */
-            padding: 20px 25px;   /* Significantly reduced vertical padding */
+            border-radius: 16px;
+            padding: 0;
             justify-content: center;
+          }
+          .reg-form-inner {
+            padding: 40px 25px;
           }
           .reg-form-box {
             max-width: 100%;
           }
-          .reg-mobile-logo {
-            display: block; /* Show logo above form on mobile */
-            height: 95px;   /* Increased logo size as requested */
+          .reg-form-logo {
+            height: 95px;
             margin: 0 auto 16px auto;
           }
           
@@ -381,103 +384,88 @@ const Register = () => {
             />
             <div className="reg-left-overlay" />
             
-            {/* Logo perfectly positioned above the girl's head */}
-            <img src={logoGif} alt="e-Tuitions Logo" className="reg-logo" />
           </div>
 
-          {/* Right section: Coral-red Form */}
+          {/* Right section: Navy Blue Form */}
           <div className="reg-card-right">
-            <div className="reg-form-box">
+            <div className="reg-form-inner">
+              <div className="reg-form-box">
 
-            {/* Mobile Logo */}
-            <img src={logoGif} alt="e-Tuitions Logo" className="reg-mobile-logo" />
+                {/* Form Logo */}
+                <img src={logoImg} alt="e-Tuitions Logo" className="reg-form-logo" />
 
-            {/* Header */}
-            <h2>Let's Get<br />You Started</h2>
-            <p className="reg-subtitle">
-              Getting started is quick and simple,<br />just fill out the form below
-            </p>
+                {/* Header */}
+                <h2>Let's Get<br />You Started</h2>
 
-            {/* Error */}
-            {error && <div className="reg-error">{error}</div>}
+                {/* Error */}
+                {error && <div className="reg-error">{error}</div>}
 
-            {/* Form */}
-            <form onSubmit={submitHandler}>
+                {/* Form */}
+                <form onSubmit={submitHandler}>
 
-              {/* Full Name */}
-              <div className="reg-field">
-                <input
-                  type="text"
-                  className="reg-input"
-                  placeholder="Full Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
+                  {/* Full Name */}
+                  <div className="reg-field">
+                    <input
+                      type="text"
+                      className="reg-input"
+                      placeholder="Full Name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div className="reg-field">
+                    <input
+                      type="email"
+                      className="reg-input"
+                      placeholder="Email Address"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  {/* Password */}
+                  <div className="reg-field">
+                    <input
+                      type="password"
+                      className="reg-input"
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  {/* Terms */}
+                  <div className="reg-terms">
+                    <input
+                      type="checkbox"
+                      id="reg-terms-chk"
+                      checked={agreedToTerms}
+                      onChange={(e) => setAgreedToTerms(e.target.checked)}
+                      required
+                    />
+                    <label htmlFor="reg-terms-chk">
+                      I agree to <span>Terms &amp; Conditions</span>
+                    </label>
+                  </div>
+
+                  {/* Submit */}
+                  <button type="submit" className="reg-btn">
+                    Register
+                  </button>
+                </form>
+
+                {/* Login link */}
+                <div className="reg-login-link">
+                  <p>Already have an account?</p>
+                  <p>Click <Link to="/login">here</Link> to login</p>
+                </div>
+
               </div>
-
-              {/* Email */}
-              <div className="reg-field">
-                <input
-                  type="email"
-                  className="reg-input"
-                  placeholder="Email Address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-
-              {/* Password */}
-              <div className="reg-field">
-                <input
-                  type="password"
-                  className="reg-input"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-
-              {/* Role */}
-              <div className="reg-field">
-                <select
-                  className="reg-select"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                >
-                  <option value="Student">Student</option>
-                  <option value="Teacher">Teacher</option>
-                </select>
-              </div>
-
-              {/* Terms */}
-              <div className="reg-terms">
-                <input
-                  type="checkbox"
-                  id="reg-terms-chk"
-                  checked={agreedToTerms}
-                  onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  required
-                />
-                <label htmlFor="reg-terms-chk">
-                  I agree to <span>Terms &amp; Conditions</span>
-                </label>
-              </div>
-
-              {/* Submit */}
-              <button type="submit" className="reg-btn">
-                Register
-              </button>
-            </form>
-
-            {/* Login link */}
-            <div className="reg-login-link">
-              <p>Already have an account?</p>
-              <p>Click <Link to="/login">here</Link> to login</p>
-            </div>
-
             </div>
           </div>
         </div>

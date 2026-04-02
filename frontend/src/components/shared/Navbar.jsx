@@ -37,7 +37,6 @@ const NAV_ITEMS = [
   },
   { label: 'Teachers', to: '/teachers' },
   { label: 'About Us', to: '/about' },
-  { label: 'Blog', to: '/blog' },
   { label: 'FAQs', to: '/faqs' },
   { label: 'Contact Us', to: '/contact-us' },
 ];
@@ -265,7 +264,7 @@ const ConnectButton = () => {
                 style={{ maxHeight: '260px' }}
               />
               <div className="flex items-center gap-2 text-orange-500 text-[12px] font-bold mt-1">
-                <span>📞</span> +91 9876543210
+                <span>📞</span> +91 99126 71666
               </div>
             </div>
           </div>
@@ -307,14 +306,14 @@ const Navbar = () => {
               <span className="hidden md:flex w-7 h-7 rounded-full bg-orange-100 items-center justify-center mr-2">
                 <HiOutlinePhone className="text-orange-600 text-[15px] md:text-sm" />
               </span>
-              <span className="hidden md:inline">Talk with us{' '}<span className="font-bold text-slate-900">+9876543210</span></span>
+              <span className="hidden md:inline">Talk with us{' '}<span className="font-bold text-slate-900">+91 99126 71666</span></span>
             </a>
-            <a href="mailto:mye3-e-tuitions@gmail.com" className="flex items-center gap-0 hover:text-orange-600 transition-colors">
+            <a href="mailto:mye3etutions@gmail.com" className="flex items-center gap-0 hover:text-orange-600 transition-colors">
               <img src="https://img.icons8.com/color/48/gmail-new.png" alt="email" className="w-[28px] h-[28px] md:hidden object-contain mr-1" />
               <span className="hidden md:flex w-7 h-7 rounded-full bg-red-100 items-center justify-center mr-2">
                 <MdEmail className="text-red-500 text-[15px] md:text-sm" />
               </span>
-              <span className="hidden md:inline">Mail Us{' '}<span className="font-bold text-slate-900">mye3-e-tuitions@gmail.com</span></span>
+              <span className="hidden md:inline">Mail Us{' '}<span className="font-bold text-slate-900">mye3etutions@gmail.com</span></span>
             </a>
           </div>
 
@@ -399,11 +398,11 @@ const Navbar = () => {
             <div className="px-4 py-3 space-y-1">
               {/* Contact info */}
               <div className="flex flex-col gap-1 py-3 px-2 bg-slate-50 rounded-lg mb-3">
-                <a href="tel:+919311656688" className="text-[12px] font-medium text-slate-600 flex items-center gap-2">
-                  <HiOutlinePhone className="text-orange-500" /> +9876543210
+                <a href="tel:+919912671666" className="text-[12px] font-medium text-slate-600 flex items-center gap-2">
+                  <HiOutlinePhone className="text-orange-500" /> +91 99126 71666
                 </a>
-                <a href="mailto:mye3-e-tuitions@gmail.com" className="text-[12px] font-medium text-slate-600 flex items-center gap-2">
-                  <HiOutlineMail className="text-orange-500" /> mye3-e-tuitions@gmail.com
+                <a href="mailto:mye3etutions@gmail.com" className="text-[12px] font-medium text-slate-600 flex items-center gap-2">
+                  <HiOutlineMail className="text-orange-500" /> mye3etutions@gmail.com
                 </a>
               </div>
 
@@ -492,7 +491,7 @@ const Navbar = () => {
 
       {/* Floating WhatsApp Button */}
       <a
-        href="https://wa.me/919876543210"
+        href="https://wa.me/919912671666"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-8 right-8 z-[1000] w-14 h-14 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform cursor-pointer"

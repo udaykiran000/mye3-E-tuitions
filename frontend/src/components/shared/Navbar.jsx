@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import logoGif from '../../assets/logo_transparent.gif';
+import logoImg from '../../assets/output-onlinepngtools.png';
 import contactSvg from '../../assets/contact-with-us.svg';
 import { logout } from '../../store/slices/authSlice';
 import {
@@ -18,13 +18,7 @@ import { MdEmail } from 'react-icons/md';
 // Dropdown data
 const NAV_ITEMS = [
   { label: 'Home', to: '/' },
-  {
-    label: 'Tuitions',
-    dropdown: [
-      { label: 'School Tuitions (Classes 6-10)', to: '/courses?section=junior' },
-      { label: 'Senior Secondary (Classes 11-12)', to: '/courses?section=senior' },
-    ],
-  },
+  { label: 'Tuitions', to: '/courses' },
   {
     label: 'Crack Exam',
     isNew: true,
@@ -296,8 +290,8 @@ const Navbar = () => {
   return (
     <>
       {/* ── TOP UTILITY BAR (Mobile & Desktop) ── */}
-      <div className="bg-slate-50 md:bg-white border-b border-slate-100 block">
-        <div className="max-w-[1280px] mx-auto px-4 md:px-8 py-2 md:py-2 flex items-center justify-between">
+      <div className="bg-orange-50/40 md:bg-white border-b border-orange-50/50 block">
+        <div className="max-w-[1280px] mx-auto px-4 md:px-8 py-1 flex items-center justify-between">
           
           {/* Left: contact info */}
           <div className="flex items-center gap-2 md:gap-6 text-[12px] font-medium text-slate-600">
@@ -338,15 +332,15 @@ const Navbar = () => {
       </div>
 
       {/* ── MAIN NAVBAR ── */}
-      <nav className="bg-white border-b border-slate-100 sticky top-0 z-[100]" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <div className="max-w-[1280px] mx-auto px-4 md:px-6 h-[80px] md:h-[90px] flex items-center justify-between gap-4">
+      <nav className="bg-white/95 md:bg-orange-50/40 backdrop-blur-md border-b border-orange-100 sticky top-0 md:relative z-[1000]" style={{ boxShadow: '0 2px 12px rgba(249,115,22,0.05)' }}>
+        <div className="max-w-[1280px] mx-auto px-4 md:px-6 h-[60px] md:h-[65px] flex items-center justify-between gap-4">
 
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 shrink-0 group">
             <img
-              src={logoGif}
+              src={logoImg}
               alt="e-Tuitions Logo"
-              className="h-20 md:h-24 w-auto object-contain scale-125 md:scale-[1.4] origin-left group-hover:scale-[1.3] md:group-hover:scale-[1.45] transition-transform"
+              className="h-16 md:h-20 w-auto object-contain scale-110 md:scale-[1.2] origin-left group-hover:scale-[1.15] md:group-hover:scale-[1.25] transition-transform"
             />
           </Link>
 

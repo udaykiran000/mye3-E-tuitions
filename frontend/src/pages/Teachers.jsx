@@ -67,7 +67,7 @@ const Teachers = () => {
       </div>
 
       {/* ── HERO SECTION ── */}
-      <div className="max-w-[1280px] mx-auto px-6 py-20 pb-28 relative overflow-hidden">
+      <div className="max-w-[1280px] mx-auto px-6 py-12 md:py-16 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-orange-50 rounded-full blur-[120px] -mr-48 -mt-48 opacity-60" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-50 rounded-full blur-[100px] -ml-40 -mb-40 opacity-40" />
 
@@ -85,7 +85,7 @@ const Teachers = () => {
             initial={{ opacity: 0, y: 20 }} 
             animate={{ opacity: 1, y: 0 }} 
             transition={{ delay: 0.1 }}
-            className="text-4xl md:text-6xl font-black text-[#002147] tracking-tighter leading-[1.1] uppercase italic"
+            className="text-3xl md:text-5xl font-black text-[#002147] tracking-tighter leading-[1.1] uppercase italic"
           >
             Meet Our <span className="text-[#f16126] not-italic">World-Class</span> <br/>Faculty
           </motion.h1>
@@ -94,30 +94,33 @@ const Teachers = () => {
             initial={{ opacity: 0, y: 20 }} 
             animate={{ opacity: 1, y: 0 }} 
             transition={{ delay: 0.2 }}
-            className="max-w-3xl mx-auto text-[#64748b] font-bold text-base md:text-lg leading-relaxed italic"
+            className="max-w-2xl mx-auto text-[#64748b] font-bold text-sm md:text-base leading-relaxed italic"
           >
             Learn from the brightest minds in the education industry. Our teachers are 
             handpicked from top institutions like IITs and NITs to group your child's success.
           </motion.p>
         </div>
 
-        {/* ── STATS STRIP ── */}
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+          {/* ── STATS STRIP ── */}
+          <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
           {[
-            { label: "Expert Teachers", val: "50+", icon: GraduationCap, color: "text-[#002147]" },
-            { label: "Years of Trust", val: "10+", icon: Clock, color: "text-[#f16126]" },
-            { label: "Happy Students", val: "10k+", icon: Users, color: "text-emerald-500" },
-            { label: "Quality Lessons", val: "5000+", icon: BookOpen, color: "text-blue-500" }
+            { label: "Expert Teachers", val: "50+", icon: GraduationCap, color: "text-[#002147]", bg: "border-navy-100" },
+            { label: "Years of Trust", val: "10+", icon: Clock, color: "text-[#f16126]", bg: "border-orange-100" },
+            { label: "Happy Students", val: "10k+", icon: Users, color: "text-emerald-500", bg: "border-emerald-100" },
+            { label: "Quality Lessons", val: "5000+", icon: BookOpen, color: "text-blue-500", bg: "border-blue-100" }
           ].map((stat, i) => (
             <motion.div 
               key={i} 
               initial={{ opacity: 0, scale: 0.9 }} 
               animate={{ opacity: 1, scale: 1 }} 
               transition={{ delay: 0.3 + i * 0.1 }}
-              className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center space-y-2 hover:shadow-lg transition-all"
+              className={`relative bg-white p-6 rounded-2xl border ${stat.bg} shadow-sm text-center space-y-2 hover:shadow-xl transition-all overflow-hidden group`}
             >
-              <stat.icon className={`w-8 h-8 mx-auto mb-2 ${stat.color}`} />
-              <p className="text-2xl font-black text-[#002147] leading-none tracking-tight">{stat.val}</p>
+              {/* Theme Accent Bar */}
+              <div className={`absolute top-0 left-0 w-1 h-full opacity-10 group-hover:opacity-100 transition-opacity bg-current ${stat.color}`} />
+              
+              <stat.icon className={`w-10 h-10 mx-auto mb-2 ${stat.color} group-hover:scale-110 transition-transform duration-500`} />
+              <p className="text-3xl font-black text-[#002147] leading-none tracking-tight">{stat.val}</p>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
             </motion.div>
           ))}
@@ -134,51 +137,43 @@ const Teachers = () => {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="group relative bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.03)] hover:shadow-2xl hover:shadow-navy-900/10 transition-all flex flex-col p-8"
+                className="group relative bg-white rounded-[24px] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col p-4"
               >
-                {/* Image Section */}
-                <div className="relative h-64 md:h-72 rounded-[24px] overflow-hidden mb-8 shadow-inner bg-slate-50">
+                {/* Image Section - MUCH SMALLER */}
+                <div className="relative h-40 md:h-44 rounded-[18px] overflow-hidden mb-6 shadow-inner bg-slate-50">
                   <img 
                     src={t.image} 
                     alt={t.name}
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
                   />
-                  <div className="absolute top-4 left-4 px-4 py-1.5 bg-[#002147] text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-lg border border-white/20 shadow-xl backdrop-blur-md">
+                  <div className="absolute top-3 left-3 px-3 py-1 bg-[#002147] text-white text-[8px] font-black uppercase tracking-[0.2em] rounded-md border border-white/20 shadow-xl backdrop-blur-md">
                      {t.subject}
-                  </div>
-                  <div className="absolute bottom-4 right-4 flex gap-2">
-                    <button className="w-9 h-9 bg-white/20 backdrop-blur-md text-white rounded-full flex items-center justify-center hover:bg-[#002147] transition-all border border-white/20">
-                      <FiLinkedin className="w-4 h-4" />
-                    </button>
-                    <button className="w-9 h-9 bg-white/20 backdrop-blur-md text-white rounded-full flex items-center justify-center hover:bg-orange-600 transition-all border border-white/20">
-                      <FiTwitter className="w-4 h-4" />
-                    </button>
                   </div>
                 </div>
 
-                {/* Content */}
-                <div className="space-y-4 flex-1">
+                {/* Content - COMPACT */}
+                <div className="space-y-3 flex-1">
                    <div>
-                     <p className="text-[10px] font-black text-[#f16126] uppercase tracking-[0.25em] mb-2">{t.qualification}</p>
-                     <h3 className="text-2xl font-black text-[#002147] uppercase italic tracking-tight group-hover:text-[#f16126] transition-colors">{t.name}</h3>
+                     <p className="text-[9px] font-black text-[#f16126] uppercase tracking-[0.2em] mb-1">{t.qualification}</p>
+                     <h3 className="text-lg font-black text-[#002147] uppercase italic tracking-tight group-hover:text-[#f16126] transition-colors">{t.name}</h3>
                    </div>
                    
-                   <div className="flex flex-col gap-2 pt-4 border-t border-slate-50">
-                      <div className="flex items-center gap-3 text-[11px] font-bold text-slate-500 uppercase tracking-tight">
-                         <FiCheckCircle className="w-4 h-4 text-emerald-500 shrink-0" /> {t.experience}
+                   <div className="flex flex-col gap-1.5 pt-3 border-t border-slate-50">
+                      <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-tight">
+                         <FiCheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> {t.experience}
                       </div>
-                      <div className="flex items-center gap-3 text-[11px] font-bold text-slate-500 uppercase tracking-tight">
-                         <FiAward className="w-4 h-4 text-orange-500 shrink-0" /> Special: {t.specialization}
+                      <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-tight">
+                         <FiAward className="w-3.5 h-3.5 text-orange-500 shrink-0" /> {t.specialization}
                       </div>
                    </div>
 
-                   <p className="text-slate-400 font-bold italic text-[13px] leading-relaxed pt-2">
+                   <p className="text-slate-400 font-bold italic text-[11px] leading-relaxed pt-1 line-clamp-2">
                      "{t.bio}"
                    </p>
                 </div>
 
-                <button className="mt-10 w-full py-4 bg-[#002147] text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.25em] flex items-center justify-center gap-3 hover:bg-[#f16126] transition-all shadow-xl active:scale-95 group/btn">
-                  Book Free Demo <FiArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                <button className="mt-6 w-full py-3 bg-[#002147] text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-[#f16126] transition-all shadow-lg active:scale-95 group/btn">
+                  Book Free Demo <FiArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
                 </button>
               </motion.div>
             ))}
@@ -186,23 +181,77 @@ const Teachers = () => {
         </div>
       </div>
 
-      {/* ── CONTACT CTA (Consistent with Home/About) ── */}
-      <div className="bg-[#f06522] py-20 px-6 text-center text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-[100px] -mr-48 -mt-48" />
-          <div className="max-w-4xl mx-auto space-y-8 relative z-10">
-             <h2 className="text-3xl md:text-5xl font-black uppercase tracking-wide leading-none italic">Join The League of <span className="text-[#002147] not-italic">Top Educators</span></h2>
-             <p className="text-white/90 text-sm md:text-lg font-bold italic leading-loose max-w-2xl mx-auto">
-                Are you a passionate educator wanting to make a difference? Join our faculty and start your journey of shaping legends.
-             </p>
-             <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-               <button className="w-full md:w-auto bg-[#002147] text-white px-12 py-5 rounded-full font-black text-xs uppercase tracking-[0.25em] hover:bg-white hover:text-[#002147] transition-all shadow-2xl active:scale-95">
-                  Apply As Teacher
-               </button>
-               <button className="w-full md:w-auto border-2 border-white text-white px-12 py-5 rounded-full font-black text-xs uppercase tracking-[0.25em] hover:bg-white hover:text-[#f16126] transition-all active:scale-95">
-                  Contact Support
-               </button>
-             </div>
+      {/* ── TEACHER REGISTRATION & BENEFITS SECTION ── */}
+      <div className="bg-[#fff8f1] py-24 px-6 overflow-hidden border-t border-orange-100">
+        <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          
+          {/* Left Side: Teacher Registration Form */}
+          <div className="relative group">
+            {/* Orange Border Accent Like Image 2 */}
+            <div className="absolute top-0 left-0 w-2 h-full bg-[#f16126] shadow-[0_0_20px_rgba(241,97,38,0.2)] rounded-l-3xl" />
+            
+            <div className="bg-white p-10 md:p-14 rounded-3xl border border-orange-100 shadow-xl relative z-10">
+              <div className="mb-10">
+                <p className="text-[10px] font-black text-[#f16126] uppercase tracking-[0.3em] mb-2 font-sans italic">Join Our Faculty</p>
+                <h2 className="text-3xl md:text-4xl font-black text-[#002147] italic uppercase tracking-tighter">Become an Online <span className="text-[#f16126] not-italic">Tutor</span></h2>
+              </div>
+
+              <form className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Name</label>
+                    <input type="text" placeholder="Enter Full Name" className="w-full bg-slate-50 border border-slate-100 rounded-xl px-5 py-4 text-sm text-[#002147] outline-none focus:border-[#f16126] transition-all font-bold placeholder-slate-400" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email</label>
+                    <input type="email" placeholder="teacher@example.com" className="w-full bg-slate-50 border border-slate-100 rounded-xl px-5 py-4 text-sm text-[#002147] outline-none focus:border-[#f16126] transition-all font-bold placeholder-slate-400" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Mobile No</label>
+                    <input type="text" placeholder="+91 XXXXX XXXXX" className="w-full bg-slate-50 border border-slate-100 rounded-xl px-5 py-4 text-sm text-[#002147] outline-none focus:border-[#f16126] transition-all font-bold placeholder-slate-400" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Subject Expertise</label>
+                    <input type="text" placeholder="Maths, Physics etc." className="w-full bg-slate-50 border border-slate-100 rounded-xl px-5 py-4 text-sm text-[#002147] outline-none focus:border-[#f16126] transition-all font-bold placeholder-slate-400" />
+                  </div>
+                </div>
+
+                <button className="w-full md:w-fit mt-4 px-12 py-5 bg-[#f16126] text-white rounded-xl font-black text-xs uppercase tracking-[0.3em] hover:bg-[#de551e] transition-all shadow-xl active:scale-95">
+                  Apply Now
+                </button>
+              </form>
+            </div>
           </div>
+
+          {/* Right Side: Why Join Mye3 Benefits Grid */}
+          <div className="space-y-12">
+            <h2 className="text-4xl md:text-5xl font-black text-[#002147] italic uppercase tracking-tighter leading-[1.1]">
+              Why Join <br/> 
+              <span className="text-[#f16126] not-italic">Mye3</span> e-Tuitions?
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-10 gap-x-12">
+               {[
+                 { title: "Global Reach", text: "Connect with students across India and beyond." },
+                 { title: "Flexible Timing", text: "Set your own schedule and teach at your convenience." },
+                 { title: "Premium Payouts", text: "Earn competitive rates for each session you conduct." },
+                 { title: "1-to-1 Interaction", text: "Engage deeply with students in personalized sessions." }
+               ].map((item, i) => (
+                 <div key={i} className="group">
+                    <h4 className="text-[13px] font-black text-[#002147] uppercase tracking-widest mb-3 flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-[#f16126] rounded-full" />
+                      {item.title}
+                    </h4>
+                    <div className="w-12 h-0.5 bg-[#f16126]/30 mb-4 group-hover:w-full transition-all duration-500" />
+                    <p className="text-slate-500 font-bold text-sm leading-relaxed italic">{item.text}</p>
+                 </div>
+               ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

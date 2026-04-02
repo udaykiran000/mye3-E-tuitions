@@ -33,6 +33,8 @@ import discCourse1 from '../assets/disc-content-1.webp';
 import discCourse2 from '../assets/disc-content-2.webp';
 import discCourse3 from '../assets/disc-content-3.webp';
 import discCourse4 from '../assets/disc-content-4.webp';
+import teacherJoinImg from '../assets/ChatGPT Image Mar 30, 2026, 04_09_31 AM.png';
+import successImg from '../assets/register img.png';
 
 // Slide content data
 const SLIDES = [
@@ -83,7 +85,7 @@ const SLIDES = [
 const POPULAR_COURSES = [
   { title: 'Short Term\nCourses', color: '#fbe08e', border: '#fbbf24', shadow: '#f59e0b', img: course1 },
   { title: 'Language\nCourses', color: '#fca876', border: '#fb923c', shadow: '#f97316', img: course2 },
-  { title: 'Coding\nClasses', color: '#b0f1cc', border: '#4ade80', shadow: '#22c55e', img: course3 },
+  { title: 'CBSE\nClasses', color: '#b0f1cc', border: '#4ade80', shadow: '#22c55e', img: course3 },
   { title: 'School\nClasses', color: '#bae0fe', border: '#93c5fd', shadow: '#3b82f6', img: course4 },
 ];
 
@@ -98,7 +100,7 @@ const DISCOVER_COURSES = [
   },
   {
     topTitle: 'Mains to Advance',
-    title: 'IIT-JEE',
+    title: 'ICSE',
     desc: 'Learn From best teachers from home at anytime at affordable prices.',
     bgColor: '#ffebd9',     
     btnColor: '#f97316',    
@@ -106,7 +108,7 @@ const DISCOVER_COURSES = [
   },
   {
     topTitle: 'Basic to advance',
-    title: 'Coding /\nProgramming',
+    title: 'CBSE',
     desc: 'Find the best tutor for coding and programming classes at affordable prices.',
     bgColor: '#d4fae4',     
     btnColor: '#22c55e',    
@@ -569,57 +571,172 @@ const Home = () => {
       {/* ════════════════════════════════════════════
           TEACHERS CTA
       ════════════════════════════════════════════ */}
-      <section className="py-16 md:py-24 bg-[#00158a] text-white">
-        <div className="max-w-[1280px] mx-auto px-4 md:px-8 text-center space-y-6">
-          <span className="inline-block text-[11px] font-black text-emerald-400 uppercase tracking-[0.5em]">Meet Our Experts</span>
-          <h2 className="text-3xl md:text-5xl font-black tracking-tight">
-            Our Dedicated Online <span className="text-emerald-400">Teachers</span>
-          </h2>
-          <p className="text-blue-200 font-medium max-w-xl mx-auto">
-            Experienced faculty committed to making every concept clear and every student confident.
-          </p>
-          <Link
-            to="/register"
-            className="inline-flex items-center gap-2 px-10 py-4 text-white font-black text-[15px] rounded-xl hover:opacity-90 transition-all shadow-lg"
-            style={{ background: 'linear-gradient(135deg,#22c55e,#16a34a)', boxShadow: '0 4px 20px rgba(34,197,94,0.4)' }}
-          >
-            Find Your Mentor <HiArrowRight />
-          </Link>
+      {/* ════════════════════════════════════════════
+          TEACHERS REGISTRATION SECTION (RE-DESIGNED)
+      ════════════════════════════════════════════ */}
+      <section className="bg-[#002147] py-12 md:py-16 overflow-hidden">
+        <div className="max-w-[1200px] mx-auto px-4 md:px-8">
+          
+          {/* Top Block: Form & Image side-by-side */}
+          <div className="flex flex-col lg:flex-row items-stretch gap-8 lg:gap-16 mb-16">
+            
+            {/* Left: Registration Form (Reflecting Image 3) */}
+            <div className="lg:w-[50%] flex flex-col justify-center">
+              <div className="bg-[#091a33] rounded-[24px] p-6 md:p-10 border border-white/5 shadow-2xl relative overflow-hidden">
+                {/* Theme Highlights */}
+                <div className="absolute top-0 left-0 w-2 h-full bg-orange-500"></div>
+                
+                <div className="space-y-1 mb-8">
+                  <span className="text-[11px] font-bold text-orange-500 uppercase tracking-[0.3em]">Join Our Faculty</span>
+                  <h2 className="text-2xl md:text-[32px] font-black text-white leading-tight">
+                    Become an Online <span className="text-orange-500">Tutor</span>
+                  </h2>
+                </div>
+
+                <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Name</label>
+                      <input 
+                        type="text" 
+                        placeholder="Enter Full Name"
+                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-orange-500 focus:bg-white/10 transition-all text-white placeholder-slate-500 text-sm" 
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Email</label>
+                      <input 
+                        type="email" 
+                        placeholder="teacher@example.com"
+                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-orange-500 focus:bg-white/10 transition-all text-white placeholder-slate-500 text-sm" 
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Mobile No</label>
+                      <input 
+                        type="tel" 
+                        placeholder="+91 XXXXX XXXXX"
+                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-orange-500 focus:bg-white/10 transition-all text-white placeholder-slate-500 text-sm" 
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Subject Expertise</label>
+                      <input 
+                        type="text" 
+                        placeholder="Maths, Physics etc."
+                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-orange-500 focus:bg-white/10 transition-all text-white placeholder-slate-500 text-sm" 
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-4 flex justify-center sm:justify-start">
+                    <button 
+                      className="px-10 py-3 bg-orange-600 hover:bg-orange-500 text-white font-black text-[13px] uppercase tracking-widest rounded-lg transition-all shadow-[0_8px_25px_rgba(234,88,12,0.3)] hover:-translate-y-0.5 active:scale-95"
+                    >
+                      Apply Now
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            {/* Right: Portrait Image (Reflecting Image 3) */}
+            <div className="lg:w-[50%] flex max-h-[500px]">
+              <div className="w-full rounded-[24px] overflow-hidden border border-white/10 shadow-2xl relative">
+                <img 
+                  src={teacherJoinImg} 
+                  alt="Join as a teacher" 
+                  className="w-full h-full object-cover grayscale-[0.2] hover:grayscale-0 transition-all duration-700"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Block: Why Join Section (Reflecting Image 4) */}
+          <div className="pt-10 border-t border-white/5">
+            <h3 className="text-2xl md:text-3xl font-black text-white mb-10 tracking-tight">
+              Why Join <span className="text-orange-500 italic">Mye3</span> <span className="text-white">e-Tuitions?</span>
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+              {[
+                { title: 'GLOBAL REACH', desc: 'Connect with students across India and beyond.', icon: HiGlobeAlt },
+                { title: 'FLEXIBLE TIMING', desc: 'Set your own schedule and teach at your convenience.', icon: HiUserGroup },
+                { title: 'PREMIUM PAYOUTS', desc: 'Earn competitive rates for each session you conduct.', icon: HiLightningBolt },
+                { title: '1-TO-1 INTERACTION', desc: 'Engage deeply with students in personalized sessions.', icon: HiAcademicCap },
+              ].map((item, i) => (
+                <div key={i} className="space-y-4 group">
+                  <div className="flex flex-col gap-1">
+                    <h4 className="text-orange-500 font-black text-[13px] tracking-widest uppercase">{item.title}</h4>
+                    <div className="w-8 h-1 bg-white/20 group-hover:w-full group-hover:bg-orange-500/50 transition-all duration-500"></div>
+                  </div>
+                  <p className="text-slate-400 text-[13px] leading-relaxed font-medium">
+                    {item.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
       </section>
 
       {/* ════════════════════════════════════════════
-          FREE DEMO CTA BANNER
+          SUCCESS JOURNEY CTA — RE-DESIGNED
       ════════════════════════════════════════════ */}
-      <section className="py-16 md:py-24 bg-white">
-        <div className="max-w-[1280px] mx-auto px-4 md:px-8">
-          <div
-            className="rounded-[48px] p-10 md:p-20 text-center text-white relative overflow-hidden"
-            style={{ background: 'linear-gradient(135deg,#f97316,#ea580c)', boxShadow: '0 30px 80px rgba(249,115,22,0.3)' }}
-          >
-            <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl -mr-40 -mt-40" />
-            <div className="absolute bottom-0 left-0 w-80 h-80 bg-black/10 rounded-full blur-3xl -ml-40 -mb-40" />
+      <section className="py-16 md:py-28 bg-white overflow-hidden">
+        <div className="max-w-[1240px] mx-auto px-4 md:px-8">
+          <div className="bg-[#002147] rounded-[48px] overflow-hidden shadow-2xl relative">
+            
+            {/* Background elements */}
+            <div className="absolute top-0 right-0 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl -mr-40 -mt-40" />
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl -ml-40 -mb-40" />
 
-            <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-tight uppercase relative z-10">
-              Start Your Success Journey <br /> With a Free Demo
-            </h2>
-            <p className="text-orange-100 font-medium max-w-xl mx-auto mt-4 text-lg relative z-10">
-              "Experience the difference of personalized mentorship before you commit."
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8 relative z-10">
-              <Link
-                to="/register"
-                className="px-10 py-4 bg-white font-black text-[15px] rounded-xl hover:bg-slate-50 active:scale-95 transition-all shadow-xl"
-                style={{ color: '#f97316' }}
-              >
-                Book Free Demo
-              </Link>
-              <Link
-                to="/login"
-                className="px-10 py-4 bg-white/20 border-2 border-white/40 text-white font-black text-[15px] rounded-xl hover:bg-white/30 transition-all"
-              >
-                Login
-              </Link>
+            <div className="flex flex-col lg:flex-row items-stretch relative z-10">
+              
+              {/* Left Column: Information */}
+              <div className="w-full lg:w-[55%] p-10 md:p-12 lg:p-14 text-left relative z-20">
+                <div className="space-y-6">
+                  <span className="text-[11px] font-black text-emerald-400 uppercase tracking-[0.4em]">Ready to start?</span>
+                  <h2 className="text-3xl md:text-[38px] font-black text-white leading-[1.1] tracking-tight">
+                    Start Your <span className="text-orange-500 italic">Success</span> Journey Today
+                  </h2>
+                  <p className="text-blue-100/70 text-base leading-relaxed max-w-lg">
+                    Experience the precision of 1-on-1 personalized mentorship. Join e-Tuitions and unlock your full academic potential with a free demo session.
+                  </p>
+                  
+                  <div className="flex flex-wrap gap-4 pt-2">
+                    <Link
+                      to="/register"
+                      className="px-8 py-3.5 bg-orange-600 hover:bg-orange-500 text-white font-black text-[14px] uppercase tracking-widest rounded-xl transition-all shadow-[0_10px_25px_rgba(234,88,12,0.3)]"
+                    >
+                      Book Free Demo
+                    </Link>
+                    <Link
+                      to="/login"
+                      className="px-8 py-3.5 bg-white/10 hover:bg-white/20 border-2 border-white/40 text-white font-black text-[14px] uppercase tracking-widest rounded-xl transition-all"
+                    >
+                      Login
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              {/* VERTICAL DIVIDER LINE (No Gap requested) */}
+              <div className="hidden lg:block absolute left-[55%] top-0 bottom-0 w-[2px] bg-blue-500/40 z-30 shadow-[0_0_15px_rgba(59,130,246,0.3)]"></div>
+
+              {/* Right Column: Image */}
+              <div className="w-full lg:w-[45%] relative">
+                <img 
+                   src={successImg} 
+                   alt="Student Success" 
+                   className="absolute inset-0 w-full h-full object-cover object-center transition-all duration-700" 
+                 />
+              </div>
+
             </div>
           </div>
         </div>

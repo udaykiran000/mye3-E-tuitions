@@ -66,7 +66,7 @@ const ContactUs = () => {
                 </div>
                 <div>
                   <h4 className="text-[13px] font-black text-[#002147] uppercase tracking-widest mb-1">Phone</h4>
-                  <p className="text-[15px] font-bold text-[#555]">+9876543210 / +91 9289439711</p>
+                  <p className="text-[15px] font-bold text-[#555]">+91 99126 71666</p>
                 </div>
               </li>
 
@@ -76,7 +76,7 @@ const ContactUs = () => {
                 </div>
                 <div>
                   <h4 className="text-[13px] font-black text-[#002147] uppercase tracking-widest mb-1">Email</h4>
-                  <p className="text-[15px] font-bold text-[#555]">mye3-e-tuitions@gmail.com</p>
+                  <p className="text-[15px] font-bold text-[#555]">mye3etutions@gmail.com</p>
                 </div>
               </li>
 
@@ -87,7 +87,7 @@ const ContactUs = () => {
                 <div>
                   <h4 className="text-[13px] font-black text-[#002147] uppercase tracking-widest mb-1">Address</h4>
                   <p className="text-[15px] font-bold text-[#555] leading-relaxed">
-                    FIEE Complex, A-55, Okhla Phase II,<br />Okhla Industrial Estate, New Delhi 110020
+                    Eluru, Andhra Pradesh - 534002
                   </p>
                 </div>
               </li>

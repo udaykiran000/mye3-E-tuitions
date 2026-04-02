@@ -155,22 +155,21 @@ const Footer = () => {
                 <HiOutlinePhone className="text-[15px]" />
               </div>
               <div className="text-[13px] font-medium leading-relaxed text-indigo-100/70 pt-0.5">
-                +91 9289439711<br />+91 9876543210
+                +91 99126 71666
               </div>
             </li>
             <li className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-white/10 text-white shadow-sm border border-white/5">
                 <HiOutlineMail className="text-[15px]" />
               </div>
-              <span className="text-[13px] font-medium text-indigo-100/70">mye3-e-tuitions@gmail.com</span>
+              <span className="text-[13px] font-medium text-indigo-100/70">mye3etutions@gmail.com</span>
             </li>
             <li className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-white/10 text-white shadow-sm border border-white/5">
                 <HiOutlineLocationMarker className="text-[15px]" />
               </div>
               <span className="text-[13px] font-medium leading-relaxed text-indigo-100/70 pt-0.5">
-                FIEE Complex, A-55, Okhla,<br />
-                New Delhi 110020
+                Eluru, Andhra Pradesh - 534002
               </span>
             </li>
           </ul>
@@ -197,7 +196,7 @@ const Footer = () => {
       {/* ── Bottom Bar ── */}
       <div className="border-t py-5 px-6 md:px-10 text-center border-white/10">
         <p className="text-[12px] font-medium text-white/30">
-          © Copyright 2020 - {new Date().getFullYear()} | e-Tuitions Learning Pvt Ltd | All Rights Reserved
+          © Copyright 2026 Mye3 e-Tuitions All Rights Reserved. Designed By WebnApp Studio
         </p>
       </div>
     </footer>

@@ -25,4 +25,7 @@ export default defineConfig({
       plugins: [tailwindcss, autoprefixer],
     },
   },
+  optimizeDeps: {
+    force: true,
+  },
 })

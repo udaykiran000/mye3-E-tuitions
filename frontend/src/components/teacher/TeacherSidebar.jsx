@@ -14,6 +14,8 @@ import {
   FileText
 } from 'lucide-react';
 
+import logoImg from '../../assets/output-onlinepngtools.png';
+
 const TeacherSidebar = ({ onClose }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -36,10 +38,17 @@ const TeacherSidebar = ({ onClose }) => {
   return (
     <aside className="w-full lg:w-72 bg-slate-900 h-screen text-white flex flex-col shadow-2xl">
       <div className="p-6 md:p-8 border-b border-slate-800 flex items-center justify-between">
-        <h1 className="text-2xl font-black tracking-tighter flex items-center gap-3">
-          <div className="w-10 h-10 bg-teal-500 rounded-xl flex items-center justify-center text-xl">T</div>
-          Faculty <span className="text-teal-400">Portal</span>
-        </h1>
+        <Link to="/" className="flex items-center gap-3 group px-2">
+          <img 
+            src={logoImg} 
+            alt="Logo" 
+            className="h-10 md:h-12 w-auto object-contain transition-transform group-hover:scale-105" 
+          />
+          <div className="flex flex-col gap-0 text-left">
+            <span className="text-xl font-black tracking-tighter leading-none whitespace-nowrap">Faculty Portal</span>
+            <span className="text-[10px] font-black text-teal-400 uppercase tracking-widest mt-0.5 italic opacity-80">Mye3 Education</span>
+          </div>
+        </Link>
         {onClose && (
           <button onClick={onClose} className="lg:hidden p-2 text-slate-400 hover:text-white transition-colors">
             <X className="w-6 h-6" />

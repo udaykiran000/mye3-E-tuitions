@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { setCredentials } from '../store/slices/authSlice';
 import { FcGoogle } from 'react-icons/fc';
-import logoGif from '../assets/logo_transparent.gif';
+import logoImg from '../assets/output-onlinepngtools.png';
 import loginImg from '../assets/ChatGPT Image Mar 30, 2026, 01_51_09 AM.png';
 
 const Login = () => {
@@ -35,16 +35,16 @@ const Login = () => {
   };
 
   return (
-    <div className="h-screen bg-sky-50 flex items-center justify-center p-4 overflow-hidden">
-      <div className="max-w-4xl w-full bg-white rounded-[2rem] shadow-2xl overflow-hidden flex flex-col lg:flex-row max-h-[90vh]">
+    <div className="min-h-screen bg-white md:bg-sky-50 flex items-center justify-center p-0 md:p-4 overflow-hidden">
+      <div className="max-w-4xl w-full h-full md:h-auto bg-white rounded-none md:rounded-[2rem] shadow-none md:shadow-2xl overflow-hidden flex flex-col lg:flex-row md:max-h-[90vh]">
         {/* Left Side: Form */}
-        <div className="w-full lg:w-[45%] p-6 md:p-8 lg:p-10 flex flex-col justify-between">
+        <div className="w-full lg:w-[45%] p-8 md:p-8 lg:p-10 flex flex-col justify-between min-h-screen md:min-h-0">
           <div className="space-y-4">
-            <header className="flex justify-center lg:justify-start">
+            <header className="flex justify-center w-full pb-4">
               <img 
-                src={logoGif} 
+                src={logoImg} 
                 alt="e-Tuitions Logo" 
-                className="h-20 md:h-28 scale-[1.2] md:scale-[1.3] object-contain -ml-2"
+                className="h-24 md:h-32 object-contain transition-all duration-500"
               />
             </header>
 

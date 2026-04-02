@@ -13,7 +13,7 @@ export default {
         dark: "#0f172a",
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Jost', 'sans-serif'],
       },
     },
   },

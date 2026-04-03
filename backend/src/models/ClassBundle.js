@@ -7,10 +7,22 @@ const classBundleSchema = new mongoose.Schema({
     unique: true,
     trim: true
   },
+  syllabus: {
+    type: String,
+    enum: ['CBSE', 'ICSE'],
+    required: true,
+    default: 'CBSE'
+  },
   price: {
     type: Number,
     required: true,
     default: 0
+  },
+  pricing: {
+    oneMonth: { type: Number, default: 0 },
+    threeMonths: { type: Number, default: 0 },
+    sixMonths: { type: Number, default: 0 },
+    twelveMonths: { type: Number, default: 0 }
   },
   subjects: [
     {

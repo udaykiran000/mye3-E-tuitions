@@ -20,22 +20,24 @@ exports.getCatalog = async (req, res, next) => {
     const catalog = [
       ...classes.map(c => ({
         id: c._id,
+        className: c.className,
+        classLevel: c.className.replace(/\D/g, ''), // Extract "10" from "Class 10"
         name: `${c.className || 'Unknown Class'} (All Subjects)`,
         type: 'bundle',
-        price: c.price || 0,
-        classLevel: c.className || 'Unknown',
+        pricing: c.pricing,
+        syllabus: c.syllabus,
         subjects: c.subjects || []
       })),
       ...subjects.map(s => ({
         id: s._id,
-        name: s.subjectName || s.name || 'Unknown Subject',
+        className: `Class ${s.classLevel}`, // Standardize to "Class X"
+        name: s.name || 'Unknown Subject',
         type: 'subject',
-        price: s.price || 0,
-        classLevel: `Class ${s.classLevel || 'N/A'}`
+        pricing: s.pricing,
+        classLevel: s.classLevel ? String(s.classLevel) : '',
       }))
     ];
 
-    res.status(200).json(catalog);
     res.status(200).json(catalog);
   } catch (error) {
     console.error('CATALOG ERROR FAIL:', error);
@@ -48,14 +50,19 @@ exports.getCatalog = async (req, res, next) => {
 // @access  Student
 exports.processMockPayment = async (req, res, next) => {
   try {
-    const { amount, packageName, referenceId, type } = req.body;
+    const { amount, packageName, referenceId, type, subscriptionType } = req.body;
 
     const student = await User.findById(req.user._id);
     if (!student) return res.status(404).json({ message: 'Student not found' });
 
-    // Calculate expiry date (30 days from now)
+    // Calculate expiry date based on duration
     const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + 30);
+    let monthsToAdd = 1;
+    if (subscriptionType === 'threeMonths') monthsToAdd = 3;
+    else if (subscriptionType === 'sixMonths') monthsToAdd = 6;
+    else if (subscriptionType === 'twelveMonths') monthsToAdd = 12;
+    
+    expiryDate.setMonth(expiryDate.getMonth() + monthsToAdd);
 
     // Create the transaction record
     const transaction = await Transaction.create({
@@ -63,24 +70,28 @@ exports.processMockPayment = async (req, res, next) => {
       amount: amount || 0,
       packageName,
       referenceId: String(referenceId),
-      type,
+      type: type || 'bundle',
       status: 'success'
     });
 
     // Update student's subscriptions
     if (!student.activeSubscriptions) student.activeSubscriptions = [];
     
-    // Check if subscription already exists, if so, extend it
-    const existingSubIndex = student.activeSubscriptions.findIndex(sub => sub.name === packageName);
+    // Check if subscription already exists for this exact referenceId (more robust than name)
+    const existingSubIndex = student.activeSubscriptions.findIndex(sub => 
+      String(sub.referenceId) === String(referenceId)
+    );
     
     if (existingSubIndex > -1) {
+      // Extend or replace
       student.activeSubscriptions[existingSubIndex].expiryDate = expiryDate;
+      student.activeSubscriptions[existingSubIndex].subscriptionType = subscriptionType || 'full';
     } else {
       student.activeSubscriptions.push({
-        name: packageName,
-        type,
-        subscriptionType: req.body.subscriptionType || 'full', // Updated
-        referenceId,
+        name: packageName.split(' - ')[0], // Pure name without duration suffix
+        type: type || 'bundle',
+        subscriptionType: subscriptionType || 'full',
+        referenceId: String(referenceId),
         expiryDate,
         purchaseDate: new Date()
       });
@@ -133,30 +144,58 @@ exports.getMySubscriptions = async (req, res, next) => {
 // @route   GET /api/student/my-learning
 // @access  Student
 exports.getMyLearning = async (req, res, next) => {
-  try {
-    // Admin bypass: return all active learning items for testing
+  try {    const now = new Date();
+    
+    // Helper function to expand a bundle name into multiple subject entries
+    const expandBundle = async (item) => {
+      if (item.type !== 'bundle' || item.isExpired) return [item];
+      
+      const classLevelNum = parseInt(item.name.replace(/\D/g, ''));
+      if (!classLevelNum) return [item];
+
+      const subjects = await Subject.find({ classLevel: classLevelNum, isActive: true }).sort({ name: 1 });
+      
+      if (subjects.length === 0) return [item];
+
+      return subjects.map(s => ({
+        ...item,
+        name: s.name,
+        originalBundleName: item.name,
+        type: 'subject', // Present it as a subject to the frontend
+        subscriptionType: 'full',
+        isExpandedFromBundle: true
+      }));
+    };
+
+    // Admin bypass: expand all active bundles and return individual subjects
     if (req.user.role === 'admin') {
       const [classes, subjects] = await Promise.all([
         ClassBundle.find({ isActive: true }),
         Subject.find({ isActive: true })
       ]);
-      const allLearning = [
-        ...classes.map(c => ({ name: c.className, type: 'bundle', subscriptionType: 'full', expiryDate: new Date('2099-12-31'), isExpired: false })),
-        ...subjects.map(s => ({ name: s.name, type: 'subject', subscriptionType: 'single', expiryDate: new Date('2099-12-31'), isExpired: false }))
-      ];
-      return res.status(200).json(allLearning);
+
+      const bundleItems = classes.map(c => ({ name: c.className, type: 'bundle', isExpired: false, expiryDate: new Date('2099-12-31') }));
+      const subjectItems = subjects.map(s => ({ name: s.name, type: 'subject', isExpired: false, expiryDate: new Date('2099-12-31') }));
+
+      const expandedBundles = await Promise.all(bundleItems.map(expandBundle));
+      const flattenedLearning = [...expandedBundles.flat(), ...subjectItems];
+
+      return res.status(200).json(flattenedLearning);
     }
 
     const student = await User.findById(req.user._id);
     if (!student) return res.status(404).json({ message: 'Student not found' });
 
-    const now = new Date();
-    const activeLearning = (student.activeSubscriptions || []).map(sub => ({
+    const activeLearningRaw = (student.activeSubscriptions || []).map(sub => ({
       ...sub.toObject ? sub.toObject() : sub,
       isExpired: now > new Date(sub.expiryDate)
     }));
 
-    res.status(200).json(activeLearning);
+    // Expand all active bundle subscriptions in the student's list
+    const expandedList = await Promise.all(activeLearningRaw.map(expandBundle));
+    const flattenedList = expandedList.flat();
+
+    res.status(200).json(flattenedList);
   } catch (error) {
     next(error);
   }

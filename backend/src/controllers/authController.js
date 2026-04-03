@@ -27,6 +27,8 @@ const authUser = async (req, res, next) => {
           name: user.name,
           email: user.email,
           role: user.role,
+          syllabus: user.syllabus,
+          className: user.className,
           token,
         });
       }
@@ -40,7 +42,7 @@ const authUser = async (req, res, next) => {
 
 const registerUser = async (req, res, next) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, syllabus, className } = req.body;
     const userExists = await User.findOne({ email });
 
     if (userExists) {
@@ -52,6 +54,8 @@ const registerUser = async (req, res, next) => {
       email,
       password,
       role: role || 'Student',
+      syllabus,
+      className,
     });
 
     if (user) {
@@ -66,6 +70,8 @@ const registerUser = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        syllabus: user.syllabus,
+        className: user.className,
         token,
       });
     } else {
@@ -105,6 +111,8 @@ const getUserProfile = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        syllabus: user.syllabus,
+        className: user.className,
       });
     } else {
       res.status(404).json({ message: 'User not found' });
@@ -132,6 +140,8 @@ const updateUserProfile = async (req, res, next) => {
         name: updatedUser.name,
         email: updatedUser.email,
         role: updatedUser.role,
+        syllabus: updatedUser.syllabus,
+        className: updatedUser.className,
       });
     } else {
       res.status(404).json({ message: 'User not found' });

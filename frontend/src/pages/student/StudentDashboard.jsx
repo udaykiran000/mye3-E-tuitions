@@ -66,6 +66,43 @@ const StudentDashboard = () => {
   return (
     <div className="space-y-8 md:space-y-12 animate-in fade-in duration-700 pb-20 p-4 md:p-8 lg:px-10">
       
+      {/* 0. SUBSCRIPTION EXPIRY WARNING (IF ANY) */}
+      {(() => {
+        const expiringSoon = learning.filter(sub => {
+          const days = Math.ceil((new Date(sub.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+          return days <= 7 && days > 0;
+        });
+
+        if (expiringSoon.length === 0) return null;
+
+        return (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-orange-50 border-2 border-orange-200 rounded-[32px] p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl shadow-orange-900/5"
+          >
+             <div className="flex items-center gap-6 text-center md:text-left flex-col md:flex-row">
+                <div className="w-16 h-16 bg-orange-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-orange-900/20 shrink-0">
+                   <Clock className="w-8 h-8 animate-pulse" />
+                </div>
+                <div className="space-y-1">
+                   <p className="text-[10px] font-black text-orange-600 uppercase tracking-[0.3em]">Account Alert</p>
+                   <h3 className="text-xl md:text-2xl font-black text-slate-900 uppercase tracking-tight italic">
+                      Your access for <span className="text-orange-600">{expiringSoon[0].name}</span> {expiringSoon.length > 1 ? `& ${expiringSoon.length - 1} others` : ''} expires soon!
+                   </h3>
+                   <p className="text-slate-500 font-bold text-xs uppercase tracking-widest">Renew within 7 days to maintain uninterrupted learning access.</p>
+                </div>
+             </div>
+             <Link 
+               to="/student/courses" 
+               className="w-full md:w-auto px-8 py-4 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-orange-600 transition-all shadow-lg active:scale-95 text-center"
+             >
+                Renew Subscription
+             </Link>
+          </motion.div>
+        );
+      })()}
+
       {/* 1. LIVE SESSIONS SECTION (LIVE, UPCOMING, RECENT) */}
       <div className="space-y-6">
         {/* LIVE NOW ALERT (IF ANY) */}

@@ -94,11 +94,12 @@ exports.getSubjects = async (req, res, next) => {
 // @access  Admin
 exports.addSubject = async (req, res, next) => {
   try {
-    const { subjectName, classLevel, price } = req.body;
+    const { name, classLevel, pricing, syllabus } = req.body;
     const subject = await Subject.create({
-      name: subjectName, // Mapping subjectName to name
+      name,
       classLevel: Number(classLevel),
-      price: Number(price)
+      pricing,
+      syllabus
     });
     res.status(201).json(subject);
   } catch (error) {
@@ -144,6 +145,34 @@ exports.getTeachersList = async (req, res, next) => {
     const teachers = await User.find({ 
       $or: [{ role: 'teacher' }, { _id: req.user._id }] 
     }).select('-password').sort({ createdAt: -1 });
+    res.status(200).json(teachers);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get teachers filtered by assignment (classLevel + subjectName)
+// @route   GET /api/admin/teachers-for-subject?classLevel=Class 10&subjectName=Maths
+// @access  Admin
+exports.getTeachersForSubject = async (req, res, next) => {
+  try {
+    const { classLevel, subjectName } = req.query;
+
+    // Build match filter
+    const matchFilter = { role: 'teacher' };
+    if (classLevel || subjectName) {
+      matchFilter.assignedSubjects = {
+        $elemMatch: {
+          ...(classLevel ? { classLevel } : {}),
+          ...(subjectName ? { subjectName } : {})
+        }
+      };
+    }
+
+    const teachers = await User.find(matchFilter)
+      .select('name email assignedSubjects')
+      .sort({ name: 1 });
+
     res.status(200).json(teachers);
   } catch (error) {
     next(error);
@@ -498,9 +527,10 @@ exports.getMaterials = async (req, res, next) => {
 // @access  Admin
 exports.updateClassPricing = async (req, res, next) => {
   try {
-    const { price, subjects } = req.body;
+    const { pricing, subjects, syllabus } = req.body;
     const updateData = {};
-    if (price !== undefined) updateData.price = Number(price);
+    if (pricing !== undefined) updateData.pricing = pricing;
+    if (syllabus !== undefined) updateData.syllabus = syllabus;
     if (subjects !== undefined) updateData.subjects = subjects;
 
     const bundle = await ClassBundle.findByIdAndUpdate(
@@ -511,6 +541,24 @@ exports.updateClassPricing = async (req, res, next) => {
 
     if (!bundle) return res.status(404).json({ message: 'All Subjects package not found' });
     res.status(200).json(bundle);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Add a new class bundle
+// @route   POST /api/admin/classes
+// @access  Admin
+exports.addClassBundle = async (req, res, next) => {
+  try {
+    const { className, syllabus, pricing, subjects } = req.body;
+    const bundle = await ClassBundle.create({
+      className,
+      syllabus,
+      pricing,
+      subjects: subjects || []
+    });
+    res.status(201).json(bundle);
   } catch (error) {
     next(error);
   }
@@ -611,6 +659,121 @@ exports.getAllTransactions = async (req, res, next) => {
     const allTransactions = [...txs, ...normalizedPayments].sort((a, b) => new Date(b.date) - new Date(a.date));
 
     res.status(200).json(allTransactions);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Schedule/Start Live Classes
+// @route   POST /api/admin/live-sessions
+// @access  Admin
+exports.createLiveSession = async (req, res, next) => {
+  try {
+    const { sessions } = req.body;
+    
+    // Validate if it's a bulk creation (sessions array) or single legacy format
+    const sessionsToCreate = sessions || [req.body];
+
+    const createdSessions = await LiveSession.insertMany(sessionsToCreate.map(s => {
+      const cleanSession = { 
+        ...s, 
+        title: s.title || `${s.subjectName} Live`,
+        status: 'upcoming' 
+      };
+      // If subjectId is not a valid ObjectId (24 hex chars), remove it to prevent CastError
+      if (s.subjectId && !/^[0-9a-fA-F]{24}$/.test(s.subjectId)) {
+        delete cleanSession.subjectId;
+      }
+      return cleanSession;
+    }));
+
+    // Emit socket event for real-time notification
+    const io = req.app.get('io');
+    if (io) {
+      createdSessions.forEach(session => {
+        io.emit('live-session-update', { type: 'create', session });
+      });
+    }
+
+    res.status(201).json({
+      message: `${createdSessions.length} Live class(es) scheduled successfully!`,
+      sessions: createdSessions
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update a Live Session
+// @route   PUT /api/admin/live-sessions/:id
+// @access  Admin
+exports.updateLiveSession = async (req, res, next) => {
+  try {
+    const { title, platform, link, teacherId, startTime, classLevel, subjectName, subjectId } = req.body;
+    
+    const session = await LiveSession.findById(req.params.id);
+    if (!session) return res.status(404).json({ message: 'Session not found' });
+
+    session.title = title || `${subjectName || session.subjectName} Live`;
+    session.platform = platform || session.platform;
+    session.link = link || session.link;
+    session.teacherId = teacherId || session.teacherId;
+    session.startTime = startTime || session.startTime;
+    session.classLevel = classLevel || session.classLevel;
+    session.subjectName = subjectName || session.subjectName;
+    
+    if (subjectId) {
+      session.subjectId = /^[0-9a-fA-F]{24}$/.test(subjectId) ? subjectId : undefined;
+    }
+
+    const updatedSession = await session.save();
+
+    // Populate teacher info before emitting
+    const populated = await LiveSession.findById(updatedSession._id).populate('teacherId', 'name email');
+
+    // Emit socket event
+    const io = req.app.get('io');
+    if (io) io.emit('live-session-update', { type: 'update', session: populated });
+
+    res.status(200).json(populated);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete a Live Session
+// @route   DELETE /api/admin/live-sessions/:id
+// @access  Admin
+exports.deleteLiveSession = async (req, res, next) => {
+  try {
+    const session = await LiveSession.findByIdAndDelete(req.params.id);
+    if (!session) return res.status(404).json({ message: 'Session not found' });
+
+    // Emit socket event
+    const io = req.app.get('io');
+    if (io) io.emit('live-session-update', { type: 'delete', sessionId: req.params.id });
+
+    res.status(200).json({ message: 'Session deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get All Live Sessions (Scheduled/Live for Roster)
+// @route   GET /api/admin/live-sessions
+// @access  Admin
+exports.getAllLiveSessions = async (req, res, next) => {
+  try {
+    // Only fetch sessions from the last 2 days to keep the dashboard snappy
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+
+    const sessions = await LiveSession.find({ 
+      startTime: { $gte: twoDaysAgo }
+    })
+      .populate('teacherId', 'name email')
+      .sort({ startTime: 1 });
+    res.status(200).json(sessions);
   } catch (error) {
     next(error);
   }

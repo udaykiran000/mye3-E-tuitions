@@ -7,7 +7,8 @@ const ManageClasses = () => {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
-  const [newPrice, setNewPrice] = useState('');
+  const [newPricing, setNewPricing] = useState({ oneMonth: 0, threeMonths: 0, sixMonths: 0, twelveMonths: 0 });
+  const [newSyllabus, setNewSyllabus] = useState('CBSE');
   
   // Manage Modal States
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
@@ -18,6 +19,12 @@ const ManageClasses = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [materials, setMaterials] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [addClassForm, setAddClassForm] = useState({
+    className: '',
+    syllabus: 'CBSE',
+    pricing: { oneMonth: 0, threeMonths: 0, sixMonths: 0, twelveMonths: 0 }
+  });
 
   const fetchClasses = async () => {
     try {
@@ -43,15 +50,16 @@ const ManageClasses = () => {
     fetchClasses();
   }, []);
 
-  const handleEdit = (id, currentPrice) => {
+  const handleEdit = (id, currentPricing, currentSyllabus) => {
     setEditingId(id);
-    setNewPrice(currentPrice);
+    setNewPricing(currentPricing || { oneMonth: 0, threeMonths: 0, sixMonths: 0, twelveMonths: 0 });
+    setNewSyllabus(currentSyllabus || 'CBSE');
   };
 
   const handleSavePrice = async (id) => {
     try {
-      await axios.put(`/admin/classes/${id}`, { price: newPrice });
-      toast.success('Price updated successfully!');
+      await axios.put(`/admin/classes/${id}`, { pricing: newPricing, syllabus: newSyllabus });
+      toast.success('Bundle updated successfully!');
       setEditingId(null);
       fetchClasses();
     } catch (error) {
@@ -124,6 +132,23 @@ const ManageClasses = () => {
     }
   };
 
+  const handleAddClass = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post('/admin/classes', addClassForm);
+      toast.success(`${addClassForm.className} created successfully!`);
+      setIsAddModalOpen(false);
+      setAddClassForm({
+        className: '',
+        syllabus: 'CBSE',
+        pricing: { oneMonth: 0, threeMonths: 0, sixMonths: 0, twelveMonths: 0 }
+      });
+      fetchClasses();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to create class');
+    }
+  };
+
   if (loading) return (
     <div className="flex h-[60vh] items-center justify-center">
       <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
@@ -139,6 +164,12 @@ const ManageClasses = () => {
             <h1 className="text-3xl font-black text-slate-900">Class 6-10 Management</h1>
             <p className="text-slate-500 font-bold">Configure bundle contents and study materials</p>
          </div>
+         <button 
+           onClick={() => setIsAddModalOpen(true)}
+           className="flex items-center gap-3 bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black shadow-lg shadow-indigo-100 hover:scale-105 active:scale-95 transition-all"
+         >
+            <PlusCircle className="w-5 h-5" /> Add New Class
+         </button>
       </div>
 
       <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden">
@@ -146,7 +177,7 @@ const ManageClasses = () => {
             <thead className="bg-slate-50/50 border-b border-slate-100">
                <tr className="text-xs font-black uppercase text-slate-400 tracking-[0.2em]">
                   <th className="px-8 py-6">Grade / Bundle Name</th>
-                  <th className="px-8 py-6">Bundle Price</th>
+                  <th className="px-8 py-6">Syllabus & Pricing</th>
                   <th className="px-8 py-6">Status</th>
                   <th className="px-8 py-6 text-right">Operational Controls</th>
                </tr>
@@ -167,19 +198,30 @@ const ManageClasses = () => {
                     </td>
                     <td className="px-8 py-6">
                        {editingId === cls._id ? (
-                         <div className="flex items-center gap-2">
-                            <input 
-                              type="number"
-                              value={newPrice}
-                              onChange={(e) => setNewPrice(e.target.value)}
-                              className="w-24 px-3 py-2 bg-slate-50 border-2 border-indigo-600 rounded-lg font-black outline-none"
-                            />
-                            <button onClick={() => handleSavePrice(cls._id)} className="p-2 bg-indigo-600 text-white rounded-lg"><Save className="w-4 h-4" /></button>
+                         <div className="flex flex-col gap-2">
+                            <select 
+                              value={newSyllabus}
+                              onChange={(e) => setNewSyllabus(e.target.value)}
+                              className="w-full px-3 py-1 bg-slate-50 border-2 border-indigo-600 rounded-lg text-sm font-bold outline-none"
+                            >
+                              <option value="CBSE">CBSE</option>
+                              <option value="ICSE">ICSE</option>
+                            </select>
+                            <div className="grid grid-cols-2 gap-1">
+                               <input type="number" placeholder="1mo" value={newPricing.oneMonth} onChange={e => setNewPricing({...newPricing, oneMonth: e.target.value})} className="w-16 px-1 py-1 text-xs border rounded" />
+                               <input type="number" placeholder="3mo" value={newPricing.threeMonths} onChange={e => setNewPricing({...newPricing, threeMonths: e.target.value})} className="w-16 px-1 py-1 text-xs border rounded" />
+                               <input type="number" placeholder="6mo" value={newPricing.sixMonths} onChange={e => setNewPricing({...newPricing, sixMonths: e.target.value})} className="w-16 px-1 py-1 text-xs border rounded" />
+                               <input type="number" placeholder="12mo" value={newPricing.twelveMonths} onChange={e => setNewPricing({...newPricing, twelveMonths: e.target.value})} className="w-16 px-1 py-1 text-xs border rounded" />
+                            </div>
+                            <button onClick={() => handleSavePrice(cls._id)} className="w-full mt-1 py-1 bg-indigo-600 text-white rounded-lg text-xs font-bold"><Save className="w-3 h-3 inline mr-1" />Save</button>
                          </div>
                        ) : (
-                         <div className="flex items-baseline gap-1">
-                            <span className="text-xl font-black text-slate-900">₹{cls.price}</span>
-                            <span className="text-[10px] font-bold text-slate-400">/mo</span>
+                         <div className="flex flex-col gap-1 text-xs text-slate-600">
+                            <span className="font-extrabold text-indigo-600 text-sm mb-1">{cls.syllabus || 'N/A'}</span>
+                            <div className="flex justify-between w-32"><span>1 mo:</span> <b>₹{cls.pricing?.oneMonth || 0}</b></div>
+                            <div className="flex justify-between w-32"><span>3 mo:</span> <b>₹{cls.pricing?.threeMonths || 0}</b></div>
+                            <div className="flex justify-between w-32"><span>6 mo:</span> <b>₹{cls.pricing?.sixMonths || 0}</b></div>
+                            <div className="flex justify-between w-32"><span>12 mo:</span> <b>₹{cls.pricing?.twelveMonths || 0}</b></div>
                          </div>
                        )}
                     </td>
@@ -189,7 +231,7 @@ const ManageClasses = () => {
                     <td className="px-8 py-6 text-right">
                        <div className="flex items-center justify-end gap-3">
                           <button 
-                            onClick={() => handleEdit(cls._id, cls.price)}
+                            onClick={() => handleEdit(cls._id, cls.pricing, cls.syllabus)}
                             className="p-3 bg-slate-50 text-slate-400 rounded-xl hover:bg-slate-100 hover:text-slate-600 transition-all"
                           >
                              <Edit2 className="w-4 h-4" />
@@ -381,6 +423,52 @@ const ManageClasses = () => {
                    </div>
                  )}
               </div>
+           </div>
+        </div>
+      )}
+      {/* ADD CLASS MODAL */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => setIsAddModalOpen(false)}></div>
+           <div className="relative bg-white rounded-[40px] w-full max-w-xl shadow-2xl animate-in fade-in zoom-in duration-300">
+              <div className="p-8 border-b border-slate-50 flex items-center justify-between">
+                 <h2 className="text-2xl font-black text-slate-900">Create New Class</h2>
+                 <button onClick={() => setIsAddModalOpen(false)} className="p-2 text-slate-300 hover:text-slate-900"><X className="w-8 h-8" /></button>
+              </div>
+              <form onSubmit={handleAddClass} className="p-8 space-y-6">
+                 <div className="space-y-1.5">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Class Name</label>
+                    <input 
+                      required
+                      type="text"
+                      placeholder="e.g. Class 10"
+                      value={addClassForm.className}
+                      onChange={(e) => setAddClassForm({...addClassForm, className: e.target.value})}
+                      className="w-full px-6 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-600 rounded-2xl outline-none font-bold"
+                    />
+                 </div>
+                 <div className="space-y-1.5">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Syllabus</label>
+                    <select 
+                      value={addClassForm.syllabus}
+                      onChange={(e) => setAddClassForm({...addClassForm, syllabus: e.target.value})}
+                      className="w-full px-6 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-600 rounded-2xl outline-none font-bold"
+                    >
+                       <option value="CBSE">CBSE</option>
+                       <option value="ICSE">ICSE</option>
+                    </select>
+                 </div>
+                 <div className="space-y-3">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Tiered Pricing (₹)</label>
+                    <div className="grid grid-cols-2 gap-4">
+                       <input type="number" placeholder="1 Month" required value={addClassForm.pricing.oneMonth} onChange={e => setAddClassForm({...addClassForm, pricing: {...addClassForm.pricing, oneMonth: e.target.value}})} className="px-5 py-3 border rounded-xl font-bold" />
+                       <input type="number" placeholder="3 Months" required value={addClassForm.pricing.threeMonths} onChange={e => setAddClassForm({...addClassForm, pricing: {...addClassForm.pricing, threeMonths: e.target.value}})} className="px-5 py-3 border rounded-xl font-bold" />
+                       <input type="number" placeholder="6 Months" required value={addClassForm.pricing.sixMonths} onChange={e => setAddClassForm({...addClassForm, pricing: {...addClassForm.pricing, sixMonths: e.target.value}})} className="px-5 py-3 border rounded-xl font-bold" />
+                       <input type="number" placeholder="12 Months" required value={addClassForm.pricing.twelveMonths} onChange={e => setAddClassForm({...addClassForm, pricing: {...addClassForm.pricing, twelveMonths: e.target.value}})} className="px-5 py-3 border rounded-xl font-bold" />
+                    </div>
+                 </div>
+                 <button type="submit" className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-indigo-100 mt-4">Create Class Bundle</button>
+              </form>
            </div>
         </div>
       )}

@@ -168,13 +168,30 @@ const ManageStudents = () => {
                          </td>
                          <td className="px-8 py-6">
                             <div className="flex flex-wrap gap-2 max-w-xs">
-                               {student.activeSubscriptions?.length > 0 ? student.activeSubscriptions.map((sub, i) => (
-                                 <span key={i} className={`px-3 py-1 text-[10px] font-black rounded-lg uppercase tracking-wider border ${new Date(sub.expiryDate) > new Date() ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'bg-slate-50 text-slate-400 border-slate-100 opacity-60'}`}>
-                                    {sub.name}
-                                 </span>
-                               )) : (
-                                 <span className="text-[10px] font-black text-slate-300 uppercase italic">No Manual Overrides</span>
-                               )}
+                                {student.activeSubscriptions?.length > 0 ? student.activeSubscriptions.map((sub, i) => {
+                                  const daysLeft = Math.ceil((new Date(sub.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+                                  const isNearExpiry = daysLeft <= 7 && daysLeft > 0;
+                                  const isExpired = daysLeft <= 0;
+
+                                  return (
+                                    <div key={i} className="flex flex-col gap-1">
+                                      <span className={`px-2.5 py-1 text-[9px] font-black rounded-lg uppercase tracking-wider border whitespace-nowrap ${
+                                        isExpired ? 'bg-slate-50 text-slate-400 border-slate-100 opacity-60' : 
+                                        isNearExpiry ? 'bg-orange-50 text-orange-600 border-orange-100' : 
+                                        'bg-indigo-50 text-indigo-600 border-indigo-100'
+                                      }`}>
+                                         {sub.name}
+                                      </span>
+                                      <span className={`text-[8px] font-black uppercase tracking-widest pl-1 leading-none ${
+                                        isExpired ? 'text-slate-300' : isNearExpiry ? 'text-orange-500 animate-pulse' : 'text-slate-400'
+                                      }`}>
+                                        Exp: {new Date(sub.expiryDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                                      </span>
+                                    </div>
+                                  );
+                                }) : (
+                                  <span className="text-[10px] font-black text-slate-300 uppercase italic">No Manual Overrides</span>
+                                )}
                             </div>
                          </td>
                          <td className="px-8 py-6">

@@ -12,7 +12,8 @@ const ManageSubjects = () => {
   const [formData, setFormData] = useState({
     name: '',
     classLevel: '11',
-    price: '',
+    syllabus: 'CBSE',
+    pricing: { oneMonth: 0, threeMonths: 0, sixMonths: 0, twelveMonths: 0 },
     teacherName: ''
   });
 
@@ -65,14 +66,15 @@ const ManageSubjects = () => {
     setFormData({
       name: sub.name,
       classLevel: sub.classLevel.toString(),
-      price: sub.price,
+      syllabus: sub.syllabus || 'CBSE',
+      pricing: sub.pricing || { oneMonth: 0, threeMonths: 0, sixMonths: 0, twelveMonths: 0 },
       teacherName: sub.teacherName === 'Not Assigned' ? '' : sub.teacherName
     });
     setIsModalOpen(true);
   };
 
   const resetForm = () => {
-    setFormData({ name: '', classLevel: '11', price: '', teacherName: '' });
+    setFormData({ name: '', classLevel: '11', syllabus: 'CBSE', pricing: { oneMonth: 0, threeMonths: 0, sixMonths: 0, twelveMonths: 0 }, teacherName: '' });
     setEditingId(null);
     setIsModalOpen(false);
   };
@@ -126,8 +128,8 @@ const ManageSubjects = () => {
               <thead className="bg-slate-50/50 border-b border-slate-100">
                  <tr className="text-xs font-black uppercase text-slate-400 tracking-[0.2em]">
                     <th className="px-8 py-7">Subject Info</th>
-                    <th className="px-8 py-7">Grade Level</th>
-                    <th className="px-8 py-7">Monthly Price</th>
+                    <th className="px-8 py-7">Grade & Syllabus</th>
+                    <th className="px-8 py-7">Tiered Pricing (₹)</th>
                     <th className="px-8 py-7">Assigned Teacher</th>
                     <th className="px-8 py-7 text-right">Actions</th>
                  </tr>
@@ -144,14 +146,19 @@ const ManageSubjects = () => {
                          </div>
                       </td>
                       <td className="px-8 py-7">
-                         <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${sub.classLevel === 11 ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                            Class {sub.classLevel}
-                         </span>
+                         <div className="space-y-1">
+                            <span className={`px-4 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest ${sub.classLevel === 11 ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                               Class {sub.classLevel}
+                            </span>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest pt-1 px-1">{sub.syllabus || 'CBSE'}</p>
+                         </div>
                       </td>
                       <td className="px-8 py-7">
-                         <div className="flex items-center gap-1.5">
-                            <IndianRupee className="w-4 h-4 text-indigo-600" />
-                            <span className="text-xl font-black text-slate-900">{sub.price}</span>
+                         <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-[10px] font-bold text-slate-500 w-32 uppercase tracking-tighter">
+                            <div className="flex justify-between"><span>1m:</span> <b className="text-slate-900">₹{sub.pricing?.oneMonth || 0}</b></div>
+                            <div className="flex justify-between"><span>3m:</span> <b className="text-slate-900">₹{sub.pricing?.threeMonths || 0}</b></div>
+                            <div className="flex justify-between"><span>6m:</span> <b className="text-slate-900">₹{sub.pricing?.sixMonths || 0}</b></div>
+                            <div className="flex justify-between"><span>12m:</span> <b className="text-slate-900">₹{sub.pricing?.twelveMonths || 0}</b></div>
                          </div>
                       </td>
                       <td className="px-8 py-7">
@@ -227,15 +234,25 @@ const ManageSubjects = () => {
                        </select>
                     </div>
                     <div className="space-y-3">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pl-2 underline decoration-indigo-500 decoration-2 underline-offset-4">Monthly Price (₹)</label>
-                       <input 
-                         required
-                         type="number"
-                         value={formData.price}
-                         onChange={(e) => setFormData({...formData, price: e.target.value})}
-                         placeholder="999"
-                         className="w-full px-8 py-5 bg-slate-50 border-2 border-transparent focus:border-indigo-600 rounded-3xl outline-none font-bold text-slate-900 transition-all"
-                       />
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pl-2 underline decoration-indigo-500 decoration-2 underline-offset-4">Syllabus</label>
+                       <select 
+                         value={formData.syllabus}
+                         onChange={(e) => setFormData({...formData, syllabus: e.target.value})}
+                         className="w-full px-8 py-5 bg-slate-50 border-2 border-transparent focus:border-indigo-600 rounded-3xl outline-none font-bold text-slate-900 appearance-none cursor-pointer transition-all"
+                       >
+                          <option value="CBSE">CBSE</option>
+                          <option value="ICSE">ICSE</option>
+                       </select>
+                    </div>
+                 </div>
+
+                 <div className="space-y-4">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pl-2 underline decoration-indigo-500 decoration-2 underline-offset-4">Tiered Pricing (₹)</label>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                       <input type="number" placeholder="1 Month" required className="px-6 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-600 rounded-2xl outline-none font-bold" value={formData.pricing.oneMonth} onChange={e => setFormData({...formData, pricing: {...formData.pricing, oneMonth: e.target.value}})} />
+                       <input type="number" placeholder="3 Months" required className="px-6 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-600 rounded-2xl outline-none font-bold" value={formData.pricing.threeMonths} onChange={e => setFormData({...formData, pricing: {...formData.pricing, threeMonths: e.target.value}})} />
+                       <input type="number" placeholder="6 Months" required className="px-6 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-600 rounded-2xl outline-none font-bold" value={formData.pricing.sixMonths} onChange={e => setFormData({...formData, pricing: {...formData.pricing, sixMonths: e.target.value}})} />
+                       <input type="number" placeholder="12 Months" required className="px-6 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-600 rounded-2xl outline-none font-bold" value={formData.pricing.twelveMonths} onChange={e => setFormData({...formData, pricing: {...formData.pricing, twelveMonths: e.target.value}})} />
                     </div>
                  </div>
 

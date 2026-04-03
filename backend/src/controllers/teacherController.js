@@ -82,7 +82,7 @@ exports.getMyAssignments = async (req, res, next) => {
       }
  
       return {
-        id: item.subjectId || item.classLevel,
+        id: item.subjectId || null, // Ensure this is only an ObjectId
         name: label,
         type: item.assignmentType,
         classLevel: item.classLevel,
@@ -96,37 +96,6 @@ exports.getMyAssignments = async (req, res, next) => {
   }
 };
 
-// @desc    Schedule/Start a Live Class
-// @route   POST /api/teacher/live-sessions
-// @access  Teacher
-exports.createLiveSession = async (req, res, next) => {
-  try {
-    const { classLevel, subjectName, subjectId, title, platform, link, startTime } = req.body;
-    
-    const session = await LiveSession.create({
-      teacherId: req.user._id,
-      subjectId,
-      classLevel,
-      subjectName,
-      title,
-      platform,
-      link,
-      startTime,
-      status: 'upcoming'
-    });
-
-    // Emit socket event for real-time notification
-    const io = req.app.get('io');
-    if (io) io.emit('live-session-update', { type: 'create', session });
-
-    res.status(201).json({
-      message: 'Live class scheduled successfully! Notifications sent to students.',
-      session
-    });
-  } catch (error) {
-    next(error);
-  }
-};
 
 // @desc    Get teacher's live sessions (Grouped by Status)
 // @route   GET /api/teacher/live-sessions

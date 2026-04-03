@@ -72,13 +72,19 @@ const StudentLayout = ({ children }) => {
   const hasLive = alerts.some(a => a.status === 'live');
   const alertCount = alerts.filter(a => a.status === 'live' || a.status === 'upcoming').length;
 
+  // SUBSCRIPTION EXPIRY LOGIC
+  const expiringSoonItems = (userInfo?.activeSubscriptions || []).filter(sub => {
+    const days = Math.ceil((new Date(sub.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+    return days <= 7 && days > 0;
+  });
+
   const handleLogout = () => {
     dispatch(logout());
     navigate('/login');
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-slate-50 flex overflow-hidden">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
@@ -89,13 +95,32 @@ const StudentLayout = ({ children }) => {
 
       {/* Sidebar - Responsive */}
       <div className={`
-        fixed inset-y-0 left-0 z-[70] w-72 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
+        fixed inset-y-0 left-0 z-[70] w-72 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <StudentSidebar onClose={() => setIsSidebarOpen(false)} />
       </div>
 
-      <div className="flex-1 flex flex-col min-h-screen w-full">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden overflow-y-auto w-full relative">
+        
+        {/* Global Expiry Banner */}
+        {expiringSoonItems.length > 0 && (
+          <div className="bg-orange-600 text-white px-6 py-2.5 flex items-center justify-center gap-4 sticky top-0 z-[60] shadow-lg animate-in slide-in-from-top duration-500">
+             <div className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-white rounded-full animate-ping" />
+                <p className="text-[10px] md:text-sm font-black uppercase tracking-widest">
+                  Urgent: {expiringSoonItems.length} of your subscriptions are expiring soon! 
+                </p>
+             </div>
+             <Link 
+               to="/student/courses" 
+               className="bg-white text-orange-600 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-orange-50 transition-all shadow-sm"
+             >
+                Renew Now
+             </Link>
+          </div>
+        )}
+
         {/* Top Header */}
         <header className="h-20 md:h-24 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-4 md:px-10 sticky top-0 z-40">
            <div className="flex items-center gap-4">

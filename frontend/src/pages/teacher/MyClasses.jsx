@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { BookOpen, FileText, ChevronRight, Loader2, GraduationCap } from 'lucide-react';
+import { FileText, Loader2, GraduationCap } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import ScheduleLiveModal from '../../components/teacher/ScheduleLiveModal';
 
 const MyClasses = () => {
   const [classes, setClasses] = useState([]);
   const [groupedClasses, setGroupedClasses] = useState({});
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedClass, setSelectedClass] = useState(null);
   const [subjectSelection, setSubjectSelection] = useState({}); // { classLevel: selectedSubjectObject }
 
   useEffect(() => {
@@ -43,10 +40,7 @@ const MyClasses = () => {
     fetchClasses();
   }, []);
 
-  const handleOpenSchedule = (cls) => {
-    setSelectedClass(cls);
-    setIsModalOpen(true);
-  };
+
 
   const handleLocalSubjectChange = (lvl, subjectObj) => {
     setSubjectSelection(prev => ({ ...prev, [lvl]: subjectObj }));
@@ -89,64 +83,66 @@ const MyClasses = () => {
             return (
               <div key={lvl} className="bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden group hover:shadow-2xl hover:shadow-teal-900/10 transition-all flex flex-col h-full ring-1 ring-slate-100">
                 {/* HEADER */}
-                <div className={`h-40 md:h-44 ${hasBundle ? 'bg-teal-600' : 'bg-slate-900'} relative p-8 md:p-10 text-white flex flex-col justify-end overflow-hidden shrink-0`}>
-                   <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -mr-24 -mt-24 group-hover:scale-150 transition-all duration-700"></div>
-                   <div className="relative z-10 space-y-1">
-                      <div className="flex items-center gap-3">
-                        <span className="px-3 py-1 bg-white/20 rounded-lg text-[8px] font-black uppercase tracking-widest text-white">
-                          {hasBundle ? 'All Subjects Access' : 'Modular Access'}
+                <div className={`h-32 ${hasBundle ? 'bg-teal-600' : 'bg-slate-900'} relative p-6 md:p-8 text-white flex flex-col justify-end overflow-hidden shrink-0`}>
+                   <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:scale-150 transition-all duration-700"></div>
+                   <div className="relative z-10 space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 bg-white/20 rounded-md text-[7px] font-black uppercase tracking-widest text-white">
+                          {hasBundle ? 'All Subjects' : 'Modular'}
                         </span>
                       </div>
-                      <h3 className="text-4xl md:text-5xl font-black leading-none uppercase tracking-tighter">{lvl}</h3>
+                      <h3 className="text-2xl md:text-3xl font-black leading-none uppercase tracking-tighter">{lvl}</h3>
                    </div>
                 </div>
 
                 {/* CONTENT: DROPDOWN + ACTIONS */}
                 <div className="p-8 space-y-8 flex-1 bg-slate-50/30">
-                   <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest pl-1">Select Subject</label>
-                      <select 
-                        className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl outline-none focus:border-teal-600 font-black text-slate-900 uppercase text-xs shadow-sm transition-all cursor-pointer hover:border-teal-300"
-                        value={currentSub ? JSON.stringify(currentSub) : ''}
-                        onChange={(e) => handleLocalSubjectChange(lvl, JSON.parse(e.target.value))}
-                      >
-                         {items.map((item, idx) => (
-                            <option key={idx} value={JSON.stringify(item)}>
-                               {item.subjectName}
-                            </option>
-                         ))}
-                      </select>
+                   <div className="space-y-4 flex-1">
+                      <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest pl-2">Select Subject</label>
+                      <div className={`grid gap-2 ${items.length > 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                         {items.map((item, idx) => {
+                            const isSelected = JSON.stringify(item) === JSON.stringify(currentSub);
+                            return (
+                               <button 
+                                 key={idx} 
+                                 onClick={() => handleLocalSubjectChange(lvl, item)}
+                                 className={`group/sub relative w-full px-4 py-3 rounded-xl border-2 flex items-center gap-3 transition-all ${
+                                    isSelected 
+                                    ? 'bg-teal-50 border-teal-500 shadow-sm ring-4 ring-teal-500/10' 
+                                    : 'bg-white border-slate-100 hover:border-teal-200 hover:bg-slate-50'
+                                 }`}
+                               >
+                                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-[10px] shrink-0 transition-all ${
+                                     isSelected ? 'bg-teal-600 text-white rotate-6' : 'bg-slate-100 text-slate-400 group-hover/sub:bg-teal-100 group-hover/sub:text-teal-600 group-hover/sub:-rotate-3'
+                                  }`}>
+                                     {item.subjectName?.charAt(0)}
+                                  </div>
+                                  <span className={`text-[11px] font-black uppercase tracking-tight truncate ${isSelected ? 'text-teal-900' : 'text-slate-500 group-hover/sub:text-teal-700'}`}>
+                                     {item.subjectName}
+                                  </span>
+                                  {isSelected && (
+                                     <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-teal-500 rounded-full"></div>
+                                  )}
+                               </button>
+                            );
+                         })}
+                      </div>
                    </div>
 
-                   <div className="grid grid-cols-5 gap-3 pt-4 border-t border-slate-100">
+                    <div className="pt-6 mt-auto">
                       <Link 
                         to="/teacher/materials" 
-                        title="Notes"
-                        className="col-span-2 p-5 bg-white border border-slate-100 text-slate-400 rounded-2xl hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm flex flex-col items-center justify-center gap-2 group/act"
+                        className="w-full py-5 bg-white border border-slate-200 text-slate-400 rounded-2xl hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm flex items-center justify-center gap-3 group/act font-black text-xs uppercase tracking-widest"
                       >
                          <FileText className="w-5 h-5 group-hover/act:scale-110 transition-transform" /> 
-                         <span className="text-[8px] font-black uppercase tracking-widest">Notes</span>
+                         <span>View Study Materials</span>
                       </Link>
-                      
-                      <button 
-                        onClick={() => currentSub && handleOpenSchedule(currentSub)}
-                        className="col-span-3 py-5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.15em] hover:bg-teal-600 transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3 group/live"
-                      >
-                         <span>Go Live</span>
-                         <ChevronRight className="w-4 h-4 group-hover/live:translate-x-1 transition-transform" />
-                      </button>
-                   </div>
+                    </div>
                 </div>
               </div>
             );
          })}
       </div>
-
-      <ScheduleLiveModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        selectedClass={selectedClass} 
-      />
     </div>
   );
 };

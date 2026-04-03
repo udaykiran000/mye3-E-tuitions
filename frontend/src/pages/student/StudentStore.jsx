@@ -23,51 +23,71 @@ import courseItem2 from '../../assets/course-item-2.webp';
 import courseItem3 from '../../assets/course-item-3.webp';
 import courseItem4 from '../../assets/course-item-4.webp';
 
-const CourseCard = ({ c, expandedId, setExpandedId, setSelectedCourse, setShowCheckout }) => {
+const CourseCard = ({ c, expandedId, setExpandedId, setSelectedCourse, setShowCheckout, userInfo }) => {
   const isBundle = c.type === 'bundle';
   const isExpanded = expandedId === c.id;
 
+  // Normalize for comparison
+  const userClass = userInfo?.className?.replace(/\D/g, '') || ''; // "10"
+  const courseClass = String(c.classLevel || c.className || '').replace(/\D/g, '') || ''; // "10"
+  
+  const userSyllabus = userInfo?.syllabus?.toUpperCase().trim() || '';
+  const courseSyllabus = c.syllabus?.toUpperCase().trim() || '';
+
+  // Strict Eligibility Logic
+  const isClassMatch = userClass === courseClass;
+  const isSyllabusMatch = !courseSyllabus || !userSyllabus || courseSyllabus === userSyllabus;
+  
+  // Only eligible if class matches exactly (and syllabus if specified)
+  const isEligible = isClassMatch && isSyllabusMatch;
+
   return (
-    <div className={`group bg-white rounded-2xl border transition-all duration-300 flex flex-col p-7 relative overflow-hidden ${isExpanded ? 'border-[#f16126] shadow-xl shadow-orange-900/5' : 'border-slate-100 hover:border-[#f16126]/30 hover:shadow-lg shadow-sm'}`}>
+    <div className={`group bg-white rounded-2xl border transition-all duration-300 flex flex-col p-7 relative overflow-hidden ${!isEligible ? 'opacity-75' : ''} ${isExpanded ? 'border-[#f16126] shadow-xl shadow-orange-900/5' : 'border-slate-100 hover:border-[#f16126]/30 hover:shadow-lg shadow-sm'}`}>
       
+      {!isEligible && (
+        <div className="absolute inset-0 bg-slate-50/10 z-[5] pointer-events-none" />
+      )}
+
       {isBundle && (
-        <div className="absolute top-0 right-0 px-5 py-2 bg-[#f16126] text-white font-black text-[9px] uppercase tracking-widest rounded-bl-xl shadow-md">
+        <div className="absolute top-0 right-0 px-5 py-2 bg-[#f16126] text-white font-black text-[9px] uppercase tracking-widest rounded-bl-xl shadow-md z-10">
           All Subjects
         </div>
       )}
 
       {/* Header Info */}
-      <div className="flex-1">
+      <div className="flex-1 relative z-10">
         <div className="flex items-center gap-3 mb-4">
           <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isBundle ? 'bg-orange-50 text-[#f16126]' : 'bg-blue-50 text-[#002147]'}`}>
             <GraduationCap className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Class {c.classLevel}</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
+              Class {courseClass} {courseSyllabus ? `(${courseSyllabus})` : ''}
+            </p>
             <h3 className="text-lg font-black text-[#002147] uppercase italic leading-tight tracking-tight">{c.name}</h3>
           </div>
         </div>
 
         {/* Pricing */}
         <div className="mb-6 flex items-baseline gap-2">
-          <span className="text-3xl font-black text-[#002147] tracking-tighter italic">₹{c.price}</span>
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">/ course investment</span>
+           <span className="text-3xl font-black text-[#002147] tracking-tighter italic">₹{(c.pricing?.oneMonth || c.price || 0).toLocaleString()}</span>
+           <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">/ 1 month start</span>
         </div>
 
         {/* Features List */}
         <div className="space-y-3 mb-8">
-          {c.subjects?.slice(0, 3).map((sub, idx) => (
+          {(c.subjects || []).slice(0, 3).map((sub, idx) => (
             <div key={idx} className="flex items-center gap-3 text-slate-600">
               <FiCheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
               <span className="text-[13px] font-bold italic">{sub.name}</span>
             </div>
           ))}
-          {c.subjects?.length > 3 && (
+          {(c.subjects || []).length > 3 && (
             <button 
               onClick={() => setExpandedId(isExpanded ? null : c.id)}
               className="text-[#f16126] text-[11px] font-black uppercase tracking-widest hover:underline pt-1"
             >
-              {isExpanded ? '- Show Less' : `+ ${c.subjects.length - 3} More Subjects`}
+              {isExpanded ? '- Show Less' : `+ ${(c.subjects || []).length - 3} More Subjects`}
             </button>
           )}
         </div>
@@ -81,7 +101,7 @@ const CourseCard = ({ c, expandedId, setExpandedId, setSelectedCourse, setShowCh
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden mb-6 space-y-2 border-t border-slate-50 pt-4"
             >
-              {c.subjects.slice(3).map((sub, idx) => (
+              {(c.subjects || []).slice(3).map((sub, idx) => (
                 <div key={idx} className="flex items-center gap-3 text-slate-500">
                   <div className="w-1 h-1 bg-[#f16126] rounded-full" />
                   <span className="text-[12px] font-medium">{sub.name}</span>
@@ -93,13 +113,25 @@ const CourseCard = ({ c, expandedId, setExpandedId, setSelectedCourse, setShowCh
       </div>
 
       {/* FOOTER CTA */}
-      <div className="pt-6 border-t border-slate-50 flex items-center justify-between gap-4">
-         <button 
-           onClick={() => { setSelectedCourse(c); setShowCheckout(true); }}
-           className="flex-1 bg-[#002147] text-white py-3.5 rounded-xl font-black text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-[#f16126] transition-all shadow-lg active:scale-95 group/buy"
-         >
-           Enroll Now <FiArrowRight className="w-4 h-4 group-hover/buy:translate-x-1 transition-transform" />
-         </button>
+      <div className="pt-6 border-t border-slate-50 flex items-center justify-between gap-4 mt-auto relative z-10">
+         {isEligible ? (
+           <button 
+             onClick={() => { setSelectedCourse(c); setShowCheckout(true); }}
+             className="flex-1 bg-[#002147] text-white py-3.5 rounded-xl font-black text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-[#f16126] transition-all shadow-lg active:scale-95 group/buy"
+           >
+             Enroll Now <FiArrowRight className="w-4 h-4 group-hover/buy:translate-x-1 transition-transform" />
+           </button>
+         ) : (
+           <div className="w-full space-y-2">
+             <button 
+               disabled
+               className="w-full bg-slate-100 text-slate-400 py-3.5 rounded-xl font-black text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 cursor-not-allowed border border-slate-200"
+             >
+               Not Eligible <FiX className="w-4 h-4" />
+             </button>
+             <p className="text-[9px] text-center font-bold text-rose-400 uppercase tracking-widest">Only for Grade {userClass} students</p>
+           </div>
+         )}
       </div>
     </div>
   );
@@ -204,6 +236,7 @@ const StudentStore = () => {
   const [showCheckout, setShowCheckout] = useState(false);
   const [buyLoading, setBuyLoading] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
+  const [selectedDuration, setSelectedDuration] = useState('oneMonth');
 
   const juniorRef = useRef(null);
   const seniorRef = useRef(null);
@@ -250,12 +283,15 @@ const StudentStore = () => {
     setBuyLoading(true);
     try {
       // Mock payment success for now to keep focus on UI
+      // Determine price based on selected duration
+      const price = selectedCourse.pricing?.[selectedDuration] || selectedCourse.price || 0;
+      
       await axios.post('/student/mock-payment-success', {
-        amount: selectedCourse.price,
-        packageName: selectedCourse.name,
-        referenceId: selectedCourse.id,
-        type: selectedCourse.type,
-        subscriptionType: selectedCourse.subscriptionType || 'full'
+        amount: price,
+        packageName: `${selectedCourse.className || selectedCourse.name} - ${selectedDuration}`,
+        referenceId: selectedCourse._id || selectedCourse.id,
+        type: selectedCourse.type || 'bundle',
+        subscriptionType: selectedDuration
       });
 
       toast.success('Course Purchased Successfully!');
@@ -271,10 +307,10 @@ const StudentStore = () => {
     }
   };
 
-  const filteredCourses = (courses || []).filter(c => 
-    c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.classLevel?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredCourses = (courses || []).filter(c => {
+    // Only search by query, don't filter out anymore
+    return (c.className?.toLowerCase() || c.name?.toLowerCase() || '').includes(searchQuery.toLowerCase());
+  });
 
   const juniorCourses = filteredCourses.filter(c => c.type === 'bundle');
   const seniorCourses = filteredCourses.filter(c => c.type === 'subject');
@@ -371,6 +407,7 @@ const StudentStore = () => {
                   setExpandedId={setExpandedId}
                   setSelectedCourse={setSelectedCourse}
                   setShowCheckout={setShowCheckout}
+                  userInfo={userInfo}
                 />
               ))}
             </div>
@@ -401,6 +438,7 @@ const StudentStore = () => {
                 setExpandedId={setExpandedId}
                 setSelectedCourse={setSelectedCourse}
                 setShowCheckout={setShowCheckout}
+                userInfo={userInfo}
               />
             ))}
           </div>
@@ -432,13 +470,29 @@ const StudentStore = () => {
                    <FiX className="w-4 h-4" />
                  </button>
                  <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-2 opacity-80">Finalize Enrollment</p>
-                 <h3 className="text-2xl font-black uppercase italic tracking-tight">{selectedCourse.name}</h3>
+                 <h3 className="text-2xl font-black uppercase italic tracking-tight">{selectedCourse.className || selectedCourse.name}</h3>
               </div>
 
               <div className="p-8 space-y-6">
+                 <div className="flex gap-2 w-full mb-2 bg-slate-100 p-1 rounded-lg">
+                    {[
+                      { key: 'oneMonth', label: '1 Month' },
+                      { key: 'threeMonths', label: '3 Months' },
+                      { key: 'sixMonths', label: '6 Months' },
+                      { key: 'twelveMonths', label: '12 Months' }
+                    ].map(dur => (
+                      <button 
+                        key={dur.key}
+                        onClick={() => setSelectedDuration(dur.key)}
+                        className={`flex-1 py-2 text-xs font-bold rounded-md transition-all ${selectedDuration === dur.key ? 'bg-white shadow-sm text-[#f16126]' : 'text-slate-500 hover:text-slate-700'}`}
+                      >
+                        {dur.label}
+                      </button>
+                    ))}
+                 </div>
                  <div className="flex items-center justify-between py-4 border-b border-slate-100">
-                    <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Course Fee</span>
-                    <span className="text-2xl font-black text-[#002147] italic">₹{selectedCourse.price}</span>
+                    <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Course Fee ({selectedDuration})</span>
+                    <span className="text-2xl font-black text-[#002147] italic">₹{selectedCourse.pricing?.[selectedDuration] || selectedCourse.price || 0}</span>
                  </div>
 
                  <div className="bg-slate-50 rounded-2xl p-5 space-y-4">
@@ -458,7 +512,7 @@ const StudentStore = () => {
                    className="w-full bg-[#002147] text-white py-4 rounded-2xl font-black text-[13px] uppercase tracking-[0.25em] flex items-center justify-center gap-3 hover:bg-[#f16126] transition-all shadow-xl active:scale-95 disabled:opacity-50"
                  >
                    {buyLoading ? 'Processing...' : (
-                     <>Confirm & Pay ₹{selectedCourse.price} <FiCreditCard className="w-5 h-5" /></>
+                     <>Confirm & Pay ₹{selectedCourse.pricing?.[selectedDuration] || selectedCourse.price || 0} <FiCreditCard className="w-5 h-5" /></>
                    )}
                  </button>
                  

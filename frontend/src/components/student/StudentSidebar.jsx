@@ -30,7 +30,6 @@ const StudentSidebar = ({ onClose }) => {
     { icon: LayoutDashboard, label: 'Summary', path: '/student/dashboard' },
     { icon: BookOpen, label: 'My Classes', path: '/student/classes' },
     { icon: Video, label: 'Live & Schedule Class', path: '/student/live-schedule' },
-    { icon: ShoppingBag, label: 'Courses', path: '/student/courses' },
     { icon: CreditCard, label: 'Fee Payments', path: '/student/payments' },
     { icon: User, label: 'Profile', path: '/student/profile' },
   ];

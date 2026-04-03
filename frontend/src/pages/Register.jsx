@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
@@ -11,16 +11,39 @@ const Register = () => {
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole]         = useState('Student');
+  const [syllabus, setSyllabus] = useState('');
+  const [className, setClassName] = useState('');
   const [error, setError]       = useState(null);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [availableClasses, setAvailableClasses] = useState([]);
 
   const dispatch  = useDispatch();
   const navigate  = useNavigate();
 
+  useEffect(() => {
+    const fetchCatalog = async () => {
+      try {
+        const { data } = await axios.get('/student/catalog');
+        // Extract unique class names/levels from both bundles and subjects
+        // We want to show "Class 6", "Class 11", etc.
+        const classes = data.map(item => item.className);
+        const uniqueClasses = [...new Set(classes)].filter(Boolean).sort((a, b) => {
+          const numA = parseInt(a.replace(/\D/g, '')) || 0;
+          const numB = parseInt(b.replace(/\D/g, '')) || 0;
+          return numA - numB;
+        });
+        setAvailableClasses(uniqueClasses);
+      } catch (err) {
+        console.error('Failed to fetch classes for registration', err);
+      }
+    };
+    fetchCatalog();
+  }, []);
+
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      const res  = await axios.post('/auth/register', { name, email, password, role });
+      const res  = await axios.post('/auth/register', { name, email, password, role, syllabus, className });
       const user = res.data;
       dispatch(setCredentials({ ...user }));
       if (user.role.toLowerCase() === 'admin')        navigate('/admin/dashboard');
@@ -437,6 +460,35 @@ const Register = () => {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                     />
+                  </div>
+
+                  {/* Syllabus */}
+                  <div className="reg-field">
+                    <select
+                      className="reg-select"
+                      value={syllabus}
+                      onChange={(e) => setSyllabus(e.target.value)}
+                      required
+                    >
+                      <option value="" disabled>Select Syllabus</option>
+                      <option value="CBSE">CBSE Syllabus</option>
+                      <option value="ICSE">ICSE Syllabus</option>
+                    </select>
+                  </div>
+
+                  {/* Class Name */}
+                  <div className="reg-field">
+                    <select
+                      className="reg-select"
+                      value={className}
+                      onChange={(e) => setClassName(e.target.value)}
+                      required
+                    >
+                      <option value="" disabled>Select Class</option>
+                      {availableClasses.map((cls, idx) => (
+                        <option key={idx} value={cls}>{cls}</option>
+                      ))}
+                    </select>
                   </div>
 
                   {/* Terms */}

@@ -5,7 +5,11 @@ const subscriptionSchema = new mongoose.Schema({
   type: { type: String, enum: ['bundle', 'subject'], required: true },
   referenceId: { type: String, required: true }, // Refers to Class or Subject (Flexible for Mock/Real)
   name: { type: String, required: true }, // e.g. "Class 10 Bundle" or "Physics Class 11"
-  subscriptionType: { type: String, enum: ['full', 'single'], default: 'full' },
+  subscriptionType: { 
+    type: String, 
+    enum: ['full', 'single', 'oneMonth', 'threeMonths', 'sixMonths', 'twelveMonths'], 
+    default: 'full' 
+  },
   expiryDate: { type: Date, required: true }
 });
 
@@ -19,6 +23,8 @@ const userSchema = new mongoose.Schema({
     default: 'Student',
     lowercase: true 
   },
+  syllabus: { type: String, enum: ['CBSE', 'ICSE'] },
+  className: { type: String },
   activeSubscriptions: [subscriptionSchema],
   assignedSubjects: [
     {

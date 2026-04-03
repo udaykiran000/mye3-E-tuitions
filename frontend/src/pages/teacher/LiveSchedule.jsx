@@ -38,8 +38,8 @@ const LiveSchedule = () => {
   return (
     <div className="space-y-8 md:space-y-12 animate-in fade-in duration-700 p-4 md:p-8 pb-20">
       <div className="space-y-1">
-         <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight italic">Live & Schedule Class</h1>
-         <p className="text-slate-500 font-bold italic text-sm md:text-base">Manage your scheduled broadcasts and track upcoming classes</p>
+         <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight italic uppercase">My Live Classes</h1>
+         <p className="text-slate-500 font-bold italic text-sm md:text-base">View your assigned live broadcasts and upcoming sessions</p>
       </div>
 
       <div className="bg-white p-6 md:p-10 rounded-[32px] border border-slate-100 shadow-xl shadow-teal-900/5">

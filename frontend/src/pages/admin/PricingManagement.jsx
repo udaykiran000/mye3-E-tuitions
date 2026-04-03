@@ -1,20 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
-  IndianRupee, 
   Settings, 
   ToggleRight, 
   ToggleLeft, 
-  Save, 
   ShieldCheck, 
   Loader2, 
-  ChevronRight, 
   BookOpen, 
   ChevronDown, 
   ChevronUp, 
   Mail, 
   CheckCircle2, 
-  Info,
   X
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
@@ -24,8 +20,13 @@ const PricingManagement = () => {
   const [seniorSubjects, setSeniorSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
+  const [isAddClassModalOpen, setIsAddClassModalOpen] = useState(false);
+  const [addClassForm, setAddClassForm] = useState({
+    className: '',
+    syllabus: 'CBSE',
+    pricing: { oneMonth: 0, threeMonths: 0, sixMonths: 0, twelveMonths: 0 }
+  });
 
-  // Manual Grant State
   const [grantForm, setGrantForm] = useState({
     email: '',
     type: 'bundle',
@@ -95,6 +96,23 @@ const PricingManagement = () => {
     }
   };
 
+  const handleAddClass = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post('/admin/classes', addClassForm);
+      toast.success(`${addClassForm.className} created successfully!`);
+      setIsAddClassModalOpen(false);
+      setAddClassForm({
+        className: '',
+        syllabus: 'CBSE',
+        pricing: { oneMonth: 0, threeMonths: 0, sixMonths: 0, twelveMonths: 0 }
+      });
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to create class');
+    }
+  };
+
   if (loading) return (
     <div className="flex h-screen items-center justify-center">
        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
@@ -129,6 +147,12 @@ const PricingManagement = () => {
                Classes 6 - 10
             </div>
             <h2 className="text-lg md:text-xl font-black text-slate-900">Junior Course Pricing</h2>
+            <button 
+              onClick={() => setIsAddClassModalOpen(true)}
+              className="ml-auto px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-indigo-100"
+            >
+               + Create New Class
+            </button>
          </div>
 
          <div className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/10 overflow-hidden">
@@ -149,38 +173,49 @@ const PricingManagement = () => {
                             <td className="px-6 md:px-10 py-8">
                                <div className="flex items-center gap-4 md:gap-5">
                                   <div className="w-12 h-12 md:w-14 md:h-14 bg-slate-900 text-white rounded-xl flex items-center justify-center font-black text-lg md:text-xl shadow-lg ring-4 ring-slate-50 shrink-0">
-                                     {cls.className.split(' ')[1]}
+                                     {cls.className.split(' ')[1] || '0'}
                                   </div>
                                   <div>
                                      <p className="font-black text-slate-900 text-base md:text-lg">{cls.className}</p>
-                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{cls.subjects.length} Subjects Linked</p>
+                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{(cls.subjects || []).length} Subjects Linked</p>
                                   </div>
                                </div>
                             </td>
                             <td className="px-6 md:px-10 py-8">
-                               <div className="flex items-center gap-3 group max-w-[180px]">
-                                  <div className="relative flex-1">
-                                    <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
-                                    <input 
-                                      id={`total-price-${cls._id}`}
-                                      type="number"
-                                      defaultValue={cls.price}
-                                      className="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500 rounded-xl pl-9 pr-3 py-2.5 font-black text-slate-900 outline-none transition-all text-sm shadow-inner"
-                                    />
-                                  </div>
-                                  <button 
-                                    onClick={() => {
-                                      const val = Number(document.getElementById(`total-price-${cls._id}`).value);
-                                      // Auto-zero out individual subjects for Classes 6-10 if total package is set
-                                      const zeroedSubjects = cls.subjects.map(s => ({ ...s, singleSubjectPrice: 0 }));
-                                      handleUpdateJuniorPrice(cls._id, { price: val, subjects: zeroedSubjects });
-                                    }}
-                                    className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-600 hover:text-white transition-all shadow-sm border border-emerald-100"
-                                    title="Update Total Fee"
-                                  >
-                                     <Save className="w-4 h-4" />
-                                  </button>
-                               </div>
+                                <div className="space-y-4">
+                                   <div className="grid grid-cols-2 gap-2">
+                                      <div className="space-y-1">
+                                         <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">1 Month</label>
+                                         <input type="number" id={`p1-${cls._id}`} defaultValue={cls.pricing?.oneMonth || 0} className="w-full bg-slate-50 border rounded-lg px-2 py-1.5 text-xs font-black outline-none focus:border-indigo-600" />
+                                      </div>
+                                      <div className="space-y-1">
+                                         <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">3 Months</label>
+                                         <input type="number" id={`p3-${cls._id}`} defaultValue={cls.pricing?.threeMonths || 0} className="w-full bg-slate-50 border rounded-lg px-2 py-1.5 text-xs font-black outline-none focus:border-indigo-600" />
+                                      </div>
+                                      <div className="space-y-1">
+                                         <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">6 Months</label>
+                                         <input type="number" id={`p6-${cls._id}`} defaultValue={cls.pricing?.sixMonths || 0} className="w-full bg-slate-50 border rounded-lg px-2 py-1.5 text-xs font-black outline-none focus:border-indigo-600" />
+                                      </div>
+                                      <div className="space-y-1">
+                                         <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">12 Months</label>
+                                         <input type="number" id={`p12-${cls._id}`} defaultValue={cls.pricing?.twelveMonths || 0} className="w-full bg-slate-50 border rounded-lg px-2 py-1.5 text-xs font-black outline-none focus:border-indigo-600" />
+                                      </div>
+                                   </div>
+                                   <button 
+                                     onClick={() => {
+                                       const pricing = {
+                                         oneMonth: Number(document.getElementById(`p1-${cls._id}`).value),
+                                         threeMonths: Number(document.getElementById(`p3-${cls._id}`).value),
+                                         sixMonths: Number(document.getElementById(`p6-${cls._id}`).value),
+                                         twelveMonths: Number(document.getElementById(`p12-${cls._id}`).value)
+                                       };
+                                       handleUpdateJuniorPrice(cls._id, { pricing });
+                                     }}
+                                     className="w-full py-2 bg-indigo-600 text-white rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-slate-900 transition-colors shadow-lg shadow-indigo-100"
+                                   >
+                                      Update Pricing
+                                   </button>
+                                </div>
                             </td>
                             <td className="px-6 md:px-10 py-8">
                                <button 
@@ -210,7 +245,7 @@ const PricingManagement = () => {
                                      </h4>
                                   </div>
                                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                     {cls.subjects.map((sub, idx) => (
+                                     {(cls.subjects || []).map((sub, idx) => (
                                        <div key={idx} className="p-5 bg-slate-50 rounded-xl border border-slate-100 group border-transparent focus-within:border-indigo-600 transition-all relative">
                                           <button 
                                             onClick={() => {
@@ -248,8 +283,7 @@ const PricingManagement = () => {
                                             
                                             if (!name) return toast.error('Enter subject name');
                                             
-                                            // Individual price defaults to 0 for Junior Classes
-                                            const updatedSubjects = [...cls.subjects, { name, singleSubjectPrice: 0 }];
+                                            const updatedSubjects = [...(cls.subjects || []), { name, singleSubjectPrice: 0 }];
                                             handleUpdateJuniorPrice(cls._id, { subjects: updatedSubjects });
                                             
                                             nameInput.value = '';
@@ -297,27 +331,44 @@ const PricingManagement = () => {
                           <tr key={sub._id} className="group hover:bg-slate-50/50 transition-all">
                              <td className="px-6 md:px-8 py-6">
                                 <div>
-                                   <p className="font-black text-slate-900 text-sm md:text-base">{sub.subjectName}</p>
-                                   <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Grade {sub.classLevel}</p>
+                                   <p className="font-black text-slate-900 text-sm md:text-base">{sub.name}</p>
+                                   <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest leading-none mb-1">{sub.syllabus}</p>
+                                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Grade {sub.classLevel}</p>
                                 </div>
                              </td>
                              <td className="px-6 md:px-8 py-6">
-                                <div className="flex items-center gap-3">
-                                   <input 
-                                     id={`senior-price-${sub._id}`}
-                                     type="number"
-                                     defaultValue={sub.price}
-                                     className="w-full max-w-[100px] bg-slate-50 border-2 border-transparent focus:border-indigo-600 rounded-lg px-3 py-2 font-black text-slate-900 outline-none transition-all text-sm"
-                                   />
+                                <div className="space-y-4">
+                                   <div className="grid grid-cols-2 gap-2">
+                                      <div className="space-y-1">
+                                         <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">1m</label>
+                                         <input type="number" id={`sp1-${sub._id}`} defaultValue={sub.pricing?.oneMonth || 0} className="w-full text-center bg-slate-50 border rounded-lg px-1 py-1.5 text-xs font-black outline-none focus:border-indigo-600" />
+                                      </div>
+                                      <div className="space-y-1">
+                                         <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">3m</label>
+                                         <input type="number" id={`sp3-${sub._id}`} defaultValue={sub.pricing?.threeMonths || 0} className="w-full text-center bg-slate-50 border rounded-lg px-1 py-1.5 text-xs font-black outline-none focus:border-indigo-600" />
+                                      </div>
+                                      <div className="space-y-1">
+                                         <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">6m</label>
+                                         <input type="number" id={`sp6-${sub._id}`} defaultValue={sub.pricing?.sixMonths || 0} className="w-full text-center bg-slate-50 border rounded-lg px-1 py-1.5 text-xs font-black outline-none focus:border-indigo-600" />
+                                      </div>
+                                      <div className="space-y-1">
+                                         <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">12m</label>
+                                         <input type="number" id={`sp12-${sub._id}`} defaultValue={sub.pricing?.twelveMonths || 0} className="w-full text-center bg-slate-50 border rounded-lg px-1 py-1.5 text-xs font-black outline-none focus:border-indigo-600" />
+                                      </div>
+                                   </div>
                                    <button 
                                       onClick={() => {
-                                        const val = document.getElementById(`senior-price-${sub._id}`).value;
-                                        handleUpdateSeniorPrice(sub._id, { ...sub, price: val });
+                                        const pricing = {
+                                          oneMonth: Number(document.getElementById(`sp1-${sub._id}`).value),
+                                          threeMonths: Number(document.getElementById(`sp3-${sub._id}`).value),
+                                          sixMonths: Number(document.getElementById(`sp6-${sub._id}`).value),
+                                          twelveMonths: Number(document.getElementById(`sp12-${sub._id}`).value)
+                                        };
+                                        handleUpdateSeniorPrice(sub._id, { pricing });
                                       }}
-                                      className="p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white transition-all shadow-sm border border-indigo-100"
-                                      title="Update"
+                                      className="w-full py-2 bg-indigo-600 text-white rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-slate-900 transition-colors shadow-lg shadow-indigo-100"
                                    >
-                                      <Save className="w-4 h-4" />
+                                      Update
                                    </button>
                                 </div>
                              </td>
@@ -350,7 +401,6 @@ const PricingManagement = () => {
                           </tr>
                         ))}
                         
-                        {/* QUICK ADD SENIOR SUBJECT ROW */}
                         <tr className="bg-indigo-50/20">
                            <td className="px-6 md:px-8 py-6">
                               <input 
@@ -359,23 +409,23 @@ const PricingManagement = () => {
                                 placeholder="New Subject (Physics...)"
                                 className="w-full bg-transparent border-b border-indigo-200 focus:border-indigo-600 outline-none py-1 font-black text-slate-900 text-xs placeholder:text-indigo-200"
                               />
-                              <select 
-                                id="new-senior-level"
-                                className="mt-2 w-full bg-transparent border-b border-indigo-100 font-extrabold text-[10px] text-slate-400 focus:text-indigo-600 transition-colors uppercase outline-none"
-                              >
-                                <option value="11">Grade 11</option>
-                                <option value="12">Grade 12</option>
-                              </select>
+                              <div className="flex gap-4 mt-2">
+                                <select id="new-senior-level" className="w-full bg-transparent border-b border-indigo-100 font-extrabold text-[10px] text-slate-400 focus:text-indigo-600 outline-none uppercase">
+                                  <option value="11">Grade 11</option>
+                                  <option value="12">Grade 12</option>
+                                </select>
+                                <select id="new-senior-syllabus" className="w-full bg-transparent border-b border-indigo-100 font-extrabold text-[10px] text-slate-400 focus:text-indigo-600 outline-none uppercase">
+                                  <option value="CBSE">CBSE</option>
+                                  <option value="ICSE">ICSE</option>
+                                </select>
+                              </div>
                            </td>
                            <td className="px-6 md:px-8 py-6">
-                              <div className="flex items-center gap-2 max-w-[120px]">
-                                 <IndianRupee className="w-3 h-3 text-slate-300" />
-                                 <input 
-                                   id="new-senior-price"
-                                   type="number" 
-                                   placeholder="Price"
-                                   className="w-full bg-transparent border-b border-indigo-200 focus:border-indigo-600 outline-none py-1 font-black text-slate-900 text-xs placeholder:text-indigo-200"
-                                 />
+                              <div className="grid grid-cols-2 gap-2">
+                                 <input type="number" id="np1" placeholder="1m" className="w-full text-center bg-white border rounded px-1 py-1 text-[10px]" />
+                                 <input type="number" id="np3" placeholder="3m" className="w-full text-center bg-white border rounded px-1 py-1 text-[10px]" />
+                                 <input type="number" id="np6" placeholder="6m" className="w-full text-center bg-white border rounded px-1 py-1 text-[10px]" />
+                                 <input type="number" id="np12" placeholder="12m" className="w-full text-center bg-white border rounded px-1 py-1 text-[10px]" />
                               </div>
                            </td>
                            <td className="px-6 md:px-8 py-6 text-right">
@@ -383,27 +433,24 @@ const PricingManagement = () => {
                                 onClick={async () => {
                                   const name = document.getElementById('new-senior-name').value;
                                   const level = document.getElementById('new-senior-level').value;
-                                  const price = document.getElementById('new-senior-price').value;
-                                  
-                                  if (!name || !price) return toast.error('Fill name and price');
-                                  
+                                  const syllabus = document.getElementById('new-senior-syllabus').value;
+                                  const pricing = {
+                                    oneMonth: Number(document.getElementById('np1').value),
+                                    threeMonths: Number(document.getElementById('np3').value),
+                                    sixMonths: Number(document.getElementById('np6').value),
+                                    twelveMonths: Number(document.getElementById('np12').value)
+                                  };
+                                  if (!name) return toast.error('Fill name');
                                   try {
-                                    await axios.post('/admin/subjects', { 
-                                      subjectName: name, 
-                                      classLevel: level, 
-                                      price: Number(price) 
-                                    });
+                                    await axios.post('/admin/subjects', { name, classLevel: level, syllabus, pricing });
                                     toast.success('Senior Subject Created!');
                                     document.getElementById('new-senior-name').value = '';
-                                    document.getElementById('new-senior-price').value = '';
                                     fetchData();
-                                  } catch (error) {
-                                    toast.error('Action failed');
-                                  }
+                                  } catch (error) { toast.error('Action failed'); }
                                 }}
-                                className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg"
+                                className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase shadow-lg"
                               >
-                                 Link
+                                 Link Subject
                               </button>
                            </td>
                         </tr>
@@ -413,15 +460,12 @@ const PricingManagement = () => {
             </div>
          </section>
 
-         {/* MANUAL OVERRIDE SECTION */}
          <section className="space-y-6">
             <div className="flex items-center gap-4 pl-4 border-l-4 border-indigo-600">
                <h2 className="text-xl font-black text-slate-900 tracking-tight">Access Control</h2>
             </div>
-            
             <div className="bg-slate-900 text-white rounded-2xl p-8 md:p-10 shadow-2xl relative overflow-hidden group">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full -mr-16 -mt-16 blur-3xl group-hover:scale-150 transition-transform duration-1000" />
-               
+               <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full -mr-16 -mt-16 blur-3xl" />
                <div className="relative z-10 space-y-8">
                   <form onSubmit={handleGrantAccess} className="space-y-5">
                      <div className="space-y-2">
@@ -429,54 +473,74 @@ const PricingManagement = () => {
                         <div className="relative">
                            <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400" />
                            <input 
-                              required
-                              type="email"
-                              value={grantForm.email}
+                              required type="email" value={grantForm.email}
                               onChange={(e) => setGrantForm({...grantForm, email: e.target.value})}
                               placeholder="student@example.com"
-                              className="w-full bg-white/5 border border-white/10 focus:border-indigo-400 rounded-xl pl-12 pr-6 py-3.5 md:py-4 font-bold outline-none transition-all text-sm"
+                              className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-6 py-4 font-bold outline-none"
                            />
                         </div>
                      </div>
-
                      <div className="space-y-2">
                         <label className="text-[10px] font-black text-indigo-300 uppercase tracking-widest ml-1">Assignment</label>
                         <select 
-                           required
-                           className="w-full bg-slate-800 border border-white/10 focus:border-indigo-400 rounded-xl px-6 py-3.5 md:py-4 font-bold outline-none appearance-none text-sm"
+                           required className="w-full bg-slate-800 border border-white/10 rounded-xl px-6 py-4 font-bold outline-none text-sm appearance-none"
                            onChange={(e) => {
                              const data = JSON.parse(e.target.value);
-                             setGrantForm({
-                               ...grantForm, 
-                               referenceId: data.id, 
-                               name: data.name, 
-                               type: data.type,
-                               subscriptionType: data.type === 'bundle' ? 'full' : 'single'
-                             });
+                             setGrantForm({ ...grantForm, referenceId: data.id, name: data.name, type: data.type });
                            }}
                         >
                            <option value="">Enroll Student...</option>
                            <optgroup label="Packages (6-10)">
-                             {juniorClasses.map(c => (
-                               <option key={c._id} value={JSON.stringify({id: c._id, name: c.className, type: 'bundle'})}>{c.className}</option>
-                             ))}
+                             {juniorClasses.map(c => <option key={c._id} value={JSON.stringify({id: c._id, name: c.className, type: 'bundle'})}>{c.className}</option>)}
                            </optgroup>
                            <optgroup label="Subjects (11-12)">
-                             {seniorSubjects.map(s => (
-                               <option key={s._id} value={JSON.stringify({id: s._id, name: s.subjectName, type: 'subject'})}>{s.subjectName} ({s.classLevel})</option>
-                             ))}
+                             {seniorSubjects.map(s => <option key={s._id} value={JSON.stringify({id: s._id, name: s.name, type: 'subject'})}>{s.name} ({s.classLevel})</option>)}
                            </optgroup>
                         </select>
                      </div>
-
-                     <button type="submit" className="w-full py-4 md:py-5 bg-indigo-500 text-white rounded-xl font-black text-[10px] md:text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-white hover:text-slate-900 transition-all flex items-center justify-center gap-3 active:scale-95">
-                        <ShieldCheck className="w-5 h-5" /> Activate
+                     <button type="submit" className="w-full py-5 bg-indigo-500 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-xl flex items-center justify-center gap-3">
+                        <ShieldCheck className="w-5 h-5" /> Activate Access
                      </button>
                   </form>
                </div>
             </div>
          </section>
       </div>
+
+      {isAddClassModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => setIsAddClassModalOpen(false)}></div>
+           <div className="relative bg-white rounded-[40px] w-full max-w-xl shadow-2xl p-10">
+              <div className="flex items-center justify-between mb-8">
+                 <h2 className="text-3xl font-black text-slate-900">Create New Class</h2>
+                 <button onClick={() => setIsAddClassModalOpen(false)} className="p-2 text-slate-300 hover:text-slate-900"><X className="w-8 h-8" /></button>
+              </div>
+              <form onSubmit={handleAddClass} className="space-y-6">
+                 <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Class Name</label>
+                    <input required type="text" placeholder="e.g. Class 5" value={addClassForm.className} onChange={(e) => setAddClassForm({...addClassForm, className: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-2 rounded-2xl outline-none font-bold" />
+                 </div>
+                 <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Syllabus</label>
+                    <select value={addClassForm.syllabus} onChange={(e) => setAddClassForm({...addClassForm, syllabus: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-2 rounded-2xl outline-none font-bold">
+                       <option value="CBSE">CBSE Syllabus</option>
+                       <option value="ICSE">ICSE Syllabus</option>
+                    </select>
+                 </div>
+                 <div className="space-y-4">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tiered Pricing (₹)</label>
+                    <div className="grid grid-cols-2 gap-4">
+                       <input type="number" placeholder="1 Month" required value={addClassForm.pricing.oneMonth} onChange={e => setAddClassForm({...addClassForm, pricing: {...addClassForm.pricing, oneMonth: e.target.value}})} className="px-5 py-4 bg-slate-50 border rounded-xl font-bold" />
+                       <input type="number" placeholder="3 Months" required value={addClassForm.pricing.threeMonths} onChange={e => setAddClassForm({...addClassForm, pricing: {...addClassForm.pricing, threeMonths: e.target.value}})} className="px-5 py-4 bg-slate-50 border rounded-xl font-bold" />
+                       <input type="number" placeholder="6 Months" required value={addClassForm.pricing.sixMonths} onChange={e => setAddClassForm({...addClassForm, pricing: {...addClassForm.pricing, sixMonths: e.target.value}})} className="px-5 py-4 bg-slate-50 border rounded-xl font-bold" />
+                       <input type="number" placeholder="12 Months" required value={addClassForm.pricing.twelveMonths} onChange={e => setAddClassForm({...addClassForm, pricing: {...addClassForm.pricing, twelveMonths: e.target.value}})} className="px-5 py-4 bg-slate-50 border rounded-xl font-bold" />
+                    </div>
+                 </div>
+                 <button type="submit" className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-indigo-100 transition-all hover:scale-[1.02]">Create Class Bundle</button>
+              </form>
+           </div>
+        </div>
+      )}
     </div>
   );
 };

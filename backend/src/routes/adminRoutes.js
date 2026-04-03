@@ -9,7 +9,8 @@ const {
   addSubject, 
   updateSubject, 
   deleteSubject, 
-  getTeachersList, 
+  getTeachersList,
+  getTeachersForSubject,
   getStudentsList, 
   extendSubscription, 
   addTeacher, 
@@ -25,7 +26,12 @@ const {
   getDashboardStats,
   toggleStatus, // New
   grantManualAccess, // New
-  getAllTransactions
+  getAllTransactions,
+  addClassBundle,
+  createLiveSession, // New
+  updateLiveSession, // New
+  deleteLiveSession, // New
+  getAllLiveSessions // New
 } = require('../controllers/adminController');
 const { protect } = require('../middleware/authMiddleware');
 const { authorizeRoles } = require('../middleware/roleMiddleware');
@@ -33,10 +39,15 @@ const upload = require('../middleware/uploadMiddleware');
 
 router.put('/pricing', protect, authorizeRoles('admin'), updatePricing);
 router.get('/classes', protect, authorizeRoles('admin'), getClassBundles);
+router.post('/classes', protect, authorizeRoles('admin'), addClassBundle);
 router.put('/classes/:id', protect, authorizeRoles('admin'), updateClassPricing); // Updated
 router.put('/classes/:id/subjects', protect, authorizeRoles('admin'), updateBundleSubjects);
 router.put('/toggle-status', protect, authorizeRoles('admin'), toggleStatus); // New
 router.post('/grant-access', protect, authorizeRoles('admin'), grantManualAccess); // New
+router.post('/live-sessions', protect, authorizeRoles('admin'), createLiveSession); // New
+router.put('/live-sessions/:id', protect, authorizeRoles('admin'), updateLiveSession); // New
+router.delete('/live-sessions/:id', protect, authorizeRoles('admin'), deleteLiveSession); // New
+router.get('/live-sessions', protect, authorizeRoles('admin'), getAllLiveSessions); // New
 
 router.get('/materials/:classId', protect, authorizeRoles('admin'), getMaterials);
 router.post('/materials', protect, authorizeRoles('admin'), upload.single('file'), addMaterial);
@@ -47,6 +58,7 @@ router.put('/subjects/:id', protect, authorizeRoles('admin'), updateSubject);
 router.delete('/subjects/:id', protect, authorizeRoles('admin'), deleteSubject);
 
 router.get('/teachers-list', protect, authorizeRoles('admin'), getTeachersList);
+router.get('/teachers-for-subject', protect, authorizeRoles('admin'), getTeachersForSubject);
 router.post('/teachers', protect, authorizeRoles('admin'), addTeacher);
 router.put('/teachers/:id/assign', protect, authorizeRoles('admin'), assignSubjectToTeacher);
 router.delete('/teachers/:id/assign/:assignmentId', protect, authorizeRoles('admin'), removeAssignmentFromTeacher);

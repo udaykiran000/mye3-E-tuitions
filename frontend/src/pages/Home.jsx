@@ -442,7 +442,7 @@ const Home = () => {
         {/* Mobile green left ring */}
         <div className="absolute left-[-30px] top-[40px] w-[90px] h-[90px] rounded-full border-[4px] border-[#22c55e] md:hidden pointer-events-none z-0"></div>
         <div className="max-w-[1100px] mx-auto px-4 md:px-12 lg:px-16 relative z-10">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 lg:gap-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 lg:gap-10">
             {[
               { value: '15496+', label: 'HAPPY PARENTS/STUDENTS', color: '#f5a623' },
               { value: '1.3M',   label: 'CLASS COMPLETED',        color: '#f97316' },
@@ -477,23 +477,23 @@ const Home = () => {
             {DISCOVER_COURSES.map((course, i) => (
               <div
                 key={i}
-                className="rounded-[24px] overflow-hidden flex flex-col sm:flex-row items-center justify-between p-5 md:px-7 md:py-6 relative"
+                className="rounded-[20px] overflow-hidden flex flex-row items-center justify-between p-4 md:px-7 md:py-6 relative h-[140px] md:h-auto"
                 style={{ background: course.bgColor }}
               >
                 {/* Decorative absolute elements on the CARD level */}
                 {/* Top middle floating outline circle */}
-                <div className="absolute top-5 left-[52%] w-10 h-10 md:w-12 md:h-12 rounded-full border-[3px]" style={{ borderColor: course.btnColor, opacity: 0.5 }}></div>
+                <div className="absolute top-2 left-[45%] w-8 h-8 md:w-12 md:h-12 rounded-full border-2 md:border-[3px]" style={{ borderColor: course.btnColor, opacity: 0.3 }}></div>
                 
                 {/* Bottom right thick quarter circle */}
-                <div className="absolute -bottom-4 -right-4 w-20 h-20 md:w-24 md:h-24 rounded-tl-[100px] border-t-[16px] border-l-[16px]" style={{ borderColor: course.btnColor, opacity: 0.4 }}></div>
+                <div className="absolute -bottom-2 -right-2 w-16 h-16 md:w-24 md:h-24 rounded-tl-[80px] border-t-[12px] border-l-[12px]" style={{ borderColor: course.btnColor, opacity: 0.3 }}></div>
 
                 {/* Left side text container */}
-                <div className="relative z-10 w-full sm:w-[55%] space-y-2.5 pb-4 sm:pb-0">
-                  <p className="font-bold text-[13px] tracking-wide" style={{ color: course.btnColor }}>{course.topTitle}</p>
-                  <h3 className="text-[24px] md:text-[28px] font-black text-slate-800 leading-[1.1] whitespace-pre-line">{course.title}</h3>
-                  <p className="text-slate-600 text-[12px] md:text-[13px] leading-relaxed max-w-[95%] mb-2 opacity-90">{course.desc}</p>
+                <div className="relative z-10 w-[60%] sm:w-[55%] space-y-1 md:space-y-2.5">
+                  <p className="font-bold text-[10px] md:text-[13px] tracking-wide" style={{ color: course.btnColor }}>{course.topTitle}</p>
+                  <h3 className="text-[17px] md:text-[28px] font-black text-slate-800 leading-[1.1] truncate md:whitespace-pre-line">{course.title}</h3>
+                  <p className="text-slate-600 text-[10px] md:text-[13px] leading-snug line-clamp-2 md:line-clamp-none opacity-90">{course.desc}</p>
                   <button 
-                    className="px-5 py-2 rounded-lg text-white font-bold text-[13px] shadow transition-transform hover:-translate-y-0.5" 
+                    className="px-3 py-1.5 md:px-5 md:py-2 rounded-md text-white font-black text-[9px] md:text-[13px] shadow transition-transform hover:-translate-y-0.5 mt-1" 
                     style={{ background: course.btnColor }}
                   >
                     Explore Now
@@ -501,10 +501,10 @@ const Home = () => {
                 </div>
                 
                 {/* Right side image & decor */}
-                <div className="relative z-10 w-full sm:w-[45%] flex justify-end items-end h-[120px] md:h-[140px] mt-4 sm:mt-0 pr-1">
+                <div className="relative z-10 w-[40%] sm:w-[45%] flex justify-end items-center h-full">
                   {/* White background circle with thick colored border */}
-                  <div className="relative w-[110px] h-[110px] md:w-[125px] md:h-[125px] bg-white rounded-full flex justify-center items-end mr-2 md:mr-4" style={{ border: `5px solid ${course.btnColor}` }}>
-                    <img src={course.img} alt={course.title} className="max-h-[145%] md:max-h-[150%] w-auto object-contain object-bottom -mb-[1px] relative z-20 pointer-events-none drop-shadow-sm" />
+                  <div className="relative w-[75px] h-[75px] md:w-[125px] md:h-[125px] bg-white rounded-full flex justify-center items-end border-[3px] md:border-[5px]" style={{ borderColor: course.btnColor }}>
+                    <img src={course.img} alt={course.title} className="max-h-[140%] w-auto object-contain object-bottom -mb-[1px] relative z-20 pointer-events-none drop-shadow-sm" />
                   </div>
                 </div>
               </div>
@@ -526,35 +526,35 @@ const Home = () => {
               <p className="text-slate-500 font-medium mt-3 max-w-md">Our ecosystem is built for high-performance learning and academic excellence.</p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="grid grid-cols-2 gap-3 md:gap-5">
               {[
                 { title: 'Personal Mentor', icon: HiUserGroup, color: '#4f46e5', bg: '#eef2ff' },
                 { title: 'Effective Study Hub', icon: HiAcademicCap, color: '#059669', bg: '#ecfdf5' },
                 { title: 'Live Classes', icon: HiVideoCamera, color: '#f97316', bg: '#fff7ed' },
                 { title: 'Interactive Quizzes', icon: HiLightningBolt, color: '#e11d48', bg: '#fff1f2' },
               ].map((item, i) => (
-                <div key={i} className="flex items-center gap-4 p-5 bg-white rounded-2xl shadow-sm border border-slate-100 hover:shadow-lg transition-all group">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl group-hover:rotate-6 transition-transform shrink-0" style={{ background: item.bg, color: item.color }}>
+                <div key={i} className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4 p-3 md:p-5 bg-white rounded-xl md:rounded-2xl shadow-sm border border-slate-100 hover:shadow-lg transition-all group text-center sm:text-left">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl flex items-center justify-center text-xl md:text-2xl group-hover:rotate-6 transition-transform shrink-0" style={{ background: item.bg, color: item.color }}>
                     <item.icon />
                   </div>
-                  <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight">{item.title}</h4>
+                  <h4 className="text-[9px] md:text-sm font-black text-slate-900 uppercase tracking-tight leading-tight">{item.title}</h4>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="relative">
-            <div className="w-full aspect-square bg-gradient-to-br from-slate-50 to-blue-50 rounded-[48px] overflow-hidden shadow-xl flex items-center justify-center">
-              <div className="text-center space-y-4 p-8">
+            <div className="w-full aspect-square md:aspect-auto md:h-full bg-gradient-to-br from-slate-50 to-blue-50 rounded-[32px] md:rounded-[48px] overflow-hidden shadow-xl flex items-center justify-center p-4">
+              <div className="grid grid-cols-2 gap-3 md:gap-4 md:p-8 w-full">
                 {[
                   { num: '10,400+', label: 'Sessions Conducted' },
                   { num: '1.3M+', label: 'Learning Minutes' },
                   { num: '100%', label: 'Student Satisfaction' },
                   { num: '8,875+', label: 'Students Enrolled' },
                 ].map((stat, i) => (
-                  <div key={i} className="bg-white rounded-2xl px-6 py-4 shadow-md border border-slate-100">
-                    <p className="text-2xl md:text-3xl font-black text-slate-900">{stat.num}</p>
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
+                  <div key={i} className="bg-white rounded-xl md:rounded-2xl px-3 py-3 md:px-6 md:py-4 shadow-md border border-slate-100 flex flex-col items-center justify-center text-center">
+                    <p className="text-xl md:text-3xl font-black text-slate-900 leading-tight">{stat.num}</p>
+                    <p className="text-[8px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">{stat.label}</p>
                   </div>
                 ))}
               </div>
@@ -574,33 +574,33 @@ const Home = () => {
       {/* ════════════════════════════════════════════
           TEACHERS REGISTRATION SECTION (RE-DESIGNED)
       ════════════════════════════════════════════ */}
-      <section className="bg-[#002147] py-12 md:py-16 overflow-hidden">
+      <section className="bg-[#002147] py-7 md:py-16 overflow-hidden">
         <div className="max-w-[1200px] mx-auto px-4 md:px-8">
           
           {/* Top Block: Form & Image side-by-side */}
-          <div className="flex flex-col lg:flex-row items-stretch gap-8 lg:gap-16 mb-16">
+          <div className="flex flex-col lg:flex-row items-stretch gap-4 lg:gap-16 mb-6 lg:mb-16">
             
             {/* Left: Registration Form (Reflecting Image 3) */}
             <div className="lg:w-[50%] flex flex-col justify-center">
-              <div className="bg-[#091a33] rounded-[24px] p-6 md:p-10 border border-white/5 shadow-2xl relative overflow-hidden">
+              <div className="bg-[#091a33] rounded-[20px] p-4 md:p-10 border border-white/5 shadow-2xl relative overflow-hidden">
                 {/* Theme Highlights */}
                 <div className="absolute top-0 left-0 w-2 h-full bg-orange-500"></div>
                 
-                <div className="space-y-1 mb-8">
-                  <span className="text-[11px] font-bold text-orange-500 uppercase tracking-[0.3em]">Join Our Faculty</span>
-                  <h2 className="text-2xl md:text-[32px] font-black text-white leading-tight">
+                <div className="space-y-1 mb-4 md:mb-8">
+                  <span className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.3em]">Join Our Faculty</span>
+                  <h2 className="text-lg md:text-[32px] font-black text-white leading-tight">
                     Become an Online <span className="text-orange-500">Tutor</span>
                   </h2>
                 </div>
 
-                <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form className="space-y-3 md:space-y-4" onSubmit={(e) => e.preventDefault()}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Name</label>
                       <input 
                         type="text" 
                         placeholder="Enter Full Name"
-                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-orange-500 focus:bg-white/10 transition-all text-white placeholder-slate-500 text-sm" 
+                        className="w-full px-3 py-2 md:py-2.5 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-orange-500 focus:bg-white/10 transition-all text-white placeholder-slate-500 text-sm" 
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -608,18 +608,18 @@ const Home = () => {
                       <input 
                         type="email" 
                         placeholder="teacher@example.com"
-                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-orange-500 focus:bg-white/10 transition-all text-white placeholder-slate-500 text-sm" 
+                        className="w-full px-3 py-2 md:py-2.5 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-orange-500 focus:bg-white/10 transition-all text-white placeholder-slate-500 text-sm" 
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Mobile No</label>
                       <input 
                         type="tel" 
                         placeholder="+91 XXXXX XXXXX"
-                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-orange-500 focus:bg-white/10 transition-all text-white placeholder-slate-500 text-sm" 
+                        className="w-full px-3 py-2 md:py-2.5 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-orange-500 focus:bg-white/10 transition-all text-white placeholder-slate-500 text-sm" 
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -627,12 +627,12 @@ const Home = () => {
                       <input 
                         type="text" 
                         placeholder="Maths, Physics etc."
-                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-orange-500 focus:bg-white/10 transition-all text-white placeholder-slate-500 text-sm" 
+                        className="w-full px-3 py-2 md:py-2.5 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-orange-500 focus:bg-white/10 transition-all text-white placeholder-slate-500 text-sm" 
                       />
                     </div>
                   </div>
 
-                  <div className="pt-4 flex justify-center sm:justify-start">
+                  <div className="pt-2 md:pt-4 flex justify-center sm:justify-start">
                     <button 
                       className="px-10 py-3 bg-orange-600 hover:bg-orange-500 text-white font-black text-[13px] uppercase tracking-widest rounded-lg transition-all shadow-[0_8px_25px_rgba(234,88,12,0.3)] hover:-translate-y-0.5 active:scale-95"
                     >
@@ -643,8 +643,8 @@ const Home = () => {
               </div>
             </div>
 
-            {/* Right: Portrait Image (Reflecting Image 3) */}
-            <div className="lg:w-[50%] flex max-h-[500px]">
+            {/* Right: Portrait Image — hidden on mobile */}
+            <div className="hidden lg:flex lg:w-[50%] max-h-[500px]">
               <div className="w-full rounded-[24px] overflow-hidden border border-white/10 shadow-2xl relative">
                 <img 
                   src={teacherJoinImg} 
@@ -661,19 +661,19 @@ const Home = () => {
               Why Join <span className="text-orange-500 italic">Mye3</span> <span className="text-white">e-Tuitions?</span>
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-12">
               {[
                 { title: 'GLOBAL REACH', desc: 'Connect with students across India and beyond.', icon: HiGlobeAlt },
                 { title: 'FLEXIBLE TIMING', desc: 'Set your own schedule and teach at your convenience.', icon: HiUserGroup },
                 { title: 'PREMIUM PAYOUTS', desc: 'Earn competitive rates for each session you conduct.', icon: HiLightningBolt },
                 { title: '1-TO-1 INTERACTION', desc: 'Engage deeply with students in personalized sessions.', icon: HiAcademicCap },
               ].map((item, i) => (
-                <div key={i} className="space-y-4 group">
+                <div key={i} className="space-y-2 lg:space-y-4 group">
                   <div className="flex flex-col gap-1">
-                    <h4 className="text-orange-500 font-black text-[13px] tracking-widest uppercase">{item.title}</h4>
-                    <div className="w-8 h-1 bg-white/20 group-hover:w-full group-hover:bg-orange-500/50 transition-all duration-500"></div>
+                    <h4 className="text-orange-500 font-black text-[10px] md:text-[13px] tracking-widest uppercase">{item.title}</h4>
+                    <div className="w-6 lg:w-8 h-1 bg-white/20 group-hover:w-full group-hover:bg-orange-500/50 transition-all duration-500"></div>
                   </div>
-                  <p className="text-slate-400 text-[13px] leading-relaxed font-medium">
+                  <p className="text-slate-400 text-[11px] md:text-[13px] leading-relaxed font-medium">
                     {item.desc}
                   </p>
                 </div>
@@ -687,9 +687,9 @@ const Home = () => {
       {/* ════════════════════════════════════════════
           SUCCESS JOURNEY CTA — RE-DESIGNED
       ════════════════════════════════════════════ */}
-      <section className="py-16 md:py-28 bg-white overflow-hidden">
+      <section className="py-8 md:py-28 bg-white overflow-hidden">
         <div className="max-w-[1240px] mx-auto px-4 md:px-8">
-          <div className="bg-[#002147] rounded-[48px] overflow-hidden shadow-2xl relative">
+          <div className="bg-[#002147] rounded-[20px] overflow-hidden shadow-2xl relative">
             
             {/* Background elements */}
             <div className="absolute top-0 right-0 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl -mr-40 -mt-40" />
@@ -698,26 +698,26 @@ const Home = () => {
             <div className="flex flex-col lg:flex-row items-stretch relative z-10">
               
               {/* Left Column: Information */}
-              <div className="w-full lg:w-[55%] p-10 md:p-12 lg:p-14 text-left relative z-20">
-                <div className="space-y-6">
+              <div className="w-full lg:w-[55%] p-6 md:p-12 lg:p-14 text-left relative z-20">
+                <div className="space-y-3 md:space-y-6">
                   <span className="text-[11px] font-black text-emerald-400 uppercase tracking-[0.4em]">Ready to start?</span>
-                  <h2 className="text-3xl md:text-[38px] font-black text-white leading-[1.1] tracking-tight">
+                  <h2 className="text-[22px] md:text-[38px] font-black text-white leading-[1.15] tracking-tight">
                     Start Your <span className="text-orange-500 italic">Success</span> Journey Today
                   </h2>
-                  <p className="text-blue-100/70 text-base leading-relaxed max-w-lg">
+                  <p className="text-blue-100/70 text-[13px] md:text-base leading-relaxed max-w-lg">
                     Experience the precision of 1-on-1 personalized mentorship. Join e-Tuitions and unlock your full academic potential with a free demo session.
                   </p>
                   
-                  <div className="flex flex-wrap gap-4 pt-2">
+                  <div className="flex flex-wrap gap-3 pt-1 md:pt-2">
                     <Link
                       to="/register"
-                      className="px-8 py-3.5 bg-orange-600 hover:bg-orange-500 text-white font-black text-[14px] uppercase tracking-widest rounded-xl transition-all shadow-[0_10px_25px_rgba(234,88,12,0.3)]"
+                      className="px-6 py-2.5 md:px-8 md:py-3.5 bg-orange-600 hover:bg-orange-500 text-white font-black text-[12px] md:text-[14px] uppercase tracking-widest rounded-xl transition-all shadow-[0_10px_25px_rgba(234,88,12,0.3)]"
                     >
                       Book Free Demo
                     </Link>
                     <Link
                       to="/login"
-                      className="px-8 py-3.5 bg-white/10 hover:bg-white/20 border-2 border-white/40 text-white font-black text-[14px] uppercase tracking-widest rounded-xl transition-all"
+                      className="px-6 py-2.5 md:px-8 md:py-3.5 bg-white/10 hover:bg-white/20 border-2 border-white/40 text-white font-black text-[12px] md:text-[14px] uppercase tracking-widest rounded-xl transition-all"
                     >
                       Login
                     </Link>
@@ -728,8 +728,8 @@ const Home = () => {
               {/* VERTICAL DIVIDER LINE (No Gap requested) */}
               <div className="hidden lg:block absolute left-[55%] top-0 bottom-0 w-[2px] bg-blue-500/40 z-30 shadow-[0_0_15px_rgba(59,130,246,0.3)]"></div>
 
-              {/* Right Column: Image */}
-              <div className="w-full lg:w-[45%] relative">
+              {/* Right Column: Image — hidden on mobile */}
+              <div className="hidden lg:block lg:w-[45%] relative">
                 <img 
                    src={successImg} 
                    alt="Student Success" 

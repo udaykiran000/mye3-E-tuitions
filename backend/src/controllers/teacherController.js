@@ -111,6 +111,56 @@ exports.getLiveSessions = async (req, res, next) => {
   }
 };
 
+// @desc    Get dashboard stats (Live count, Student count, etc.)
+// @route   GET /api/teacher/dashboard-stats
+// @access  Teacher
+exports.getDashboardStats = async (req, res, next) => {
+  try {
+    const teacherId = req.user._id;
+    const teacher = await User.findById(teacherId);
+    if (!teacher && req.user.role !== 'admin') return res.status(404).json({ message: 'Teacher not found' });
+
+    // 1. Get Live and Upcoming counts
+    const sessions = await LiveSession.find(req.user.role === 'admin' ? {} : { teacherId });
+    const liveCount = sessions.filter(s => s.status === 'live').length;
+    const upcomingCount = sessions.filter(s => s.status === 'upcoming').length;
+    const endedCount = sessions.filter(s => s.status === 'ended').length;
+
+    // 2. Calculate Real-Time Student Count
+    // This counts students who are enrolled in a subject or bundle assigned to this teacher
+    let studentCount = 0;
+    if (req.user.role === 'admin') {
+      studentCount = await User.countDocuments({ role: 'student' });
+    } else {
+      const assignments = teacher.assignedSubjects || [];
+      const assignedNames = assignments.map(a => a.subjectName);
+      const assignedLevels = assignments.map(a => a.classLevel);
+
+      // Find students who have an active subscription matching any of these names/levels
+      // Note: This is an approximation based on the name-matching logic used in the portal
+      const enrolledStudents = await User.find({
+        role: 'student',
+        'activeSubscriptions.expiryDate': { $gt: new Date() },
+        $or: [
+          { 'activeSubscriptions.name': { $in: assignedNames } },
+          { 'activeSubscriptions.name': { $in: assignedLevels } }
+        ]
+      });
+      studentCount = enrolledStudents.length;
+    }
+
+    res.status(200).json({
+      liveCount,
+      upcomingCount,
+      endedCount,
+      studentCount,
+      totalAssigned: req.user.role === 'admin' ? 0 : (teacher.assignedSubjects?.length || 0)
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Update live session status (Start/End Class)
 // @route   PUT /api/teacher/live-sessions/:id/status
 // @access  Teacher

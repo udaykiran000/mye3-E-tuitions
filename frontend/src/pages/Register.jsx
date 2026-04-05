@@ -11,7 +11,7 @@ const Register = () => {
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole]         = useState('Student');
-  const [syllabus, setSyllabus] = useState('');
+  const [board, setBoard] = useState('');
   const [className, setClassName] = useState('');
   const [error, setError]       = useState(null);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -43,12 +43,13 @@ const Register = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      const res  = await axios.post('/auth/register', { name, email, password, role, syllabus, className });
+      const res  = await axios.post('/auth/register', { name, email: email.toLowerCase(), password, role, board, className });
       const user = res.data;
       dispatch(setCredentials({ ...user }));
-      if (user.role.toLowerCase() === 'admin')        navigate('/admin/dashboard');
-      else if (user.role.toLowerCase() === 'teacher') navigate('/teacher/dashboard');
-      else                                             navigate('/student/dashboard');
+      const userRole = user?.role?.toLowerCase() || 'student';
+      if (userRole === 'admin')        navigate('/admin/dashboard');
+      else if (userRole === 'teacher') navigate('/teacher/dashboard');
+      else                             navigate('/student/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || err.message);
     }
@@ -107,10 +108,10 @@ const Register = () => {
         .reg-main-card {
           position: relative;
           display: flex;
-          width: 85%;
-          max-width: 1150px;
+          width: 92%;
+          max-width: 1300px;
           height: 82vh;
-          min-height: 550px;
+          min-height: 680px;
           border-radius: 12px;
           box-shadow: 0 40px 80px rgba(0,0,0,0.3); /* Big drop shadow */
           overflow: hidden; /* Rounds the inner corners */
@@ -120,9 +121,9 @@ const Register = () => {
         /* ── Image section (Left) ── */
         .reg-card-left {
           position: relative;
-          width: 60%;
+          width: 65%;
           height: 100%;
-          background: #002855; 
+          background: #e96f12; /* Fallback orange color to match image just in case */
         }
 
         .reg-left-img {
@@ -130,8 +131,8 @@ const Register = () => {
           inset: 0;
           width: 100%;
           height: 100%;
-          object-fit: cover; /* Back to cover as requested "sides ki em vadhu" */
-          object-position: center;
+          object-fit: cover; 
+          object-position: 10% center; /* Adjusting again for wider container */
           display: block;
         }
 
@@ -150,18 +151,30 @@ const Register = () => {
         /* ── Form section (Right) ── */
         .reg-card-right {
           position: relative;
-          width: 40%;
+          width: 35%;
           height: 100%;
           background: #002855;
           display: flex;
           flex-direction: column;
-          overflow: hidden; /* No scrolling */
+          overflow-y: auto; /* Enable scrolling for smaller screens */
+        }
+
+        /* Custom scrollbar to keep it looking clean */
+        .reg-card-right::-webkit-scrollbar {
+          width: 6px;
+        }
+        .reg-card-right::-webkit-scrollbar-track {
+          background: #002855;
+        }
+        .reg-card-right::-webkit-scrollbar-thumb {
+          background: rgba(255,255,255,0.2);
+          border-radius: 3px;
         }
 
         /* Inner container - compacted */
         .reg-form-inner {
           width: 100%;
-          height: 100%;
+          min-height: 100%;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -415,7 +428,9 @@ const Register = () => {
               <div className="reg-form-box">
 
                 {/* Form Logo */}
-                <img src={logoImg} alt="e-Tuitions Logo" className="reg-form-logo" />
+                <Link to="/" className="inline-block hover:scale-105 transition-transform" style={{ margin: '0 auto', display: 'block', textAlign: 'center' }}>
+                  <img src={logoImg} alt="e-Tuitions Logo" className="reg-form-logo" />
+                </Link>
 
                 {/* Header */}
                 <h2>Let's Get<br />You Started</h2>
@@ -462,17 +477,19 @@ const Register = () => {
                     />
                   </div>
 
-                  {/* Syllabus */}
+                  {/* Board */}
                   <div className="reg-field">
                     <select
                       className="reg-select"
-                      value={syllabus}
-                      onChange={(e) => setSyllabus(e.target.value)}
+                      value={board}
+                      onChange={(e) => setBoard(e.target.value)}
                       required
                     >
-                      <option value="" disabled>Select Syllabus</option>
-                      <option value="CBSE">CBSE Syllabus</option>
-                      <option value="ICSE">ICSE Syllabus</option>
+                      <option value="" disabled>Select Board</option>
+                      <option value="TS Board">TS Board</option>
+                      <option value="AP Board">AP Board</option>
+                      <option value="CBSE Board">CBSE Board</option>
+                      <option value="ICSE Board">ICSE Board</option>
                     </select>
                   </div>
 
@@ -514,7 +531,7 @@ const Register = () => {
                 {/* Login link */}
                 <div className="reg-login-link">
                   <p>Already have an account?</p>
-                  <p>Click <Link to="/login">here</Link> to login</p>
+                  <Link to="/login" className="reg-login-btn">Click here to Login</Link>
                 </div>
 
               </div>

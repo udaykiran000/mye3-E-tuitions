@@ -15,6 +15,7 @@ import {
   HiChevronRight
 } from 'react-icons/hi';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 // Import local assets
 import slider1 from '../assets/slider1.jpeg';
@@ -83,10 +84,10 @@ const SLIDES = [
 ];
 
 const POPULAR_COURSES = [
-  { title: 'Short Term\nCourses', color: '#fbe08e', border: '#fbbf24', shadow: '#f59e0b', img: course1 },
-  { title: 'Language\nCourses', color: '#fca876', border: '#fb923c', shadow: '#f97316', img: course2 },
-  { title: 'CBSE\nClasses', color: '#b0f1cc', border: '#4ade80', shadow: '#22c55e', img: course3 },
-  { title: 'School\nClasses', color: '#bae0fe', border: '#93c5fd', shadow: '#3b82f6', img: course4 },
+  { title: 'TS\nBoard', href: '/courses#TS Board', color: '#fbe08e', border: '#fbbf24', shadow: '#f59e0b', img: course1 },
+  { title: 'AP\nBoard', href: '/courses#AP Board', color: '#fca876', border: '#fb923c', shadow: '#f97316', img: course2 },
+  { title: 'CBSE\nBoard', href: '/courses#CBSE Board', color: '#b0f1cc', border: '#4ade80', shadow: '#22c55e', img: course3 },
+  { title: 'ICSE\nBoard', href: '/courses#ICSE Board', color: '#bae0fe', border: '#93c5fd', shadow: '#3b82f6', img: course4 },
 ];
 
 const DISCOVER_COURSES = [
@@ -125,6 +126,7 @@ const DISCOVER_COURSES = [
 ];
 
 const Home = () => {
+  const { userInfo } = useSelector((state) => state.auth);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const nextSlide = () => setCurrentSlide((p) => (p === SLIDES.length - 1 ? 0 : p + 1));
@@ -210,7 +212,7 @@ const Home = () => {
               <span
                 className="inline-flex items-center gap-2 px-6 py-2 rounded-full font-bold text-[14px] text-white bg-[#fab500]"
               >
-                Popular Courses
+                Popular Tuitions
               </span>
             </div>
 
@@ -219,7 +221,7 @@ const Home = () => {
               {POPULAR_COURSES.map((course, i) => (
                 <Link
                   key={i}
-                  to="/courses"
+                  to={course.href || "/courses"}
                   className="group relative rounded-2xl overflow-hidden flex flex-col"
                   style={{
                     background: course.color,
@@ -425,7 +427,7 @@ const Home = () => {
               ))}
             </div>
             <Link
-              to="/register"
+              to={userInfo ? (userInfo?.role?.toLowerCase() === 'teacher' ? '/teacher/dashboard' : '/student/dashboard') : '/register'}
               className="inline-flex items-center gap-2 px-7 py-3 text-white font-black text-[14px] rounded-xl hover:opacity-90 transition-all shadow-lg"
               style={{ background: 'linear-gradient(135deg,#f97316,#ea580c)', boxShadow: '0 4px 16px rgba(249,115,22,0.35)' }}
             >
@@ -710,7 +712,7 @@ const Home = () => {
                   
                   <div className="flex flex-wrap gap-3 pt-1 md:pt-2">
                     <Link
-                      to="/register"
+                      to={userInfo ? (userInfo?.role?.toLowerCase() === 'teacher' ? '/teacher/dashboard' : '/student/dashboard') : '/register'}
                       className="px-6 py-2.5 md:px-8 md:py-3.5 bg-orange-600 hover:bg-orange-500 text-white font-black text-[12px] md:text-[14px] uppercase tracking-widest rounded-xl transition-all shadow-[0_10px_25px_rgba(234,88,12,0.3)]"
                     >
                       Book Free Demo

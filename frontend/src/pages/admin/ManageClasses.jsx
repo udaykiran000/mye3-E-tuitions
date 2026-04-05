@@ -8,7 +8,7 @@ const ManageClasses = () => {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [newPricing, setNewPricing] = useState({ oneMonth: 0, threeMonths: 0, sixMonths: 0, twelveMonths: 0 });
-  const [newSyllabus, setNewSyllabus] = useState('CBSE');
+  const [newBoard, setNewBoard] = useState('TS Board');
   
   // Manage Modal States
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
@@ -22,7 +22,7 @@ const ManageClasses = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [addClassForm, setAddClassForm] = useState({
     className: '',
-    syllabus: 'CBSE',
+    board: 'TS Board',
     pricing: { oneMonth: 0, threeMonths: 0, sixMonths: 0, twelveMonths: 0 }
   });
 
@@ -50,15 +50,15 @@ const ManageClasses = () => {
     fetchClasses();
   }, []);
 
-  const handleEdit = (id, currentPricing, currentSyllabus) => {
+  const handleEdit = (id, currentPricing, currentBoard) => {
     setEditingId(id);
     setNewPricing(currentPricing || { oneMonth: 0, threeMonths: 0, sixMonths: 0, twelveMonths: 0 });
-    setNewSyllabus(currentSyllabus || 'CBSE');
+    setNewBoard(currentBoard || 'TS Board');
   };
 
   const handleSavePrice = async (id) => {
     try {
-      await axios.put(`/admin/classes/${id}`, { pricing: newPricing, syllabus: newSyllabus });
+      await axios.put(`/admin/classes/${id}`, { pricing: newPricing, board: newBoard });
       toast.success('Bundle updated successfully!');
       setEditingId(null);
       fetchClasses();
@@ -140,7 +140,7 @@ const ManageClasses = () => {
       setIsAddModalOpen(false);
       setAddClassForm({
         className: '',
-        syllabus: 'CBSE',
+        board: 'TS Board',
         pricing: { oneMonth: 0, threeMonths: 0, sixMonths: 0, twelveMonths: 0 }
       });
       fetchClasses();
@@ -177,7 +177,7 @@ const ManageClasses = () => {
             <thead className="bg-slate-50/50 border-b border-slate-100">
                <tr className="text-xs font-black uppercase text-slate-400 tracking-[0.2em]">
                   <th className="px-8 py-6">Grade / Bundle Name</th>
-                  <th className="px-8 py-6">Syllabus & Pricing</th>
+                  <th className="px-8 py-6">Board & Pricing</th>
                   <th className="px-8 py-6">Status</th>
                   <th className="px-8 py-6 text-right">Operational Controls</th>
                </tr>
@@ -200,10 +200,12 @@ const ManageClasses = () => {
                        {editingId === cls._id ? (
                          <div className="flex flex-col gap-2">
                             <select 
-                              value={newSyllabus}
-                              onChange={(e) => setNewSyllabus(e.target.value)}
+                              value={newBoard}
+                              onChange={(e) => setNewBoard(e.target.value)}
                               className="w-full px-3 py-1 bg-slate-50 border-2 border-indigo-600 rounded-lg text-sm font-bold outline-none"
                             >
+                              <option value="TS Board">TS Board</option>
+                              <option value="AP Board">AP Board</option>
                               <option value="CBSE">CBSE</option>
                               <option value="ICSE">ICSE</option>
                             </select>
@@ -217,7 +219,7 @@ const ManageClasses = () => {
                          </div>
                        ) : (
                          <div className="flex flex-col gap-1 text-xs text-slate-600">
-                            <span className="font-extrabold text-indigo-600 text-sm mb-1">{cls.syllabus || 'N/A'}</span>
+                            <span className="font-extrabold text-indigo-600 text-sm mb-1">{cls.board || 'N/A'}</span>
                             <div className="flex justify-between w-32"><span>1 mo:</span> <b>₹{cls.pricing?.oneMonth || 0}</b></div>
                             <div className="flex justify-between w-32"><span>3 mo:</span> <b>₹{cls.pricing?.threeMonths || 0}</b></div>
                             <div className="flex justify-between w-32"><span>6 mo:</span> <b>₹{cls.pricing?.sixMonths || 0}</b></div>
@@ -231,7 +233,7 @@ const ManageClasses = () => {
                     <td className="px-8 py-6 text-right">
                        <div className="flex items-center justify-end gap-3">
                           <button 
-                            onClick={() => handleEdit(cls._id, cls.pricing, cls.syllabus)}
+                            onClick={() => handleEdit(cls._id, cls.pricing, cls.board)}
                             className="p-3 bg-slate-50 text-slate-400 rounded-xl hover:bg-slate-100 hover:text-slate-600 transition-all"
                           >
                              <Edit2 className="w-4 h-4" />
@@ -448,12 +450,14 @@ const ManageClasses = () => {
                     />
                  </div>
                  <div className="space-y-1.5">
-                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Syllabus</label>
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Education Board</label>
                     <select 
-                      value={addClassForm.syllabus}
-                      onChange={(e) => setAddClassForm({...addClassForm, syllabus: e.target.value})}
+                      value={addClassForm.board}
+                      onChange={(e) => setAddClassForm({...addClassForm, board: e.target.value})}
                       className="w-full px-6 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-600 rounded-2xl outline-none font-bold"
                     >
+                       <option value="TS Board">TS Board</option>
+                       <option value="AP Board">AP Board</option>
                        <option value="CBSE">CBSE</option>
                        <option value="ICSE">ICSE</option>
                     </select>

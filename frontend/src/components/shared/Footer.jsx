@@ -171,24 +171,24 @@ const Footer = () => {
           {/* Column 5: Contact Us */}
           <div className="lg:col-span-1">
             <h4 className="text-[14px] font-black mb-5 uppercase tracking-wider text-white">Contact Us</h4>
-            <ul className="space-y-3 relative z-10">
-              <li className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 bg-white/10 text-white border border-white/5">
-                  <HiOutlinePhone className="text-[11px]" />
+            <ul className="space-y-4 relative z-10">
+              <li className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-white/10 text-white border border-white/5">
+                  <HiOutlinePhone className="text-[15px]" />
                 </div>
-                <span className="text-[11px] font-medium text-indigo-100/70 leading-none whitespace-nowrap">+91 99126 71666</span>
+                <span className="text-[13px] md:text-[14px] font-medium text-indigo-100/70 leading-none whitespace-nowrap">+91 99126 71666</span>
               </li>
-              <li className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 bg-white/10 text-white border border-white/5">
-                  <HiOutlineMail className="text-[11px]" />
+              <li className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-white/10 text-white border border-white/5">
+                  <HiOutlineMail className="text-[15px]" />
                 </div>
-                <span className="text-[10px] font-medium text-indigo-100/70 leading-none break-all">mye3etutions@gmail.com</span>
+                <span className="text-[13px] md:text-[14px] font-medium text-indigo-100/70 leading-none break-all">mye3etutions@gmail.com</span>
               </li>
-              <li className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 bg-white/10 text-white border border-white/5">
-                  <HiOutlineLocationMarker className="text-[11px]" />
+              <li className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-white/10 text-white border border-white/5">
+                  <HiOutlineLocationMarker className="text-[15px]" />
                 </div>
-                <span className="text-[11px] font-medium text-indigo-100/70 leading-snug">Eluru, AP - 534002</span>
+                <span className="text-[13px] md:text-[14px] font-medium text-indigo-100/70 leading-snug">Eluru, AP - 534002</span>
               </li>
             </ul>
           </div>

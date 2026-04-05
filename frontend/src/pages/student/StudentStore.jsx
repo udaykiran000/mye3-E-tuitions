@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -16,7 +16,8 @@ import {
 } from 'react-icons/fi';
 import { GraduationCap } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { setCredentials } from '../../store/slices/authSlice';
 import courseItem1 from '../../assets/course-item-1.webp';
 import courseItem2 from '../../assets/course-item-2.webp';
 import courseItem3 from '../../assets/course-item-3.webp';
@@ -182,22 +183,22 @@ const CourseCard = ({ c, expandedId, setExpandedId, setSelectedCourse, setShowCh
   const isExpanded = expandedId === c.id;
 
   // Normalize for comparison
+  // Normalize for comparison
   const userClass = userInfo?.className?.replace(/\D/g, '') || '';
   const courseClass = String(c.classLevel || c.className || '').replace(/\D/g, '') || '';
-  const userSyllabus = userInfo?.syllabus?.toUpperCase().trim() || '';
-  const courseSyllabus = c.syllabus?.toUpperCase().trim() || '';
+  const userBoard = userInfo?.board?.toUpperCase().trim() || '';
+  const courseBoard = c.board?.toUpperCase().trim() || '';
 
-  const isClassMatch = userClass === courseClass;
-  const isSyllabusMatch = !courseSyllabus || !userSyllabus || courseSyllabus === userSyllabus;
-  const isEligible = isClassMatch && isSyllabusMatch;
+  // If not logged in, show everything as eligible for viewing/exploring
+  const isEligible = !userInfo || (userClass === courseClass && (!courseBoard || !userBoard || courseBoard === userBoard));
 
   return (
     <motion.div 
       whileHover={{ y: -5 }}
-      className={`group bg-white rounded-3xl border transition-all duration-300 flex flex-col p-6 relative overflow-hidden ${!isEligible ? 'opacity-75' : ''} ${isExpanded ? 'border-orange-500 shadow-xl' : 'border-slate-100 hover:border-orange-500/30 hover:shadow-2xl shadow-sm'}`}
+      className={`group bg-white rounded-3xl border transition-all duration-300 flex flex-col p-4 relative overflow-hidden ${!isEligible ? 'opacity-75' : ''} ${isExpanded ? 'border-orange-500 shadow-xl' : 'border-slate-100 hover:border-orange-500/30 hover:shadow-2xl shadow-sm'}`}
     >
       {/* Brand Bar */}
-      <div className={`absolute top-0 left-0 w-1.5 h-full ${isBundle ? 'bg-orange-500 shadow-[0_0_15px_rgba(241,97,38,0.4)]' : 'bg-[#002147]'}`} />
+      <div className={`absolute top-0 left-0 w-1 h-full ${isBundle ? 'bg-orange-500 shadow-[0_0_15px_rgba(241,97,38,0.4)]' : 'bg-[#002147]'}`} />
       
       {!isEligible && (
         <div className="absolute inset-0 bg-slate-50/10 z-[5] pointer-events-none" />
@@ -209,39 +210,39 @@ const CourseCard = ({ c, expandedId, setExpandedId, setSelectedCourse, setShowCh
         </div>
       )}
 
-      <div className="flex items-start justify-between mb-8">
-        <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center p-3 border border-slate-100 group-hover:bg-orange-50 group-hover:scale-105 transition-all duration-300 shadow-sm">
+      <div className="flex items-start justify-between mb-4">
+        <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center p-2.5 border border-slate-100 group-hover:bg-orange-50 group-hover:scale-105 transition-all duration-300 shadow-sm">
           <img src={brandSymbol} alt="logo" className="w-full h-full object-contain" />
         </div>
         <div className="text-right">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 italic">Starting From</p>
-          <p className="text-2xl font-black text-[#002147] italic tracking-tighter leading-none">₹{(c.pricing?.oneMonth || c.price || 0).toLocaleString()}</p>
+          <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5 italic">From</p>
+          <p className="text-xl font-black text-[#002147] italic tracking-tighter leading-none">₹{(c.pricing?.oneMonth || c.price || 0).toLocaleString()}</p>
         </div>
       </div>
 
-      <div className="mb-6 flex-1">
-        <p className="text-[10px] font-black text-orange-600 uppercase tracking-[0.3em] leading-none mb-2">
-          Class {courseClass} {courseSyllabus ? `(${courseSyllabus})` : ''}
+      <div className="mb-4 flex-1">
+        <p className="text-[9px] font-black text-orange-600 uppercase tracking-[0.3em] leading-none mb-1.5">
+          {Number(courseClass) === 11 ? 'Inter 1st Year' : Number(courseClass) === 12 ? 'Inter 2nd Year' : `Class ${courseClass}`} {courseBoard ? `(${courseBoard})` : ''}
         </p>
-        <h3 className="text-[20px] font-black text-[#002147] leading-tight tracking-tight uppercase italic">{c.name}</h3>
+        <h3 className="text-[16px] font-black text-[#002147] leading-tight tracking-tight uppercase italic">{c.name}</h3>
         
         {/* Features Preview */}
-        <div className="mt-6 space-y-2.5">
+        <div className="mt-4 space-y-2">
           {(c.subjects || []).slice(0, 3).map((sub, idx) => (
-            <div key={idx} className="flex items-center gap-2.5 text-slate-600">
-              <FiCheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-              <span className="text-[11px] font-bold italic uppercase tracking-tight">{sub.name}</span>
+            <div key={idx} className="flex items-center gap-2 text-slate-600">
+              <FiCheckCircle className="w-3 h-3 text-emerald-500 shrink-0" />
+              <span className="text-[10px] font-bold italic uppercase tracking-tight">{sub.name}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="pt-6 border-t border-slate-50 space-y-4">
+      <div className="pt-4 border-t border-slate-50 space-y-3">
         {isEligible ? (
           <div className="flex gap-3">
              <button 
                onClick={() => { setSelectedCourse(c); setShowCheckout(true); }}
-               className="flex-1 bg-[#002147] text-white py-3.5 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-orange-500 transition-all shadow-lg active:scale-95 group/buy"
+               className="flex-1 bg-[#002147] text-white py-3 rounded-xl font-black text-[9px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-orange-500 transition-all shadow-lg active:scale-95 group/buy"
              >
                Enroll <FiArrowRight className="w-4 h-4 group-hover/buy:translate-x-1 transition-transform" />
              </button>
@@ -320,7 +321,9 @@ const StoreCarousel = () => {
 
 const StudentStore = () => {
   const location = useLocation();
+  const dispatch = useDispatch();
   const { userInfo } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -337,8 +340,9 @@ const StudentStore = () => {
   const fetchCourses = async () => {
     try {
       const { data } = await axios.get('/student/catalog');
+      let baseCourses = [];
       if (!data || data.length === 0) {
-        const mockData = [
+        baseCourses = [
           { id: 'c6', name: 'Class 6 - All Subjects', classLevel: '6', type: 'bundle', price: 999, subjects: [{name: 'Maths'}, {name: 'Science'}, {name: 'English'}] },
           { id: 'c7', name: 'Class 7 - All Subjects', classLevel: '7', type: 'bundle', price: 999, subjects: [{name: 'Maths'}, {name: 'Science'}, {name: 'English'}] },
           { id: 'c8', name: 'Class 8 - All Subjects', classLevel: '8', type: 'bundle', price: 1199, subjects: [{name: 'Maths'}, {name: 'Physics'}, {name: 'Chemistry'}] },
@@ -347,12 +351,37 @@ const StudentStore = () => {
           { id: 'c11', name: 'Class 11 - Subjects', classLevel: '11', type: 'subject', price: 999, subjects: [{name: 'Physics'}, {name: 'Chemistry'}, {name: 'Maths'}] },
           { id: 'c12', name: 'Class 12 - Subjects', classLevel: '12', type: 'subject', price: 999, subjects: [{name: 'Physics'}, {name: 'Chemistry'}, {name: 'Maths'}] },
         ];
-        const sorted = [...mockData].sort((a, b) => parseInt(a.classLevel.toString().replace(/\D/g,'')) - parseInt(b.classLevel.toString().replace(/\D/g,'')));
-        setCourses(sorted);
       } else {
-        const sorted = [...data].sort((a, b) => parseInt(a.classLevel.toString().replace(/\D/g,'')) - parseInt(b.classLevel.toString().replace(/\D/g,'')));
-        setCourses(sorted);
+        baseCourses = data;
       }
+
+      // Replicate courses across all boards to populate the UI fully
+      const allBoards = ['TS Board', 'AP Board', 'CBSE Board', 'ICSE Board'];
+      const populatedCourses = [];
+      
+      // Get unique prototypes to copy from (one for each unique course name)
+      const prototypes = {};
+      baseCourses.forEach(c => {
+        const uniqueName = c.name?.trim().toLowerCase();
+        if (uniqueName && !prototypes[uniqueName]) {
+          prototypes[uniqueName] = c;
+        }
+      });
+
+      // For every board, create a full set of courses
+      allBoards.forEach(board => {
+        Object.values(prototypes).forEach(proto => {
+           populatedCourses.push({
+             ...proto,
+             id: `${proto._id || proto.id}-${board}`,
+             _id: `${proto._id || proto.id}-${board}`, // Ensure unique key
+             board: board
+           });
+        });
+      });
+
+      const sorted = populatedCourses.sort((a, b) => parseInt(a.classLevel?.toString().replace(/\D/g,'') || '0') - parseInt(b.classLevel?.toString().replace(/\D/g,'') || '0'));
+      setCourses(sorted);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -360,6 +389,19 @@ const StudentStore = () => {
   };
 
   useEffect(() => { fetchCourses(); }, [userInfo]);
+
+  // Hash scrolling support
+  useEffect(() => {
+    if (location.hash && !loading) {
+      setTimeout(() => {
+        const id = decodeURIComponent(location.hash.substring(1));
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'auto', block: 'start' });
+        }
+      }, 50); // fast scroll after render
+    }
+  }, [location.hash, loading]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -370,6 +412,30 @@ const StudentStore = () => {
       seniorRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [location, courses]);
+
+  // Handle direct buy from dashboard
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const action = params.get('action');
+    if (action === 'buy' && !loading && courses.length > 0) {
+      // Find matching course for user's class and board
+      const userClass = userInfo?.className?.replace(/\D/g, '') || '';
+      const userBoard = userInfo?.board?.toUpperCase().trim() || '';
+      
+      const match = courses.find(c => {
+         const courseClass = String(c.classLevel || c.className || '').replace(/\D/g, '') || '';
+         const courseBoard = c.board?.toUpperCase().trim() || '';
+         return userClass === courseClass && (courseBoard === userBoard || !courseBoard);
+      });
+
+      if (match) {
+        setSelectedCourse(match);
+        setShowCheckout(true);
+        // Clean up URL to prevent repeat triggers on reload
+        window.history.replaceState({}, '', '/student/courses');
+      }
+    }
+  }, [location, loading, courses, userInfo]);
 
   const handleEnroll = (course) => {
     setSelectedCourse(course);
@@ -389,11 +455,29 @@ const StudentStore = () => {
         subscriptionType: selectedDuration
       });
       toast.success('Course Purchased Successfully!');
+      
+      // Update Redux state with new subscriptions
+      const updatedUser = {
+        ...userInfo,
+        activeSubscriptions: [
+          ...(userInfo.activeSubscriptions || []),
+          {
+            name: selectedCourse.className || selectedCourse.name,
+            type: selectedCourse.type || 'bundle',
+            subscriptionType: selectedDuration,
+            expiryDate: new Date(Date.now() + (selectedDuration === 'oneMonth' ? 30 : 90) * 86400000), // Approximate for sync
+            referenceId: selectedCourse._id || selectedCourse.id,
+            purchaseDate: new Date()
+          }
+        ]
+      };
+      dispatch(setCredentials(updatedUser));
+
       setTimeout(() => {
         setBuyLoading(false);
         setShowCheckout(false);
         setSelectedCourse(null);
-        window.location.href = '/student/dashboard';
+        navigate('/student/dashboard');
       }, 1500);
     } catch (error) {
       toast.error('Payment Failed');
@@ -405,8 +489,69 @@ const StudentStore = () => {
     (c.className?.toLowerCase() || c.name?.toLowerCase() || '').includes(searchQuery.toLowerCase())
   );
 
-  const juniorCourses = filteredCourses.filter(c => c.type === 'bundle');
-  const seniorCourses = filteredCourses.filter(c => c.type === 'subject');
+  // Only filter if user is a student and has specific class/board settings
+  const isStudentFiltered = userInfo?.role?.toLowerCase() === 'student' && 
+                            (userInfo?.className || userInfo?.board);
+
+  const finalFiltered = isStudentFiltered ? filteredCourses.filter(c => {
+    const courseClass = String(c.classLevel || c.className || '').replace(/\D/g, '') || '';
+    const userClass = userInfo?.className?.replace(/\D/g, '') || '';
+    const courseBoard = c.board?.toUpperCase().trim() || '';
+    const userBoard = userInfo?.board?.toUpperCase().trim() || '';
+    
+    // Only show if class matches (and board if specified)
+    return userClass === courseClass && (!courseBoard || !userBoard || courseBoard === userBoard);
+  }) : filteredCourses;
+
+  const juniorCourses = finalFiltered.filter(c => c.type === 'bundle');
+  const interFirstYear = finalFiltered.filter(c => c.type === 'subject' && Number(c.classLevel) === 11);
+  const interSecondYear = finalFiltered.filter(c => c.type === 'subject' && Number(c.classLevel) === 12);
+
+  const renderBoardGroups = (courseList) => {
+    const boards = ['TS Board', 'AP Board', 'CBSE Board', 'ICSE Board'];
+    const grouped = {};
+    boards.forEach(b => {
+      const baseBoard = b.replace(' Board', '');
+      const filtered = courseList.filter(c => {
+        const cBoard = c.board || 'TS Board';
+        return cBoard === b || cBoard === baseBoard;
+      });
+      // Always add the board to grouped, even if empty, to ensure all boards are shown
+      grouped[b] = filtered;
+    });
+    
+    return Object.entries(grouped).map(([boardName, boardCourses]) => {
+      // Hide empty boards only when restrictive filtering is active for students
+      if (boardCourses.length === 0 && isStudentFiltered) return null;
+      
+      return (
+        <div key={boardName} id={boardName} className="space-y-5 scroll-mt-24">
+        <div className="flex items-center gap-4">
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-lg border border-slate-100">{boardName}</span>
+          <div className="flex-1 h-[1px] bg-slate-50" />
+        </div>
+        {boardCourses.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+            {boardCourses.map(c => (
+              <CourseCard key={c.id} c={c} expandedId={expandedId} setExpandedId={setExpandedId} setSelectedCourse={setSelectedCourse} setShowCheckout={setShowCheckout} userInfo={userInfo} onDetailView={(course) => { setSelectedCourse(course); setShowDetailModal(true); }} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#fcfcfd] flex items-center justify-center font-sans">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-slate-200 border-t-orange-500 rounded-full animate-spin"></div>
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] animate-pulse">Loading Courses...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#fcfcfd] min-h-screen font-sans">
@@ -444,12 +589,12 @@ const StudentStore = () => {
             <div className="relative z-10">
               <div className="flex items-center gap-2 mb-4 px-4 py-1 bg-orange-50 rounded-full w-fit border border-orange-100">
                 <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />
-                <span className="text-[9px] font-black text-orange-600 uppercase tracking-widest">Enrolment 2026</span>
+                <span className="text-[9px] font-black text-orange-600 uppercase tracking-widest">Admissions Open 2026</span>
               </div>
               <h1 className="text-3xl md:text-4xl font-black text-[#002147] mb-4 italic tracking-tighter leading-none uppercase">
-                MYE3-E-TUITION <span className="text-orange-500 not-italic">STORE</span>
+                MYE3-E-TUITION <span className="text-orange-500 not-italic">ACADEMY</span>
               </h1>
-              <p className="text-slate-500 font-bold italic text-sm max-w-xl mb-6 leading-relaxed">Choose your goal and start learning with expert teachers.</p>
+              <p className="text-slate-500 font-bold italic text-sm max-w-xl mb-6 leading-relaxed">Explore our comprehensive online courses and start learning with expert tutors.</p>
               <div className="flex flex-wrap gap-3">
                 <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-100"><FiCheckCircle /> All Subjects</div>
                 <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-[10px] font-black uppercase tracking-widest border border-blue-100"><FiCheckCircle /> Live Classes</div>
@@ -460,32 +605,39 @@ const StudentStore = () => {
         </div>
       </div>
 
-      <div className="max-w-[1280px] mx-auto px-4 md:px-8 pb-32 space-y-20">
-        <section ref={juniorRef} className="scroll-mt-32">
-          <div className="flex items-center gap-6 mb-12">
-            <div className="px-5 py-2 bg-[#002147] text-white rounded-2xl transform -skew-x-12"><h2 className="text-2xl font-black italic tracking-tight uppercase leading-none skew-x-12">School Tuitions</h2></div>
-            <div className="flex-1 h-[2px] bg-slate-100" />
-            <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">CLASS 6TH - 10TH</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {juniorCourses.map(c => (
-              <CourseCard key={c.id} c={c} expandedId={expandedId} setExpandedId={setExpandedId} setSelectedCourse={setSelectedCourse} setShowCheckout={setShowCheckout} userInfo={userInfo} onDetailView={(course) => { setSelectedCourse(course); setShowDetailModal(true); }} />
-            ))}
-          </div>
-        </section>
+      <div className="max-w-[1280px] mx-auto px-4 md:px-8 pb-32 space-y-12">
+        {juniorCourses.length > 0 && (
+          <section ref={juniorRef} className="scroll-mt-32 space-y-8">
+            <div className="flex items-center gap-6">
+              <div className="px-5 py-2 bg-[#002147] text-white rounded-2xl transform -skew-x-12"><h2 className="text-xl font-black italic tracking-tight uppercase leading-none skew-x-12">School Tuitions</h2></div>
+              <div className="flex-1 h-[2px] bg-slate-100" />
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">CLASS 6TH - 10TH</span>
+            </div>
+            {renderBoardGroups(juniorCourses)}
+          </section>
+        )}
 
-        <section ref={seniorRef} className="scroll-mt-32">
-          <div className="flex items-center gap-6 mb-12">
-            <div className="px-5 py-2 bg-orange-500 text-white rounded-2xl transform -skew-x-12"><h2 className="text-2xl font-black italic tracking-tight uppercase leading-none skew-x-12">Senior Classes</h2></div>
-            <div className="flex-1 h-[2px] bg-slate-100" />
-            <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">CLASS 11TH - 12TH</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {seniorCourses.map(c => (
-              <CourseCard key={c.id} c={c} expandedId={expandedId} setExpandedId={setExpandedId} setSelectedCourse={setSelectedCourse} setShowCheckout={setShowCheckout} userInfo={userInfo} onDetailView={(course) => { setSelectedCourse(course); setShowDetailModal(true); }} />
-            ))}
-          </div>
-        </section>
+        {interFirstYear.length > 0 && (
+          <section ref={seniorRef} className="scroll-mt-32 space-y-8">
+            <div className="flex items-center gap-6">
+              <div className="px-5 py-2 bg-orange-500 text-white rounded-2xl transform -skew-x-12"><h2 className="text-xl font-black italic tracking-tight uppercase leading-none skew-x-12">Inter First Year</h2></div>
+              <div className="flex-1 h-[2px] bg-slate-100" />
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">CLASS 11TH</span>
+            </div>
+            {renderBoardGroups(interFirstYear)}
+          </section>
+        )}
+
+        {interSecondYear.length > 0 && (
+          <section className="scroll-mt-32 space-y-8">
+            <div className="flex items-center gap-6">
+              <div className="px-5 py-2 bg-indigo-600 text-white rounded-2xl transform -skew-x-12"><h2 className="text-xl font-black italic tracking-tight uppercase leading-none skew-x-12">Inter Second Year</h2></div>
+              <div className="flex-1 h-[2px] bg-slate-100" />
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">CLASS 12TH</span>
+            </div>
+            {renderBoardGroups(interSecondYear)}
+          </section>
+        )}
       </div>
 
       <AnimatePresence>

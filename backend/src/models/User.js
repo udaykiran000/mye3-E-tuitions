@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
     default: 'Student',
     lowercase: true 
   },
-  syllabus: { type: String, enum: ['CBSE', 'ICSE'] },
+  board: { type: String, enum: ['CBSE', 'ICSE', 'TS Board', 'AP Board'] },
   className: { type: String },
   activeSubscriptions: [subscriptionSchema],
   assignedSubjects: [

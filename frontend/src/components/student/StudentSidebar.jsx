@@ -12,6 +12,7 @@ import {
   Home,
   ShoppingBag,
   Video,
+  FileText,
   X
 } from 'lucide-react';
 
@@ -29,9 +30,10 @@ const StudentSidebar = ({ onClose }) => {
 
   const menuItems = [
     { icon: Home, label: 'Home', path: '/', end: true },
-    { icon: LayoutDashboard, label: 'Summary', path: '/student/dashboard' },
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/student/dashboard' },
     { icon: BookOpen, label: 'My Classes', path: '/student/classes' },
     { icon: Video, label: 'Live & Schedule Class', path: '/student/live-schedule' },
+    { icon: FileText, label: 'Notes', path: '/student/notes' },
     { icon: CreditCard, label: 'Fee Payments', path: '/student/payments' },
     { icon: User, label: 'Profile', path: '/student/profile' },
   ];
@@ -45,10 +47,7 @@ const StudentSidebar = ({ onClose }) => {
             alt="Logo" 
             className="h-10 md:h-12 w-auto object-contain transition-transform group-hover:scale-105" 
           />
-          <div className="flex flex-col gap-0 text-left">
-            <span className="text-xl font-black tracking-tighter leading-none whitespace-nowrap">Student Portal</span>
-            <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mt-0.5 italic opacity-80">Mye3 Education</span>
-          </div>
+
         </Link>
         {onClose && (
           <button onClick={onClose} className="lg:hidden p-2 text-slate-400 hover:text-indigo-600 transition-colors">

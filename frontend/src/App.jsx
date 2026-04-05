@@ -43,6 +43,7 @@ import MyLearning from './pages/student/MyLearning';
 import StudentLiveSchedule from './pages/student/StudentLiveSchedule';
 import ProfileSettings from './pages/shared/ProfileSettings';
 import PaymentHistory from './pages/student/PaymentHistory';
+import StudentNotes from './pages/student/StudentNotes';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, role }) => {
@@ -51,9 +52,9 @@ const ProtectedRoute = ({ children, role }) => {
   if (!userInfo) return <Navigate to="/login" replace />;
   
   // Admin bypass: Admins can access all views
-  if (userInfo.role.toLowerCase() === 'admin') return children;
+  if (userInfo?.role?.toLowerCase() === 'admin') return children;
   
-  if (role && userInfo.role.toLowerCase() !== role.toLowerCase()) return <Navigate to="/" replace />;
+  if (role && userInfo?.role?.toLowerCase() !== role.toLowerCase()) return <Navigate to="/" replace />;
   
   return children;
 };
@@ -95,7 +96,8 @@ function AppContent() {
                       <Route path="live-schedule" element={<StudentLiveSchedule />} />
                       <Route path="courses" element={<StudentStore />} />
                       <Route path="classes/:courseName" element={<StudentCourseContent />} />
-                      <Route path="materials" element={<div className="text-2xl font-black text-slate-300 italic pt-20 text-center uppercase tracking-widest leading-loose">Materials Hub<br/><span className="text-sm opacity-50">Centralized Resource Archive coming soon...</span></div>} />
+                      <Route path="notes" element={<StudentNotes />} />
+                      <Route path="materials" element={<StudentNotes />} />
                       <Route path="payments" element={<PaymentHistory />} />
                       <Route path="profile" element={<ProfileSettings role="Student" />} />
                     </Routes>

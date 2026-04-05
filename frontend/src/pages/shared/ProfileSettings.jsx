@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { setCredentials } from '../../store/slices/authSlice';
 import toast from 'react-hot-toast';
@@ -26,13 +27,32 @@ const ProfileSettings = ({ role }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab ] = useState('personal');
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [subsLoading, setSubsLoading] = useState(false);
+
+  React.useEffect(() => {
+    if (activeTab === 'subscriptions' && role?.toLowerCase() === 'student') {
+      const fetchSubs = async () => {
+        setSubsLoading(true);
+        try {
+          const { data } = await axios.get('/student/subscriptions');
+          setSubscriptions(data);
+        } catch (err) {
+          toast.error('Failed to fetch subscriptions');
+        } finally {
+          setSubsLoading(false);
+        }
+      };
+      fetchSubs();
+    }
+  }, [activeTab, role]);
 
   // Role-based theme colors
   const theme = {
     student: 'indigo',
     teacher: 'teal',
     admin: 'indigo'
-  }[role.toLowerCase()] || 'indigo';
+  }[role?.toLowerCase() || 'student'] || 'indigo';
 
   const t = {
     indigo: {
@@ -231,7 +251,12 @@ const ProfileSettings = ({ role }) => {
                   </div>
 
                   <div className="space-y-6">
-                    {(userInfo?.activeSubscriptions || []).length === 0 ? (
+                    {subsLoading ? (
+                      <div className="py-20 flex flex-col items-center justify-center space-y-4">
+                        <Loader2 className={`w-8 h-8 ${t.text} animate-spin`} />
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Fetching live records...</p>
+                      </div>
+                    ) : (subscriptions || []).length === 0 ? (
                       <div className="py-20 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-100">
                          <ShieldCheck className="w-12 h-12 text-slate-200 mx-auto mb-4" />
                          <p className="text-slate-400 font-black uppercase tracking-widest text-sm italic">No active enrollments found</p>
@@ -239,7 +264,7 @@ const ProfileSettings = ({ role }) => {
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 gap-4">
-                        {userInfo.activeSubscriptions.map((sub, idx) => {
+                        {subscriptions.map((sub, idx) => {
                           const daysLeft = Math.ceil((new Date(sub.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
                           const isNearExpiry = daysLeft <= 7 && daysLeft > 0;
                           const isExpired = daysLeft <= 0;

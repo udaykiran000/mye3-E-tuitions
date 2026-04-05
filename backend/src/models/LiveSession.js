@@ -5,6 +5,7 @@ const liveSessionSchema = new mongoose.Schema({
   subjectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject' },
   classLevel: { type: String, required: true },
   subjectName: { type: String, required: true },
+  board: { type: String, enum: ['CBSE', 'ICSE', 'TS Board', 'AP Board'], default: 'TS Board' },
   title: { type: String, required: true },
   platform: { type: String, enum: ['Zoom', 'Google Meet', 'YouTube Live'], required: true },
   link: { type: String, required: true },

@@ -12,7 +12,7 @@ const ManageSubjects = () => {
   const [formData, setFormData] = useState({
     name: '',
     classLevel: '11',
-    syllabus: 'CBSE',
+    board: 'TS Board',
     pricing: { oneMonth: 0, threeMonths: 0, sixMonths: 0, twelveMonths: 0 },
     teacherName: ''
   });
@@ -66,7 +66,7 @@ const ManageSubjects = () => {
     setFormData({
       name: sub.name,
       classLevel: sub.classLevel.toString(),
-      syllabus: sub.syllabus || 'CBSE',
+      board: sub.board || 'TS Board',
       pricing: sub.pricing || { oneMonth: 0, threeMonths: 0, sixMonths: 0, twelveMonths: 0 },
       teacherName: sub.teacherName === 'Not Assigned' ? '' : sub.teacherName
     });
@@ -74,7 +74,7 @@ const ManageSubjects = () => {
   };
 
   const resetForm = () => {
-    setFormData({ name: '', classLevel: '11', syllabus: 'CBSE', pricing: { oneMonth: 0, threeMonths: 0, sixMonths: 0, twelveMonths: 0 }, teacherName: '' });
+    setFormData({ name: '', classLevel: '11', board: 'TS Board', pricing: { oneMonth: 0, threeMonths: 0, sixMonths: 0, twelveMonths: 0 }, teacherName: '' });
     setEditingId(null);
     setIsModalOpen(false);
   };
@@ -94,7 +94,7 @@ const ManageSubjects = () => {
          <div className="space-y-2">
             <h1 className="text-4xl font-black text-slate-900 tracking-tight">Subject Management</h1>
             <p className="text-slate-500 font-bold flex items-center gap-2">
-               Class 11 & 12 Specialized Individual Subscriptions
+               Inter 1st & 2nd Year Specialized Individual Subscriptions
             </p>
          </div>
          <button 
@@ -128,7 +128,7 @@ const ManageSubjects = () => {
               <thead className="bg-slate-50/50 border-b border-slate-100">
                  <tr className="text-xs font-black uppercase text-slate-400 tracking-[0.2em]">
                     <th className="px-8 py-7">Subject Info</th>
-                    <th className="px-8 py-7">Grade & Syllabus</th>
+                    <th className="px-8 py-7">Year & Board</th>
                     <th className="px-8 py-7">Tiered Pricing (₹)</th>
                     <th className="px-8 py-7">Assigned Teacher</th>
                     <th className="px-8 py-7 text-right">Actions</th>
@@ -147,10 +147,10 @@ const ManageSubjects = () => {
                       </td>
                       <td className="px-8 py-7">
                          <div className="space-y-1">
-                            <span className={`px-4 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest ${sub.classLevel === 11 ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                               Class {sub.classLevel}
+                            <span className={`px-4 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest ${Number(sub.classLevel) === 11 ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                               {Number(sub.classLevel) === 11 ? 'Inter 1st Year' : 'Inter 2nd Year'}
                             </span>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest pt-1 px-1">{sub.syllabus || 'CBSE'}</p>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest pt-1 px-1">{sub.board || 'TS Board'}</p>
                          </div>
                       </td>
                       <td className="px-8 py-7">
@@ -223,23 +223,25 @@ const ManageSubjects = () => {
 
                  <div className="grid grid-cols-2 gap-8">
                     <div className="space-y-3">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pl-2 underline decoration-indigo-500 decoration-2 underline-offset-4">Grade Level</label>
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pl-2 underline decoration-indigo-500 decoration-2 underline-offset-4">Academic Year</label>
                        <select 
                          value={formData.classLevel}
                          onChange={(e) => setFormData({...formData, classLevel: e.target.value})}
                          className="w-full px-8 py-5 bg-slate-50 border-2 border-transparent focus:border-indigo-600 rounded-3xl outline-none font-bold text-slate-900 appearance-none cursor-pointer transition-all"
                        >
-                          <option value="11">Class 11</option>
-                          <option value="12">Class 12</option>
+                          <option value="11">Inter 1st Year (11)</option>
+                          <option value="12">Inter 2nd Year (12)</option>
                        </select>
                     </div>
                     <div className="space-y-3">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pl-2 underline decoration-indigo-500 decoration-2 underline-offset-4">Syllabus</label>
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pl-2 underline decoration-indigo-500 decoration-2 underline-offset-4">Educational Board</label>
                        <select 
-                         value={formData.syllabus}
-                         onChange={(e) => setFormData({...formData, syllabus: e.target.value})}
+                         value={formData.board}
+                         onChange={(e) => setFormData({...formData, board: e.target.value})}
                          className="w-full px-8 py-5 bg-slate-50 border-2 border-transparent focus:border-indigo-600 rounded-3xl outline-none font-bold text-slate-900 appearance-none cursor-pointer transition-all"
                        >
+                          <option value="TS Board">TS Board</option>
+                          <option value="AP Board">AP Board</option>
                           <option value="CBSE">CBSE</option>
                           <option value="ICSE">ICSE</option>
                        </select>

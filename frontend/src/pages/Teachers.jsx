@@ -1,5 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { 
   FiSearch, 
   FiCheckCircle, 
@@ -16,6 +18,7 @@ import teacherPhysics from '../assets/teacher-physics.png';
 import teacherChemistry from '../assets/teacher-chemistry.png';
 
 const Teachers = () => {
+  const { userInfo } = useSelector((state) => state.auth);
   const teachers = [
     {
       name: "Dr. Rajesh Kumar",
@@ -172,9 +175,12 @@ const Teachers = () => {
                    </p>
                 </div>
 
-                <button className="mt-6 w-full py-3 bg-[#002147] text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-[#f16126] transition-all shadow-lg active:scale-95 group/btn">
+                <Link 
+                  to={userInfo ? (userInfo?.role?.toLowerCase() === 'teacher' ? '/teacher/dashboard' : '/student/dashboard') : '/register'}
+                  className="mt-6 w-full py-3 bg-[#002147] text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-[#f16126] transition-all shadow-lg active:scale-95 group/btn"
+                >
                   Book Free Demo <FiArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
-                </button>
+                </Link>
               </motion.div>
             ))}
           </div>

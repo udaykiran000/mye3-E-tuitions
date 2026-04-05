@@ -130,7 +130,7 @@ const StudentLiveSchedule = () => {
                         </p>
                         <span className="w-1 h-1 rounded-full bg-slate-300" />
                         <p className={`font-black uppercase tracking-widest text-[8px] md:text-[9px] ${session.status === 'live' ? 'text-indigo-400' : 'text-indigo-600'}`}>
-                           {session.classLevel} Syllabus
+                           {Number(session.classLevel) === 11 ? 'Inter 1st Year' : Number(session.classLevel) === 12 ? 'Inter 2nd Year' : `Class ${session.classLevel}`} Board
                         </p>
                      </div>
                   </div>
@@ -155,7 +155,7 @@ const StudentLiveSchedule = () => {
                     to={`/student/classes/${session.classLevel}`}
                     className={`w-full text-center py-2 text-[9px] font-black uppercase tracking-widest hover:underline ${session.status === 'live' ? 'text-white/30 hover:text-white' : 'text-slate-400 hover:text-indigo-600'}`}
                   >
-                     Syllabus hub
+                     Academic hub
                   </Link>
                </div>
             </div>
@@ -198,7 +198,9 @@ const StudentLiveSchedule = () => {
                   <div className="min-w-0">
                      <div className="flex items-center gap-2 mb-2">
                         <span className="px-2.5 py-1 bg-slate-900 text-white rounded-lg text-[8px] font-black uppercase tracking-widest shrink-0">Ended</span>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">{session.classLevel}</p>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">
+                           {Number(session.classLevel) === 11 ? 'Inter 1st Year' : Number(session.classLevel) === 12 ? 'Inter 2nd Year' : `Class ${session.classLevel}`}
+                        </p>
                      </div>
                      <h3 className="text-lg md:text-xl font-black text-slate-900 truncate uppercase tracking-tighter leading-none mb-2">{session.title}</h3>
                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -245,7 +247,7 @@ const StudentLiveSchedule = () => {
                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-4">
                   <div className="flex items-center gap-4 px-6 py-4 bg-white/5 rounded-2xl border border-white/10 group hover:border-white/20 transition-all">
                      <BookOpen className="w-6 h-6 text-indigo-400" />
-                     <p className="text-[11px] font-black uppercase tracking-widest">Syllabus Mapping</p>
+                     <p className="text-[11px] font-black uppercase tracking-widest">Board Mapping</p>
                   </div>
                   <div className="flex items-center gap-4 px-6 py-4 bg-white/5 rounded-2xl border border-white/10 group hover:border-white/20 transition-all">
                      <FileText className="w-6 h-6 text-amber-400" />

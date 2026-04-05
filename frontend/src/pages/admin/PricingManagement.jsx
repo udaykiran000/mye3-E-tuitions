@@ -2,14 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
   Settings, 
-  ToggleRight, 
-  ToggleLeft, 
-  ShieldCheck, 
   Loader2, 
   BookOpen, 
   ChevronDown, 
   ChevronUp, 
-  Mail, 
   CheckCircle2, 
   X
 } from 'lucide-react';
@@ -23,17 +19,8 @@ const PricingManagement = () => {
   const [isAddClassModalOpen, setIsAddClassModalOpen] = useState(false);
   const [addClassForm, setAddClassForm] = useState({
     className: '',
-    syllabus: 'CBSE',
+    board: 'TS Board',
     pricing: { oneMonth: 0, threeMonths: 0, sixMonths: 0, twelveMonths: 0 }
-  });
-
-  const [grantForm, setGrantForm] = useState({
-    email: '',
-    type: 'bundle',
-    referenceId: '',
-    name: '',
-    subscriptionType: 'full',
-    durationDays: 365
   });
 
   const fetchData = async () => {
@@ -85,26 +72,18 @@ const PricingManagement = () => {
     }
   };
 
-  const handleGrantAccess = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post('/admin/grant-access', grantForm);
-      toast.success('Manual access granted!');
-      setGrantForm({ ...grantForm, email: '' });
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Grant failed');
-    }
-  };
-
   const handleAddClass = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/admin/classes', addClassForm);
-      toast.success(`${addClassForm.className} created successfully!`);
+      const allBoards = ['TS Board', 'AP Board', 'CBSE Board', 'ICSE Board'];
+      await Promise.all(allBoards.map(board => 
+        axios.post('/admin/classes', { ...addClassForm, board })
+      ));
+      toast.success(`${addClassForm.className} created successfully for all boards!`);
       setIsAddClassModalOpen(false);
       setAddClassForm({
         className: '',
-        syllabus: 'CBSE',
+        board: 'TS Board',
         pricing: { oneMonth: 0, threeMonths: 0, sixMonths: 0, twelveMonths: 0 }
       });
       fetchData();
@@ -126,175 +105,140 @@ const PricingManagement = () => {
   });
 
   return (
-    <div className="space-y-12 pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 font-sans">
+    <div className="space-y-6 pb-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 font-sans">
       <Toaster position="top-right" />
       
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
-         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full -mr-32 -mt-32 blur-3xl opacity-50" />
-         <div className="space-y-2 relative z-10">
-            <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-               <Settings className="w-8 h-8 md:w-10 md:h-10 text-slate-900" /> Update Fees
+      <div className="flex items-center justify-between gap-4 py-2 border-b border-slate-100 mb-4">
+         <div className="space-y-0">
+            <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+               <Settings className="w-5 h-5 text-indigo-600" /> Pricing Management
             </h1>
-            <p className="text-slate-500 font-bold italic text-sm md:text-base">Manage subscription fees and course pricing.</p>
+            <p className="text-slate-400 font-bold text-[10px] uppercase tracking-[0.15em]">Control course fees and subscription tiers</p>
          </div>
       </div>
 
-      {/* JUNIOR SECTION (6-10) */}
-      <section className="space-y-6">
-         <div className="flex items-center gap-4">
-            <div className="px-5 py-2 bg-indigo-600 text-white rounded-xl font-black text-[10px] md:text-xs uppercase tracking-widest shadow-lg shadow-indigo-100">
+      {/* SECTIONS WRAPPER */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start pb-12">
+        
+        {/* JUNIOR SECTION (6-10) */}
+        <section className="space-y-4">
+         <div className="flex items-center gap-3">
+            <div className="px-4 py-1.5 bg-indigo-600 text-white rounded-lg font-black text-[9px] uppercase tracking-widest shadow-md">
                Classes 6 - 10
             </div>
-            <h2 className="text-lg md:text-xl font-black text-slate-900">Junior Course Pricing</h2>
+            <h2 className="text-base md:text-lg font-black text-slate-900">Junior Pricing</h2>
             <button 
               onClick={() => setIsAddClassModalOpen(true)}
-              className="ml-auto px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-indigo-100"
+              className="ml-auto px-5 py-2 bg-indigo-600/10 text-indigo-600 border border-indigo-200 rounded-lg font-black text-[9px] uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all"
             >
-               + Create New Class
+               + New Class
             </button>
          </div>
 
-         <div className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/10 overflow-hidden">
-            <div className="overflow-x-auto">
-               <table className="w-full text-left min-w-[800px]">
-                  <thead className="bg-slate-50/50 border-b border-slate-100">
-                     <tr className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">
-                        <th className="px-6 md:px-10 py-6">Grade</th>
-                        <th className="px-6 md:px-10 py-6">Course Fee (Total)</th>
-                        <th className="px-6 md:px-10 py-6">Status</th>
-                        <th className="px-6 md:px-10 py-6 text-right">Settings</th>
-                     </tr>
-                  </thead>
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/5 overflow-hidden">
+             <div className="overflow-x-auto">
+                <table className="w-full text-left min-w-[600px]">
+                    <thead className="bg-slate-50/50 border-b border-slate-100">
+                       <tr className="text-[9px] font-black uppercase text-slate-400 tracking-[0.2em]">
+                          <th className="px-6 py-4 w-[15%]">Grade</th>
+                          <th className="px-6 py-4 w-[55%]">Pricing (1m / 3m / 6m / 12m)</th>
+                          <th className="px-6 py-4 w-[15%] text-center">Status</th>
+                          <th className="px-6 py-4 w-[15%] text-right">Actions</th>
+                       </tr>
+                    </thead>
                   <tbody className="divide-y divide-slate-50">
                      {classLevels.map((cls) => (
                        <React.Fragment key={cls._id}>
-                         <tr className={`hover:bg-slate-50/50 transition-all ${expandedId === cls._id ? 'bg-indigo-50/30' : ''}`}>
-                            <td className="px-6 md:px-10 py-8">
-                               <div className="flex items-center gap-4 md:gap-5">
-                                  <div className="w-12 h-12 md:w-14 md:h-14 bg-slate-900 text-white rounded-xl flex items-center justify-center font-black text-lg md:text-xl shadow-lg ring-4 ring-slate-50 shrink-0">
-                                     {cls.className.split(' ')[1] || '0'}
-                                  </div>
-                                  <div>
-                                     <p className="font-black text-slate-900 text-base md:text-lg">{cls.className}</p>
-                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{(cls.subjects || []).length} Subjects Linked</p>
-                                  </div>
+                         <tr className="group hover:bg-slate-50/50 transition-all">
+                           <td className="px-6 py-4 font-black text-slate-900">{cls.className}</td>
+                           <td className="px-6 py-4">
+                             <div className="flex items-center gap-2">
+                               <div className="flex items-center gap-1.5 p-1 bg-slate-50 rounded-lg border border-slate-100">
+                                 <input type="number" id={`p1-${cls._id}`} title="1m" defaultValue={cls.pricing?.oneMonth || 0} className="w-12 text-center bg-white border rounded p-1 text-[10px] font-bold outline-none focus:border-indigo-600" />
+                                 <input type="number" id={`p3-${cls._id}`} title="3m" defaultValue={cls.pricing?.threeMonths || 0} className="w-12 text-center bg-white border rounded p-1 text-[10px] font-bold outline-none focus:border-indigo-600" />
+                                 <input type="number" id={`p6-${cls._id}`} title="6m" defaultValue={cls.pricing?.sixMonths || 0} className="w-12 text-center bg-white border rounded p-1 text-[10px] font-bold outline-none focus:border-indigo-600" />
+                                 <input type="number" id={`p12-${cls._id}`} title="12m" defaultValue={cls.pricing?.twelveMonths || 0} className="w-12 text-center bg-white border rounded p-1 text-[10px] font-bold outline-none focus:border-indigo-600" />
                                </div>
-                            </td>
-                            <td className="px-6 md:px-10 py-8">
-                                <div className="space-y-4">
-                                   <div className="grid grid-cols-2 gap-2">
-                                      <div className="space-y-1">
-                                         <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">1 Month</label>
-                                         <input type="number" id={`p1-${cls._id}`} defaultValue={cls.pricing?.oneMonth || 0} className="w-full bg-slate-50 border rounded-lg px-2 py-1.5 text-xs font-black outline-none focus:border-indigo-600" />
-                                      </div>
-                                      <div className="space-y-1">
-                                         <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">3 Months</label>
-                                         <input type="number" id={`p3-${cls._id}`} defaultValue={cls.pricing?.threeMonths || 0} className="w-full bg-slate-50 border rounded-lg px-2 py-1.5 text-xs font-black outline-none focus:border-indigo-600" />
-                                      </div>
-                                      <div className="space-y-1">
-                                         <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">6 Months</label>
-                                         <input type="number" id={`p6-${cls._id}`} defaultValue={cls.pricing?.sixMonths || 0} className="w-full bg-slate-50 border rounded-lg px-2 py-1.5 text-xs font-black outline-none focus:border-indigo-600" />
-                                      </div>
-                                      <div className="space-y-1">
-                                         <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">12 Months</label>
-                                         <input type="number" id={`p12-${cls._id}`} defaultValue={cls.pricing?.twelveMonths || 0} className="w-full bg-slate-50 border rounded-lg px-2 py-1.5 text-xs font-black outline-none focus:border-indigo-600" />
-                                      </div>
-                                   </div>
-                                   <button 
-                                     onClick={() => {
-                                       const pricing = {
-                                         oneMonth: Number(document.getElementById(`p1-${cls._id}`).value),
-                                         threeMonths: Number(document.getElementById(`p3-${cls._id}`).value),
-                                         sixMonths: Number(document.getElementById(`p6-${cls._id}`).value),
-                                         twelveMonths: Number(document.getElementById(`p12-${cls._id}`).value)
-                                       };
-                                       handleUpdateJuniorPrice(cls._id, { pricing });
-                                     }}
-                                     className="w-full py-2 bg-indigo-600 text-white rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-slate-900 transition-colors shadow-lg shadow-indigo-100"
-                                   >
-                                      Update Pricing
-                                   </button>
-                                </div>
-                            </td>
-                            <td className="px-6 md:px-10 py-8">
                                <button 
-                                 onClick={() => handleToggleStatus('class', cls._id, cls.isActive)}
-                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 font-black text-[10px] uppercase tracking-widest transition-all ${cls.isActive ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-rose-50 border-rose-100 text-rose-600'}`}
+                                 onClick={() => {
+                                   const pricing = {
+                                     oneMonth: Number(document.getElementById(`p1-${cls._id}`).value),
+                                     threeMonths: Number(document.getElementById(`p3-${cls._id}`).value),
+                                     sixMonths: Number(document.getElementById(`p6-${cls._id}`).value),
+                                     twelveMonths: Number(document.getElementById(`p12-${cls._id}`).value)
+                                   };
+                                   handleUpdateJuniorPrice(cls._id, { pricing });
+                                 }}
+                                 className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-slate-900 transition-colors shadow-sm"
                                >
-                                  {cls.isActive ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
-                                  {cls.isActive ? 'Active' : 'Halted'}
+                                 <CheckCircle2 className="w-4 h-4" />
                                </button>
-                            </td>
-                            <td className="px-6 md:px-10 py-8 text-right">
-                               <button 
-                                 onClick={() => setExpandedId(expandedId === cls._id ? null : cls._id)}
-                                 className="p-3 md:p-4 bg-slate-50 text-slate-400 rounded-xl hover:bg-white hover:text-indigo-600 hover:shadow-xl transition-all border border-transparent hover:border-indigo-50"
-                               >
-                                  {expandedId === cls._id ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                                </button>
-                            </td>
+                             </div>
+                           </td>
+                           <td className="px-6 py-4 text-center">
+                             <button onClick={() => handleToggleStatus('class', cls._id, cls.isActive)} className={cls.isActive ? 'text-emerald-500' : 'text-slate-300'}>
+                               <CheckCircle2 className="w-5 h-5 mx-auto" />
+                             </button>
+                           </td>
+                           <td className="px-6 py-4 text-right">
+                             <button onClick={() => setExpandedId(expandedId === cls._id ? null : cls._id)} className="text-indigo-600">
+                               {expandedId === cls._id ? <ChevronUp /> : <ChevronDown />}
+                             </button>
+                           </td>
                          </tr>
                          {expandedId === cls._id && (
                            <tr className="bg-slate-50/50">
                              <td colSpan="4" className="px-4 md:px-10 py-6 md:py-10">
-                               <div className="bg-white rounded-2xl border border-slate-100 p-6 md:p-8 shadow-inner space-y-6">
-                                  <div className="flex items-center justify-between">
-                                     <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] flex items-center gap-2">
-                                        <BookOpen className="w-4 h-4 text-indigo-500" /> Linked Subjects
-                                     </h4>
-                                  </div>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                     {(cls.subjects || []).map((sub, idx) => (
-                                       <div key={idx} className="p-5 bg-slate-50 rounded-xl border border-slate-100 group border-transparent focus-within:border-indigo-600 transition-all relative">
-                                          <button 
-                                            onClick={() => {
-                                              if (window.confirm('Remove this subject?')) {
-                                                const updatedSubjects = cls.subjects.filter((_, i) => i !== idx);
-                                                handleUpdateJuniorPrice(cls._id, { subjects: updatedSubjects });
-                                              }
-                                            }}
-                                            className="absolute top-2 right-2 p-1.5 bg-white text-rose-300 hover:text-rose-600 hover:shadow-lg rounded-lg opacity-0 group-hover:opacity-100 transition-all border border-rose-50"
-                                          >
-                                             <X className="w-3 h-3" />
-                                          </button>
-                                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">{sub.name}</label>
-                                          <div className="mt-2 text-[10px] font-bold text-indigo-500/50 uppercase tracking-tight italic">Part of Full Package</div>
-                                       </div>
-                                     ))}
-                                     
-                                     {/* QUICK ADD SUBJECT CARD */}
-                                     <div className="p-5 bg-indigo-600/5 rounded-xl border-2 border-dashed border-indigo-200 flex flex-col justify-center gap-4 hover:bg-white hover:border-indigo-600 transition-all group/add">
-                                        <div className="space-y-3">
-                                           <div className="flex items-center gap-2">
-                                              <div className="w-7 h-7 bg-indigo-600 text-white rounded-lg flex items-center justify-center shrink-0"><BookOpen className="w-3.5 h-3.5" /></div>
-                                              <input 
-                                                id={`new-sub-name-${cls._id}`}
-                                                type="text" 
-                                                placeholder="Enter Subject Name..."
-                                                className="w-full bg-transparent border-b-2 border-indigo-100 focus:border-indigo-600 outline-none py-1 font-black text-slate-900 text-xs placeholder:text-indigo-200"
-                                              />
-                                           </div>
+                                <div className="bg-white rounded-2xl border border-slate-100 p-6 md:p-8 shadow-inner space-y-6">
+                                   <div className="flex items-center justify-between">
+                                      <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] flex items-center gap-2">
+                                         <BookOpen className="w-4 h-4 text-indigo-500" /> Linked Subjects
+                                      </h4>
+                                   </div>
+                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                      {(cls.subjects || []).map((sub, idx) => (
+                                        <div key={idx} className="p-5 bg-slate-50 rounded-xl border border-slate-100 group transition-all relative">
+                                           <button 
+                                             onClick={() => {
+                                               if (window.confirm('Remove this subject?')) {
+                                                 const updatedSubjects = cls.subjects.filter((_, i) => i !== idx);
+                                                 handleUpdateJuniorPrice(cls._id, { subjects: updatedSubjects });
+                                               }
+                                             }}
+                                             className="absolute top-2 right-2 p-1.5 text-rose-300 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-all"
+                                           >
+                                              <X className="w-3 h-3" />
+                                           </button>
+                                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">{sub.name}</label>
+                                           <div className="mt-2 text-[10px] font-bold text-indigo-500/50 uppercase italic">Part of Full Package</div>
                                         </div>
-                                        <button 
-                                          onClick={() => {
-                                            const nameInput = document.getElementById(`new-sub-name-${cls._id}`);
-                                            const name = nameInput.value;
-                                            
-                                            if (!name) return toast.error('Enter subject name');
-                                            
-                                            const updatedSubjects = [...(cls.subjects || []), { name, singleSubjectPrice: 0 }];
-                                            handleUpdateJuniorPrice(cls._id, { subjects: updatedSubjects });
-                                            
-                                            nameInput.value = '';
-                                          }}
-                                          className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-100 hover:shadow-indigo-200 transition-all"
-                                        >
-                                           Link New Subject
-                                        </button>
-                                     </div>
-                                  </div>
-                               </div>
+                                      ))}
+                                      
+                                      {/* QUICK ADD SUBJECT */}
+                                      <div className="p-5 bg-indigo-600/5 rounded-xl border-2 border-dashed border-indigo-200 flex flex-col justify-center gap-4 hover:bg-white hover:border-indigo-600 transition-all">
+                                         <input 
+                                           id={`new-sub-name-${cls._id}`}
+                                           type="text" 
+                                           placeholder="Enter Subject Name..."
+                                           className="w-full bg-transparent border-b-2 border-indigo-100 focus:border-indigo-600 outline-none py-1 font-black text-slate-900 text-xs placeholder:text-indigo-200"
+                                         />
+                                         <button 
+                                           onClick={() => {
+                                             const nameInput = document.getElementById(`new-sub-name-${cls._id}`);
+                                             const name = nameInput.value;
+                                             if (!name) return toast.error('Enter name');
+                                             const updatedSubjects = [...(cls.subjects || []), { name, singleSubjectPrice: 0 }];
+                                             handleUpdateJuniorPrice(cls._id, { subjects: updatedSubjects });
+                                             nameInput.value = '';
+                                           }}
+                                           className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg"
+                                         >
+                                            Link New Subject
+                                         </button>
+                                      </div>
+                                   </div>
+                                </div>
                              </td>
                            </tr>
                          )}
@@ -304,207 +248,178 @@ const PricingManagement = () => {
                </table>
             </div>
          </div>
-      </section>
+        </section>
 
-      {/* SENIOR SECTION (11-12) */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 md:gap-12">
-         <section className="xl:col-span-2 space-y-6">
-            <div className="flex items-center gap-4">
-               <div className="px-5 py-2 bg-slate-900 text-white rounded-xl font-black text-[10px] md:text-xs uppercase tracking-widest">
-                  Classes 11 - 12
+        {/* INTER SECTION */}
+        <div className="space-y-12">
+            {/* INTER 1st YEAR */}
+            <section className="space-y-4">
+               <div className="flex items-center gap-3">
+                  <div className="px-4 py-1.5 bg-indigo-900 text-white rounded-lg font-black text-[9px] uppercase tracking-widest shadow-md">
+                     First Year
+                  </div>
+                  <h2 className="text-base md:text-lg font-black text-slate-900 leading-none">Inter 1st Year</h2>
                </div>
-               <h2 className="text-lg md:text-xl font-black text-slate-900">Senior Subject Fees</h2>
-            </div>
 
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/10 overflow-hidden">
-               <div className="overflow-x-auto">
-                  <table className="w-full text-left min-w-[600px]">
-                     <thead className="bg-slate-50/50 border-b border-slate-100">
-                        <tr className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">
-                           <th className="px-6 md:px-8 py-6">Subject / Class</th>
-                           <th className="px-6 md:px-8 py-6">Fee</th>
-                           <th className="px-6 md:px-8 py-6 text-right">Actions</th>
-                        </tr>
-                     </thead>
-                     <tbody className="divide-y divide-slate-50 font-bold">
-                        {seniorSubjects.map((sub) => (
-                          <tr key={sub._id} className="group hover:bg-slate-50/50 transition-all">
-                             <td className="px-6 md:px-8 py-6">
-                                <div>
-                                   <p className="font-black text-slate-900 text-sm md:text-base">{sub.name}</p>
-                                   <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest leading-none mb-1">{sub.syllabus}</p>
-                                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Grade {sub.classLevel}</p>
-                                </div>
-                             </td>
-                             <td className="px-6 md:px-8 py-6">
-                                <div className="space-y-4">
-                                   <div className="grid grid-cols-2 gap-2">
-                                      <div className="space-y-1">
-                                         <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">1m</label>
-                                         <input type="number" id={`sp1-${sub._id}`} defaultValue={sub.pricing?.oneMonth || 0} className="w-full text-center bg-slate-50 border rounded-lg px-1 py-1.5 text-xs font-black outline-none focus:border-indigo-600" />
-                                      </div>
-                                      <div className="space-y-1">
-                                         <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">3m</label>
-                                         <input type="number" id={`sp3-${sub._id}`} defaultValue={sub.pricing?.threeMonths || 0} className="w-full text-center bg-slate-50 border rounded-lg px-1 py-1.5 text-xs font-black outline-none focus:border-indigo-600" />
-                                      </div>
-                                      <div className="space-y-1">
-                                         <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">6m</label>
-                                         <input type="number" id={`sp6-${sub._id}`} defaultValue={sub.pricing?.sixMonths || 0} className="w-full text-center bg-slate-50 border rounded-lg px-1 py-1.5 text-xs font-black outline-none focus:border-indigo-600" />
-                                      </div>
-                                      <div className="space-y-1">
-                                         <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest">12m</label>
-                                         <input type="number" id={`sp12-${sub._id}`} defaultValue={sub.pricing?.twelveMonths || 0} className="w-full text-center bg-slate-50 border rounded-lg px-1 py-1.5 text-xs font-black outline-none focus:border-indigo-600" />
-                                      </div>
-                                   </div>
-                                   <button 
-                                      onClick={() => {
-                                        const pricing = {
-                                          oneMonth: Number(document.getElementById(`sp1-${sub._id}`).value),
-                                          threeMonths: Number(document.getElementById(`sp3-${sub._id}`).value),
-                                          sixMonths: Number(document.getElementById(`sp6-${sub._id}`).value),
-                                          twelveMonths: Number(document.getElementById(`sp12-${sub._id}`).value)
-                                        };
-                                        handleUpdateSeniorPrice(sub._id, { pricing });
-                                      }}
-                                      className="w-full py-2 bg-indigo-600 text-white rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-slate-900 transition-colors shadow-lg shadow-indigo-100"
-                                   >
-                                      Update
-                                   </button>
-                                </div>
-                             </td>
-                             <td className="px-6 md:px-8 py-6 text-right">
-                                <div className="flex items-center justify-end gap-2 md:gap-3">
-                                  <button 
-                                    onClick={() => handleToggleStatus('subject', sub._id, sub.isActive)}
-                                    className={`p-2 rounded-lg transition-all ${sub.isActive ? 'text-emerald-500 hover:bg-emerald-50' : 'text-slate-300 hover:bg-slate-50'}`}
-                                  >
-                                     <CheckCircle2 className={`w-6 h-6 ${sub.isActive ? 'fill-emerald-50' : ''}`} />
-                                  </button>
-                                  <button 
-                                    onClick={async () => {
-                                      if (window.confirm('Delete this senior subject?')) {
-                                        try {
-                                          await axios.delete(`/admin/subjects/${sub._id}`);
-                                          toast.success('Subject removed');
-                                          fetchData();
-                                        } catch (error) {
-                                          toast.error('Delete failed');
-                                        }
-                                      }
-                                    }}
-                                    className="p-2 text-rose-300 hover:text-rose-600 transition-all"
-                                  >
-                                     <X className="w-5 h-5" />
-                                  </button>
-                                </div>
-                             </td>
-                          </tr>
-                        ))}
-                        
-                        <tr className="bg-indigo-50/20">
-                           <td className="px-6 md:px-8 py-6">
-                              <input 
-                                id="new-senior-name"
-                                type="text" 
-                                placeholder="New Subject (Physics...)"
-                                className="w-full bg-transparent border-b border-indigo-200 focus:border-indigo-600 outline-none py-1 font-black text-slate-900 text-xs placeholder:text-indigo-200"
-                              />
-                              <div className="flex gap-4 mt-2">
-                                <select id="new-senior-level" className="w-full bg-transparent border-b border-indigo-100 font-extrabold text-[10px] text-slate-400 focus:text-indigo-600 outline-none uppercase">
-                                  <option value="11">Grade 11</option>
-                                  <option value="12">Grade 12</option>
-                                </select>
-                                <select id="new-senior-syllabus" className="w-full bg-transparent border-b border-indigo-100 font-extrabold text-[10px] text-slate-400 focus:text-indigo-600 outline-none uppercase">
-                                  <option value="CBSE">CBSE</option>
-                                  <option value="ICSE">ICSE</option>
-                                </select>
-                              </div>
-                           </td>
-                           <td className="px-6 md:px-8 py-6">
-                              <div className="grid grid-cols-2 gap-2">
-                                 <input type="number" id="np1" placeholder="1m" className="w-full text-center bg-white border rounded px-1 py-1 text-[10px]" />
-                                 <input type="number" id="np3" placeholder="3m" className="w-full text-center bg-white border rounded px-1 py-1 text-[10px]" />
-                                 <input type="number" id="np6" placeholder="6m" className="w-full text-center bg-white border rounded px-1 py-1 text-[10px]" />
-                                 <input type="number" id="np12" placeholder="12m" className="w-full text-center bg-white border rounded px-1 py-1 text-[10px]" />
-                              </div>
-                           </td>
-                           <td className="px-6 md:px-8 py-6 text-right">
-                              <button 
-                                onClick={async () => {
-                                  const name = document.getElementById('new-senior-name').value;
-                                  const level = document.getElementById('new-senior-level').value;
-                                  const syllabus = document.getElementById('new-senior-syllabus').value;
-                                  const pricing = {
-                                    oneMonth: Number(document.getElementById('np1').value),
-                                    threeMonths: Number(document.getElementById('np3').value),
-                                    sixMonths: Number(document.getElementById('np6').value),
-                                    twelveMonths: Number(document.getElementById('np12').value)
-                                  };
-                                  if (!name) return toast.error('Fill name');
-                                  try {
-                                    await axios.post('/admin/subjects', { name, classLevel: level, syllabus, pricing });
-                                    toast.success('Senior Subject Created!');
-                                    document.getElementById('new-senior-name').value = '';
-                                    fetchData();
-                                  } catch (error) { toast.error('Action failed'); }
-                                }}
-                                className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase shadow-lg"
-                              >
-                                 Link Subject
-                              </button>
-                           </td>
-                        </tr>
-                     </tbody>
-                  </table>
+               <div className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/5 overflow-hidden">
+                  <div className="overflow-x-auto">
+                     <table className="w-full text-left min-w-[600px]">
+                        <thead className="bg-slate-50/50 border-b border-slate-100">
+                           <tr className="text-[9px] font-black uppercase text-slate-400 tracking-[0.2em]">
+                              <th className="px-6 py-4 w-[25%]">Subject</th>
+                              <th className="px-6 py-4 w-[50%] text-center">Pricing</th>
+                              <th className="px-6 py-4 w-[25%] text-right">Actions</th>
+                           </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                           {seniorSubjects.filter(s => Number(s.classLevel) === 11).map((sub) => (
+                              <tr key={sub._id} className="group hover:bg-slate-50/50 transition-all">
+                                 <td className="px-6 py-4">
+                                    <p className="font-black text-slate-900 text-sm whitespace-nowrap">{sub.name}</p>
+                                    <span className="text-[8px] font-black text-indigo-500 uppercase tracking-widest leading-none">{sub.board}</span>
+                                 </td>
+                                 <td className="px-6 py-4">
+                                    <div className="flex items-center gap-2 justify-center">
+                                       <div className="flex items-center gap-1.5 p-1 bg-slate-50 rounded-lg border border-slate-100">
+                                          <input type="number" id={`sp1-${sub._id}`} title="1m" defaultValue={sub.pricing?.oneMonth || 0} className="w-12 text-center bg-white border rounded p-1 text-[10px] font-bold outline-none focus:border-indigo-600" />
+                                          <input type="number" id={`sp3-${sub._id}`} title="3m" defaultValue={sub.pricing?.threeMonths || 0} className="w-12 text-center bg-white border rounded p-1 text-[10px] font-bold outline-none focus:border-indigo-600" />
+                                          <input type="number" id={`sp6-${sub._id}`} title="6m" defaultValue={sub.pricing?.sixMonths || 0} className="w-12 text-center bg-white border rounded p-1 text-[10px] font-bold outline-none focus:border-indigo-600" />
+                                          <input type="number" id={`sp12-${sub._id}`} title="12m" defaultValue={sub.pricing?.twelveMonths || 0} className="w-12 text-center bg-white border rounded p-1 text-[10px] font-bold outline-none focus:border-indigo-600" />
+                                       </div>
+                                       <button onClick={() => {
+                                          const pricing = {
+                                            oneMonth: Number(document.getElementById(`sp1-${sub._id}`).value),
+                                            threeMonths: Number(document.getElementById(`sp3-${sub._id}`).value),
+                                            sixMonths: Number(document.getElementById(`sp6-${sub._id}`).value),
+                                            twelveMonths: Number(document.getElementById(`sp12-${sub._id}`).value)
+                                          };
+                                          handleUpdateSeniorPrice(sub._id, { pricing });
+                                       }} className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-slate-900 transition-colors shadow-sm"><CheckCircle2 className="w-4 h-4" /></button>
+                                    </div>
+                                 </td>
+                                 <td className="px-6 py-4 text-right">
+                                    <div className="flex items-center justify-end gap-2">
+                                       <button onClick={() => handleToggleStatus('subject', sub._id, sub.isActive)} className={sub.isActive ? 'text-emerald-500' : 'text-slate-300'}><CheckCircle2 className="w-5 h-5 mx-auto" /></button>
+                                       <button onClick={async () => { if(window.confirm('Delete?')){ await axios.delete(`/admin/subjects/${sub._id}`); fetchData(); } }} className="text-rose-300 hover:text-rose-600"><X className="w-4 h-4 mx-auto" /></button>
+                                    </div>
+                                 </td>
+                              </tr>
+                           ))}
+                        </tbody>
+                     </table>
+                  </div>
                </div>
-            </div>
-         </section>
+            </section>
 
-         <section className="space-y-6">
-            <div className="flex items-center gap-4 pl-4 border-l-4 border-indigo-600">
-               <h2 className="text-xl font-black text-slate-900 tracking-tight">Access Control</h2>
-            </div>
-            <div className="bg-slate-900 text-white rounded-2xl p-8 md:p-10 shadow-2xl relative overflow-hidden group">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full -mr-16 -mt-16 blur-3xl" />
-               <div className="relative z-10 space-y-8">
-                  <form onSubmit={handleGrantAccess} className="space-y-5">
-                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-indigo-300 uppercase tracking-widest ml-1">Student Email</label>
-                        <div className="relative">
-                           <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400" />
-                           <input 
-                              required type="email" value={grantForm.email}
-                              onChange={(e) => setGrantForm({...grantForm, email: e.target.value})}
-                              placeholder="student@example.com"
-                              className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-6 py-4 font-bold outline-none"
-                           />
+            {/* INTER 2nd YEAR */}
+            <section className="space-y-4">
+               <div className="flex items-center gap-3">
+                  <div className="px-4 py-1.5 bg-orange-600 text-white rounded-lg font-black text-[9px] uppercase tracking-widest shadow-md">
+                     Second Year
+                  </div>
+                  <h2 className="text-base md:text-lg font-black text-slate-900 leading-none">Inter 2nd Year</h2>
+               </div>
+
+               <div className="bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/5 overflow-hidden">
+                  <div className="overflow-x-auto">
+                     <table className="w-full text-left min-w-[600px]">
+                        <thead className="bg-slate-50/50 border-b border-slate-100">
+                           <tr className="text-[9px] font-black uppercase text-slate-400 tracking-[0.2em]">
+                              <th className="px-6 py-4 w-[25%]">Subject</th>
+                              <th className="px-6 py-4 w-[50%] text-center">Pricing</th>
+                              <th className="px-6 py-4 w-[25%] text-right">Actions</th>
+                           </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                           {seniorSubjects.filter(s => Number(s.classLevel) === 12).map((sub) => (
+                              <tr key={sub._id} className="group hover:bg-slate-50/50 transition-all">
+                                 <td className="px-6 py-4">
+                                    <p className="font-black text-slate-900 text-sm whitespace-nowrap">{sub.name}</p>
+                                    <span className="text-[8px] font-black text-indigo-500 uppercase tracking-widest leading-none">{sub.board}</span>
+                                 </td>
+                                 <td className="px-6 py-4 text-center">
+                                    <div className="flex items-center gap-2 justify-center">
+                                       <div className="flex items-center gap-1.5 p-1 bg-slate-50 rounded-lg border border-slate-100">
+                                          <input type="number" id={`sp2-1-${sub._id}`} title="1m" defaultValue={sub.pricing?.oneMonth || 0} className="w-12 text-center bg-white border rounded p-1 text-[10px] font-bold outline-none focus:border-indigo-600" />
+                                          <input type="number" id={`sp2-3-${sub._id}`} title="3m" defaultValue={sub.pricing?.threeMonths || 0} className="w-12 text-center bg-white border rounded p-1 text-[10px] font-bold outline-none focus:border-indigo-600" />
+                                          <input type="number" id={`sp2-6-${sub._id}`} title="6m" defaultValue={sub.pricing?.sixMonths || 0} className="w-12 text-center bg-white border rounded p-1 text-[10px] font-bold outline-none focus:border-indigo-600" />
+                                          <input type="number" id={`sp2-12-${sub._id}`} title="12m" defaultValue={sub.pricing?.twelveMonths || 0} className="w-12 text-center bg-white border rounded p-1 text-[10px] font-bold outline-none focus:border-indigo-600" />
+                                       </div>
+                                       <button onClick={() => {
+                                          const pricing = {
+                                            oneMonth: Number(document.getElementById(`sp2-1-${sub._id}`).value),
+                                            threeMonths: Number(document.getElementById(`sp2-3-${sub._id}`).value),
+                                            sixMonths: Number(document.getElementById(`sp2-6-${sub._id}`).value),
+                                            twelveMonths: Number(document.getElementById(`sp2-12-${sub._id}`).value)
+                                          };
+                                          handleUpdateSeniorPrice(sub._id, { pricing });
+                                       }} className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-slate-900 transition-colors shadow-sm"><CheckCircle2 className="w-4 h-4" /></button>
+                                    </div>
+                                 </td>
+                                 <td className="px-6 py-4 text-right">
+                                    <div className="flex items-center justify-end gap-2">
+                                       <button onClick={() => handleToggleStatus('subject', sub._id, sub.isActive)} className={sub.isActive ? 'text-emerald-500' : 'text-slate-300'}><CheckCircle2 className="w-5 h-5" /></button>
+                                       <button onClick={async () => { if(window.confirm('Delete?')){ await axios.delete(`/admin/subjects/${sub._id}`); fetchData(); } }} className="text-rose-300 hover:text-rose-600"><X className="w-4 h-4" /></button>
+                                    </div>
+                                 </td>
+                              </tr>
+                           ))}
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+            </section>
+
+            {/* ADD SUBJECT BLOCK */}
+            <div className="p-6 bg-slate-900 text-white rounded-2xl shadow-xl space-y-4">
+                <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+                    <BookOpen className="w-5 h-5 text-indigo-400" />
+                    <h3 className="font-black text-sm uppercase tracking-widest">Link Inter Subject</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                        <input id="new-senior-name" type="text" placeholder="Subject Name..." className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 font-bold text-sm outline-none focus:border-indigo-500 placeholder:text-white/20" />
+                        <div className="flex gap-2">
+                            <select id="new-senior-level" className="flex-1 bg-white/5 border border-white/10 rounded-xl px-2 py-3 font-bold text-[10px] outline-none">
+                                <option value="11">Inter 1st Year (11)</option>
+                                <option value="12">Inter 2nd Year (12)</option>
+                            </select>
+                            <div className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 font-bold text-[10px] text-white/50 flex items-center justify-center uppercase tracking-widest">
+                                All Boards
+                            </div>
                         </div>
-                     </div>
-                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-indigo-300 uppercase tracking-widest ml-1">Assignment</label>
-                        <select 
-                           required className="w-full bg-slate-800 border border-white/10 rounded-xl px-6 py-4 font-bold outline-none text-sm appearance-none"
-                           onChange={(e) => {
-                             const data = JSON.parse(e.target.value);
-                             setGrantForm({ ...grantForm, referenceId: data.id, name: data.name, type: data.type });
-                           }}
-                        >
-                           <option value="">Enroll Student...</option>
-                           <optgroup label="Packages (6-10)">
-                             {juniorClasses.map(c => <option key={c._id} value={JSON.stringify({id: c._id, name: c.className, type: 'bundle'})}>{c.className}</option>)}
-                           </optgroup>
-                           <optgroup label="Subjects (11-12)">
-                             {seniorSubjects.map(s => <option key={s._id} value={JSON.stringify({id: s._id, name: s.name, type: 'subject'})}>{s.name} ({s.classLevel})</option>)}
-                           </optgroup>
-                        </select>
-                     </div>
-                     <button type="submit" className="w-full py-5 bg-indigo-500 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-xl flex items-center justify-center gap-3">
-                        <ShieldCheck className="w-5 h-5" /> Activate Access
-                     </button>
-                  </form>
-               </div>
+                    </div>
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-4 gap-2">
+                           <div className="space-y-1"><label className="text-[8px] font-black text-white/40 uppercase text-center block">1m</label><input type="number" id="np1" className="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-center text-xs font-bold" /></div>
+                           <div className="space-y-1"><label className="text-[8px] font-black text-white/40 uppercase text-center block">3m</label><input type="number" id="np3" className="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-center text-xs font-bold" /></div>
+                           <div className="space-y-1"><label className="text-[8px] font-black text-white/40 uppercase text-center block">6m</label><input type="number" id="np6" className="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-center text-xs font-bold" /></div>
+                           <div className="space-y-1"><label className="text-[8px] font-black text-white/40 uppercase text-center block">12m</label><input type="number" id="np12" className="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-center text-xs font-bold" /></div>
+                        </div>
+                        <button onClick={async () => {
+                           const name = document.getElementById('new-senior-name').value;
+                           const level = document.getElementById('new-senior-level').value;
+                           const pricing = {
+                             oneMonth: Number(document.getElementById('np1').value),
+                             threeMonths: Number(document.getElementById('np3').value),
+                             sixMonths: Number(document.getElementById('np6').value),
+                             twelveMonths: Number(document.getElementById('np12').value)
+                           };
+                           if (!name) return toast.error('Enter name');
+                           try {
+                             const allBoards = ['TS Board', 'AP Board', 'CBSE Board', 'ICSE Board'];
+                             await Promise.all(allBoards.map(board => 
+                               axios.post('/admin/subjects', { name, classLevel: level, board, pricing })
+                             ));
+                             toast.success('Subject Linked to all boards!');
+                             document.getElementById('new-senior-name').value = '';
+                             fetchData();
+                           } catch (error) { toast.error('Failed'); }
+                        }} className="w-full py-4 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl">Create New Subject</button>
+                    </div>
+                </div>
             </div>
-         </section>
+        </div>
       </div>
 
       {isAddClassModalOpen && (
@@ -521,11 +436,10 @@ const PricingManagement = () => {
                     <input required type="text" placeholder="e.g. Class 5" value={addClassForm.className} onChange={(e) => setAddClassForm({...addClassForm, className: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-2 rounded-2xl outline-none font-bold" />
                  </div>
                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Syllabus</label>
-                    <select value={addClassForm.syllabus} onChange={(e) => setAddClassForm({...addClassForm, syllabus: e.target.value})} className="w-full px-6 py-4 bg-slate-50 border-2 rounded-2xl outline-none font-bold">
-                       <option value="CBSE">CBSE Syllabus</option>
-                       <option value="ICSE">ICSE Syllabus</option>
-                    </select>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Board</label>
+                    <div className="w-full px-6 py-4 bg-slate-100 border-2 rounded-2xl font-bold text-slate-400 uppercase text-xs tracking-widest flex items-center justify-center">
+                       Auto-Applied to All Boards
+                    </div>
                  </div>
                  <div className="space-y-4">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tiered Pricing (₹)</label>

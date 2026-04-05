@@ -99,7 +99,7 @@ exports.addSubject = async (req, res, next) => {
       name,
       classLevel: Number(classLevel),
       pricing,
-      syllabus
+      board
     });
     res.status(201).json(subject);
   } catch (error) {
@@ -530,7 +530,7 @@ exports.updateClassPricing = async (req, res, next) => {
     const { pricing, subjects, syllabus } = req.body;
     const updateData = {};
     if (pricing !== undefined) updateData.pricing = pricing;
-    if (syllabus !== undefined) updateData.syllabus = syllabus;
+    if (board !== undefined) updateData.board = board;
     if (subjects !== undefined) updateData.subjects = subjects;
 
     const bundle = await ClassBundle.findByIdAndUpdate(
@@ -551,10 +551,10 @@ exports.updateClassPricing = async (req, res, next) => {
 // @access  Admin
 exports.addClassBundle = async (req, res, next) => {
   try {
-    const { className, syllabus, pricing, subjects } = req.body;
+    const { className, board, pricing, subjects } = req.body;
     const bundle = await ClassBundle.create({
       className,
-      syllabus,
+      board,
       pricing,
       subjects: subjects || []
     });
@@ -678,6 +678,7 @@ exports.createLiveSession = async (req, res, next) => {
       const cleanSession = { 
         ...s, 
         title: s.title || `${s.subjectName} Live`,
+        board: s.board || 'TS Board',
         status: 'upcoming' 
       };
       // If subjectId is not a valid ObjectId (24 hex chars), remove it to prevent CastError
@@ -709,7 +710,7 @@ exports.createLiveSession = async (req, res, next) => {
 // @access  Admin
 exports.updateLiveSession = async (req, res, next) => {
   try {
-    const { title, platform, link, teacherId, startTime, classLevel, subjectName, subjectId } = req.body;
+    const { title, platform, link, teacherId, startTime, classLevel, subjectName, subjectId, board } = req.body;
     
     const session = await LiveSession.findById(req.params.id);
     if (!session) return res.status(404).json({ message: 'Session not found' });
@@ -721,6 +722,7 @@ exports.updateLiveSession = async (req, res, next) => {
     session.startTime = startTime || session.startTime;
     session.classLevel = classLevel || session.classLevel;
     session.subjectName = subjectName || session.subjectName;
+    if (board) session.board = board;
     
     if (subjectId) {
       session.subjectId = /^[0-9a-fA-F]{24}$/.test(subjectId) ? subjectId : undefined;
@@ -764,12 +766,14 @@ exports.deleteLiveSession = async (req, res, next) => {
 // @access  Admin
 exports.getAllLiveSessions = async (req, res, next) => {
   try {
-    // Only fetch sessions from the last 2 days to keep the dashboard snappy
+    // Fetch from 2 days ago up to 45 days ahead (supports full month scheduling view)
     const twoDaysAgo = new Date();
     twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+    const fortyFiveDaysAhead = new Date();
+    fortyFiveDaysAhead.setDate(fortyFiveDaysAhead.getDate() + 45);
 
     const sessions = await LiveSession.find({ 
-      startTime: { $gte: twoDaysAgo }
+      startTime: { $gte: twoDaysAgo, $lte: fortyFiveDaysAhead }
     })
       .populate('teacherId', 'name email')
       .sort({ startTime: 1 });

@@ -8,7 +8,8 @@ const {
   getMaterialsByAssignment,
   processMockPayment,
   getCatalog,
-  getMyTransactions
+  getMyTransactions,
+  getAllMaterials
 } = require('../controllers/studentController');
 const { protect } = require('../middleware/authMiddleware');
 const { authorizeRoles } = require('../middleware/roleMiddleware');
@@ -27,5 +28,6 @@ router.get('/content/:courseName', getCourseContent);
 router.get('/materials/:assignmentId', getMaterialsByAssignment);
 router.post('/mock-payment-success', processMockPayment);
 router.get('/transactions', getMyTransactions);
+router.get('/all-materials', getAllMaterials);
 
 module.exports = router;

@@ -19,16 +19,6 @@ import { MdEmail } from 'react-icons/md';
 const NAV_ITEMS = [
   { label: 'Home', to: '/' },
   { label: 'Tuitions', to: '/courses' },
-  {
-    label: 'Crack Exam',
-    isNew: true,
-    dropdown: [
-      { label: 'IIT-JEE Preparation', to: '/courses' },
-      { label: 'NEET Preparation', to: '/courses' },
-      { label: 'Foundation (8th-10th)', to: '/courses' },
-      { label: 'Olympiad Coaching', to: '/courses' },
-    ],
-  },
   { label: 'Teachers', to: '/teachers' },
   { label: 'About Us', to: '/about' },
   { label: 'FAQs', to: '/faqs' },
@@ -313,7 +303,10 @@ const Navbar = () => {
 
           {/* Right: book demo / login */}
           <div className="flex items-center text-[12px] font-medium text-slate-500 md:text-slate-600 text-right">
-            <Link to="/register" className="hover:text-orange-600 transition-colors flex flex-col items-center md:flex-row leading-[1.2] md:leading-normal mr-2">
+            <Link 
+              to={userInfo ? (userInfo?.role?.toLowerCase() === 'teacher' ? '/teacher/dashboard' : '/student/dashboard') : '/register'} 
+              className="hover:text-orange-600 transition-colors flex flex-col items-center md:flex-row leading-[1.2] md:leading-normal mr-2"
+            >
               <span className="whitespace-nowrap">Book a Free Demo</span>
               <span className="md:ml-1">class</span>
             </Link>
@@ -356,9 +349,9 @@ const Navbar = () => {
             {userInfo ? (
               <Link
                 to={
-                  userInfo.role.toLowerCase() === 'admin'
+                  userInfo?.role?.toLowerCase() === 'admin'
                     ? '/admin/dashboard'
-                    : userInfo.role.toLowerCase() === 'teacher'
+                    : userInfo?.role?.toLowerCase() === 'teacher'
                     ? '/teacher/dashboard'
                     : '/student/dashboard'
                 }
@@ -455,7 +448,7 @@ const Navbar = () => {
                   Enrol Now
                 </Link>
                 <Link
-                  to="/register"
+                  to={userInfo ? (userInfo?.role?.toLowerCase() === 'teacher' ? '/teacher/dashboard' : '/student/dashboard') : '/register'}
                   onClick={() => setMobileOpen(false)}
                   className="block w-full text-center py-3 text-orange-600 font-bold text-[13px] rounded-lg border-2 border-orange-200 hover:bg-orange-50"
                 >

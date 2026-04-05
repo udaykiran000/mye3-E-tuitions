@@ -7,9 +7,9 @@ const classBundleSchema = new mongoose.Schema({
     unique: true,
     trim: true
   },
-  syllabus: {
+  board: {
     type: String,
-    enum: ['CBSE', 'ICSE'],
+    enum: ['CBSE', 'ICSE', 'TS Board', 'AP Board'],
     required: true,
     default: 'CBSE'
   },

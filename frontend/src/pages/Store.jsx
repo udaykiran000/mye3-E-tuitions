@@ -12,13 +12,16 @@ const Store = () => {
     { id: '10', name: 'Class 10 - All Subjects', price: 1499, level: 'Class 10' },
   ];
 
-  const subjects11_12 = [
-    { id: 'p11', name: 'Physics', level: 'Class 11', price: 499 },
-    { id: 'm11', name: 'Mathematics', level: 'Class 11', price: 499 },
-    { id: 'c11', name: 'Chemistry', level: 'Class 11', price: 499 },
-    { id: 'p12', name: 'Physics', level: 'Class 12', price: 599 },
-    { id: 'm12', name: 'Mathematics', level: 'Class 12', price: 599 },
-    { id: 'b12', name: 'Biology', level: 'Class 12', price: 599 },
+  const inter1stYear = [
+    { id: 'p11', name: 'Physics', level: 'Inter 1st Year', price: 499 },
+    { id: 'm11', name: 'Mathematics', level: 'Inter 1st Year', price: 499 },
+    { id: 'c11', name: 'Chemistry', level: 'Inter 1st Year', price: 499 },
+  ];
+
+  const inter2ndYear = [
+    { id: 'p12', name: 'Physics', level: 'Inter 2nd Year', price: 599 },
+    { id: 'm12', name: 'Mathematics', level: 'Inter 2nd Year', price: 599 },
+    { id: 'b12', name: 'Biology', level: 'Inter 2nd Year', price: 599 },
   ];
 
   const toggleSubject = (id) => {
@@ -28,7 +31,7 @@ const Store = () => {
   };
 
   const totalPrice = selectedSubjects.reduce((acc, id) => {
-    const sub = subjects11_12.find(s => s.id === id);
+    const sub = [...inter1stYear, ...inter2ndYear].find(s => s.id === id);
     return acc + (sub?.price || 0);
   }, 0);
 
@@ -67,39 +70,70 @@ const Store = () => {
            </div>
         </div>
 
-        {/* Right: Classes 11-12 */}
+        {/* INTER CLASSES (11-12) */}
         <div className="xl:col-span-12">
             <h2 className="text-2xl font-black mb-8 flex items-center gap-3">
-              <HiBookmark className="text-emerald-500" /> Senior Secondary (Class 11 - 12)
+              <HiBookmark className="text-emerald-500" /> Inter Classes (1st & 2nd Year)
            </h2>
-           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-              <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                {subjects11_12.map(sub => (
-                   <label 
-                    key={sub.id} 
-                    className={`relative p-6 rounded-3xl cursor-pointer border-2 transition-all group overflow-hidden ${selectedSubjects.includes(sub.id) ? 'border-emerald-500 bg-emerald-50 shadow-2xl shadow-emerald-100' : 'border-white bg-white hover:border-slate-200 shadow-xl shadow-slate-200/50'}`}
-                   >
-                      <div className="relative z-10 flex flex-col h-full">
-                         <div className="flex justify-between items-start mb-6">
-                            <span className="px-2 py-0.5 bg-slate-100 text-[10px] font-black uppercase text-slate-500 rounded-md tracking-widest">{sub.level}</span>
-                            <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all ${selectedSubjects.includes(sub.id) ? 'bg-emerald-500 border-emerald-500 text-white scale-110 shadow-lg' : 'border-slate-300'}`}>
-                               {selectedSubjects.includes(sub.id) && <HiCheck />}
-                            </div>
-                         </div>
-                         <h4 className="text-xl font-black text-slate-900 mb-1">{sub.name}</h4>
-                         <p className="text-xs font-bold text-slate-400">Expert Instruction + PDF Notes</p>
-                         <div className="mt-auto pt-6 flex items-baseline gap-1">
-                            <span className="text-2xl font-black text-slate-900">₹{sub.price}</span>
-                            <span className="text-[10px] font-bold text-slate-400 capitalize">/ month / subject</span>
-                         </div>
-                      </div>
-                      <input type="checkbox" className="hidden" onChange={() => toggleSubject(sub.id)} />
-                      
-                      {selectedSubjects.includes(sub.id) && (
-                         <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl"></div>
-                      )}
-                   </label>
-                ))}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+              <div className="lg:col-span-2 space-y-12">
+                {/* 1st Year */}
+                <div className="space-y-6">
+                  <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest border-l-4 border-emerald-500 pl-3">Inter First Year</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {inter1stYear.map(sub => (
+                       <label 
+                        key={sub.id} 
+                        className={`relative p-6 rounded-3xl cursor-pointer border-2 transition-all group overflow-hidden ${selectedSubjects.includes(sub.id) ? 'border-emerald-500 bg-emerald-50 shadow-2xl shadow-emerald-100' : 'border-white bg-white hover:border-slate-200 shadow-xl shadow-slate-200/50'}`}
+                       >
+                          <div className="relative z-10 flex flex-col h-full">
+                             <div className="flex justify-between items-start mb-6">
+                                <span className="px-2 py-0.5 bg-slate-100 text-[10px] font-black uppercase text-slate-500 rounded-md tracking-widest">{sub.level}</span>
+                                <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all ${selectedSubjects.includes(sub.id) ? 'bg-emerald-500 border-emerald-500 text-white scale-110 shadow-lg' : 'border-slate-300'}`}>
+                                   {selectedSubjects.includes(sub.id) && <HiCheck />}
+                                </div>
+                             </div>
+                             <h4 className="text-xl font-black text-slate-900 mb-1">{sub.name}</h4>
+                             <p className="text-xs font-bold text-slate-400">Expert Instruction + PDF Notes</p>
+                             <div className="mt-auto pt-6 flex items-baseline gap-1">
+                                <span className="text-2xl font-black text-slate-900">₹{sub.price}</span>
+                                <span className="text-[10px] font-bold text-slate-400 capitalize">/ mo</span>
+                             </div>
+                          </div>
+                          <input type="checkbox" className="hidden" onChange={() => toggleSubject(sub.id)} />
+                       </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 2nd Year */}
+                <div className="space-y-6">
+                  <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest border-l-4 border-indigo-500 pl-3">Inter Second Year</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {inter2ndYear.map(sub => (
+                       <label 
+                        key={sub.id} 
+                        className={`relative p-6 rounded-3xl cursor-pointer border-2 transition-all group overflow-hidden ${selectedSubjects.includes(sub.id) ? 'border-indigo-500 bg-indigo-50 shadow-2xl shadow-indigo-100' : 'border-white bg-white hover:border-slate-200 shadow-xl shadow-slate-200/50'}`}
+                       >
+                          <div className="relative z-10 flex flex-col h-full">
+                             <div className="flex justify-between items-start mb-6">
+                                <span className="px-2 py-0.5 bg-slate-100 text-[10px] font-black uppercase text-slate-500 rounded-md tracking-widest">{sub.level}</span>
+                                <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all ${selectedSubjects.includes(sub.id) ? 'bg-indigo-500 border-indigo-500 text-white scale-110 shadow-lg' : 'border-slate-300'}`}>
+                                   {selectedSubjects.includes(sub.id) && <HiCheck />}
+                                </div>
+                             </div>
+                             <h4 className="text-xl font-black text-slate-900 mb-1">{sub.name}</h4>
+                             <p className="text-xs font-bold text-slate-400">Expert Instruction + PDF Notes</p>
+                             <div className="mt-auto pt-6 flex items-baseline gap-1">
+                                <span className="text-2xl font-black text-slate-900">₹{sub.price}</span>
+                                <span className="text-[10px] font-bold text-slate-400 capitalize">/ mo</span>
+                             </div>
+                          </div>
+                          <input type="checkbox" className="hidden" onChange={() => toggleSubject(sub.id)} />
+                       </label>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               {/* Checkout Summary Card */}
@@ -115,7 +149,7 @@ const Store = () => {
                              </div>
                           ) : (
                              selectedSubjects.map(id => {
-                               const item = subjects11_12.find(s => s.id === id);
+                               const item = [...inter1stYear, ...inter2ndYear].find(s => s.id === id);
                                return (
                                  <div key={id} className="flex justify-between items-center text-sm font-bold">
                                     <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div> {item.name}</span>

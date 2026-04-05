@@ -9,7 +9,8 @@ const {
   getRecordings,
   getMaterials,
   uploadMaterial,
-  deleteMaterial
+  deleteMaterial,
+  getDashboardStats
 } = require('../controllers/teacherController');
 const { protect } = require('../middleware/authMiddleware');
 const { authorizeRoles } = require('../middleware/roleMiddleware');
@@ -28,5 +29,6 @@ router.get('/recordings', getRecordings);
 router.get('/materials', getMaterials);
 router.post('/materials', upload.single('file'), uploadMaterial);
 router.delete('/materials/:id', deleteMaterial);
+router.get('/dashboard-stats', getDashboardStats);
 
 module.exports = router;

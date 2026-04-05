@@ -18,13 +18,14 @@ const Login = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('/auth/login', { email, password });
+      const res = await axios.post('/auth/login', { email: email.toLowerCase(), password });
       const user = res.data;
       dispatch(setCredentials({ ...user }));
       
-      if (user.role.toLowerCase() === 'admin') {
+      const userRole = user?.role?.toLowerCase() || 'student';
+      if (userRole === 'admin') {
         navigate('/admin/dashboard');
-      } else if (user.role.toLowerCase() === 'teacher') {
+      } else if (userRole === 'teacher') {
         navigate('/teacher/dashboard');
       } else {
         navigate('/student/dashboard');
@@ -41,11 +42,13 @@ const Login = () => {
         <div className="w-full lg:w-[45%] p-8 md:p-8 lg:p-10 flex flex-col justify-between min-h-screen md:min-h-0">
           <div className="space-y-4">
             <header className="flex justify-center w-full pb-4">
-              <img 
-                src={logoImg} 
-                alt="e-Tuitions Logo" 
-                className="h-24 md:h-32 object-contain transition-all duration-500"
-              />
+              <Link to="/" className="inline-block hover:scale-105 transition-transform duration-300">
+                <img 
+                  src={logoImg} 
+                  alt="e-Tuitions Logo" 
+                  className="h-24 md:h-32 object-contain"
+                />
+              </Link>
             </header>
 
             {/* Social Login Buttons & Create Account */}

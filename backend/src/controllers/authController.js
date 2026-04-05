@@ -12,7 +12,10 @@ const generateToken = (userId, deviceToken) => {
 const authUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (user) {
       const isMatch = await user.matchPassword(password);
       if (isMatch) {
@@ -27,7 +30,7 @@ const authUser = async (req, res, next) => {
           name: user.name,
           email: user.email,
           role: user.role,
-          syllabus: user.syllabus,
+          board: user.board,
           className: user.className,
           token,
         });
@@ -42,8 +45,11 @@ const authUser = async (req, res, next) => {
 
 const registerUser = async (req, res, next) => {
   try {
-    const { name, email, password, role, syllabus, className } = req.body;
-    const userExists = await User.findOne({ email });
+    const { name, email, password, role, board, className } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+    const userExists = await User.findOne({ email: email.toLowerCase() });
 
     if (userExists) {
       return res.status(400).json({ message: 'User already exists' });
@@ -51,10 +57,10 @@ const registerUser = async (req, res, next) => {
 
     const user = new User({
       name,
-      email,
+      email: email.toLowerCase(),
       password,
       role: role || 'Student',
-      syllabus,
+      board,
       className,
     });
 
@@ -70,7 +76,7 @@ const registerUser = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        syllabus: user.syllabus,
+        board: user.board,
         className: user.className,
         token,
       });
@@ -111,7 +117,7 @@ const getUserProfile = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        syllabus: user.syllabus,
+        board: user.board,
         className: user.className,
       });
     } else {
@@ -140,7 +146,7 @@ const updateUserProfile = async (req, res, next) => {
         name: updatedUser.name,
         email: updatedUser.email,
         role: updatedUser.role,
-        syllabus: updatedUser.syllabus,
+        board: updatedUser.board,
         className: updatedUser.className,
       });
     } else {

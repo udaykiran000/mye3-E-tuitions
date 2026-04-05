@@ -1,16 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { Activity, ShieldCheck, Users, Clock, AlertCircle, Loader2, BookOpen, Plus, X, Calendar, Video, Link as LinkIcon, Check, LayoutGrid, List, UserPlus, ChevronDown, Edit2, Trash2 } from 'lucide-react';
+import { Activity, ShieldCheck, Users, Clock, AlertCircle, Loader2, BookOpen, Plus, X, Calendar, Video, Link as LinkIcon, Check, LayoutGrid, List, UserPlus, ChevronDown, Edit2, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { HiSearch } from 'react-icons/hi';
 
-const WEEKDAYS = [
-  { id: 1, label: 'Mon' },
-  { id: 2, label: 'Tue' },
-  { id: 3, label: 'Wed' },
-  { id: 4, label: 'Thu' },
-  { id: 5, label: 'Fri' },
-  { id: 6, label: 'Sat' },
-];
+const BOARDS = ['CBSE', 'ICSE', 'TS Board', 'AP Board'];
+
+// Returns Sun-Sat Date objects for the current week (Sunday first)
+const getWeekDates = (offset = 0) => {
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // 0=Sun
+  // Sunday of current week
+  const sunday = new Date(today);
+  sunday.setDate(today.getDate() - dayOfWeek + offset * 7);
+  sunday.setHours(0, 0, 0, 0);
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(sunday);
+    d.setDate(sunday.getDate() + i);
+    return d;
+  });
+};
+
+const FMT_DAY = d => d.toLocaleDateString('en-IN', { weekday: 'short' });
+const FMT_DATE = d => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+const isSameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 
 const LiveMonitor = () => {
     const [viewType, setViewType] = useState('roster'); // Default to the requested roster grid
@@ -23,9 +35,17 @@ const LiveMonitor = () => {
 
     // Filter State
     const [classFilter, setClassFilter] = useState('All');
+    const [boardFilter, setBoardFilter] = useState('TS Board');
     const [teacherFilter, setTeacherFilter] = useState('All');
     const [statusFilter, setStatusFilter] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
+    const [expandedClasses, setExpandedClasses] = useState([]); // Accordion state for class rows
+    // Always show the current week (Sunday to Saturday)
+    const weekOffset = 0;
+
+    // Compute week dates whenever offset changes
+    const weekDates = useMemo(() => getWeekDates(weekOffset), [weekOffset]);
+    const today = useMemo(() => { const d = new Date(); d.setHours(0,0,0,0); return d; }, []);
 
     // Scheduling State
     const [showScheduler, setShowScheduler] = useState(false);
@@ -38,8 +58,10 @@ const LiveMonitor = () => {
         link: '',
         teacherId: '',
         assignmentId: '',
+        board: 'TS Board',
         startTime: '10:00',
-        selectedDays: []
+        selectedDays: [], // weekday numbers 1-6
+        preset: null // 'today' | 'thisWeek' | 'next3' | 'thisMonth' | 'custom'
     });
     const [filteredTeachers, setFilteredTeachers] = useState([]);
     const [showAssignPanel, setShowAssignPanel] = useState(false);
@@ -47,8 +69,8 @@ const LiveMonitor = () => {
     const [assigning, setAssigning] = useState(false);
 
     // Inline cell form state — tracks which cell is being edited
-    const [activeCell, setActiveCell] = useState(null); // { classLevel, dayId }
-    const [cellForm, setCellForm] = useState({ sessionId: '', subjectId: '', subjectName: '', teacherId: '', time: '10:00', platform: 'Zoom', link: '' });
+    const [activeCell, setActiveCell] = useState(null); // { classLevel, date: Date }
+    const [cellForm, setCellForm] = useState({ sessionId: '', subjectId: '', subjectName: '', teacherId: '', time: '10:00', platform: 'Zoom', link: '', board: 'TS Board' });
     const [cellTeachers, setCellTeachers] = useState([]);
     const [cellSubjects, setCellSubjects] = useState([]);
     const [cellSaving, setCellSaving] = useState(false);
@@ -98,11 +120,7 @@ const LiveMonitor = () => {
 
     useEffect(() => {
         fetchData();
-        const interval = setInterval(() => {
-           if (!showScheduler) fetchData();
-        }, 15000);
-        return () => clearInterval(interval);
-    }, [showScheduler]);
+    }, []);
 
     // When the selected assignment changes, fetch only eligible teachers
     useEffect(() => {
@@ -126,55 +144,91 @@ const LiveMonitor = () => {
     const toggleDay = (dayId) => {
         setFormData(prev => ({
             ...prev,
-            selectedDays: prev.selectedDays.includes(dayId) 
+            preset: 'custom',
+            selectedDays: prev.selectedDays.includes(dayId)
                ? prev.selectedDays.filter(d => d !== dayId)
                : [...prev.selectedDays, dayId]
         }));
     };
 
+    // Build date list from a preset
+    const buildDatesFromPreset = (preset, selectedDays) => {
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const dates = [];
+
+        if (preset === 'today') {
+            return [new Date(now)];
+        }
+        if (preset === 'thisWeek') {
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(now); d.setDate(now.getDate() + i);
+                if (d.getDay() >= 1 && d.getDay() <= 6) dates.push(new Date(d));
+            }
+            return dates;
+        }
+        if (preset === 'next3') {
+            for (let i = 0; i < 3; i++) {
+                const d = new Date(now); d.setDate(now.getDate() + i);
+                dates.push(new Date(d));
+            }
+            return dates;
+        }
+        if (preset === 'thisMonth') {
+            const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            let d = new Date(now);
+            while (d <= endOfMonth) {
+                if (!selectedDays.length || selectedDays.includes(d.getDay()))
+                    dates.push(new Date(d));
+                d.setDate(d.getDate() + 1);
+            }
+            return dates;
+        }
+        // custom: use selectedDays within next 4 weeks
+        for (let i = 0; i < 28; i++) {
+            const d = new Date(now); d.setDate(now.getDate() + i);
+            if (selectedDays.includes(d.getDay())) dates.push(new Date(d));
+        }
+        return dates;
+    };
+
     const handleScheduleSubmit = async (e) => {
         e.preventDefault();
-        
-        if (formData.selectedDays.length === 0) {
-            alert('Please select at least one day.');
+
+        const { preset, selectedDays } = formData;
+        if (!preset && selectedDays.length === 0) {
+            alert('Please select a preset or at least one day.');
             return;
         }
 
         const assignment = assignments.find(a => String(a.id) === String(formData.assignmentId) || a.classLevel === formData.assignmentId);
-        if (!assignment) {
-            alert('Please select a valid class/subject.');
-            return;
-        }
+        if (!assignment) { alert('Please select a valid class/subject.'); return; }
 
         setScheduling(true);
-        const sessionsToCreate = [];
         const [hour, minute] = formData.startTime.split(':');
-        const today = new Date();
+        const targetDates = buildDatesFromPreset(preset || 'custom', selectedDays);
 
-        // One-time session generation logic for the specified days
-        for (let i = 0; i < 7; i++) {
-           const d = new Date(today);
-           d.setDate(today.getDate() + i);
-           
-           if (formData.selectedDays.includes(d.getDay())) {
-              d.setHours(parseInt(hour), parseInt(minute), 0, 0);
-              
-              sessionsToCreate.push({
-                 platform: formData.platform,
-                 link: formData.link,
-                 teacherId: formData.teacherId,
-                 classLevel: assignment.classLevel,
-                 subjectName: assignment.subjectName,
-                 subjectId: assignment.type === 'subject' ? (assignment.id || assignment.subjectId) : undefined,
-                 startTime: d.toISOString()
-              });
-           }
-        }
+        const sessionsToCreate = targetDates.map(d => {
+            const dt = new Date(d);
+            dt.setHours(parseInt(hour), parseInt(minute), 0, 0);
+            return {
+                platform: formData.platform,
+                link: formData.link,
+                teacherId: formData.teacherId,
+                classLevel: assignment.classLevel,
+                subjectName: assignment.subjectName,
+                board: formData.board,
+                subjectId: assignment.type === 'subject' ? (assignment.id || assignment.subjectId) : undefined,
+                startTime: dt.toISOString()
+            };
+        });
+
+        if (sessionsToCreate.length === 0) { alert('No dates found for the selected preset/days.'); setScheduling(false); return; }
 
         try {
             await axios.post('/admin/live-sessions', { sessions: sessionsToCreate });
             setShowScheduler(false);
-            setFormData({ platform: 'Zoom', link: '', teacherId: '', assignmentId: '', startTime: '10:00', selectedDays: [] });
+            setFormData({ platform: 'Zoom', link: '', teacherId: '', assignmentId: '', board: 'TS Board', startTime: '10:00', selectedDays: [], preset: null });
             fetchData();
         } catch (error) {
             console.error('Failed to schedule:', error);
@@ -215,7 +269,7 @@ const LiveMonitor = () => {
         }
     };
 
-    const openCellScheduler = (classLevel, dayId, existingSession = null) => {
+    const openCellScheduler = (classLevel, date, existingSession = null, preselectedSubjectName = null) => {
         const levelNum = parseInt(classLevel.replace(/\D/g, ''));
         let subs = [];
 
@@ -258,7 +312,8 @@ const LiveMonitor = () => {
                 teacherId: existingSession.teacherId?._id || existingSession.teacherId,
                 time: sessionTime,
                 platform: existingSession.platform,
-                link: existingSession.link
+                link: existingSession.link,
+                board: existingSession.board || 'TS Board'
             });
             
             // Load teachers for this subject
@@ -271,21 +326,27 @@ const LiveMonitor = () => {
                 .finally(() => setCellLoadingTeachers(false));
         } else {
             // CREATE MODE
-            const firstSub = subs[0];
-            setCellForm({ sessionId: '', subjectId: firstSub?.id || '', subjectName: firstSub?.subjectName || '', teacherId: '', time: '10:00', platform: 'Zoom', link: '' });
+            let initSub = null;
+            if (preselectedSubjectName && preselectedSubjectName !== 'All') {
+                initSub = subs.find(s => s.subjectName === preselectedSubjectName);
+            }
+            if (!initSub) initSub = subs[0];
+
+            setCellForm({ sessionId: '', subjectId: initSub?.id || '', subjectName: initSub?.subjectName || '', teacherId: '', time: '10:00', platform: 'Zoom', link: '', board: 'TS Board' });
             
-            if (firstSub) {
+            if (initSub) {
                 setCellLoadingTeachers(true);
                 const params = new URLSearchParams();
                 params.set('classLevel', classLevel);
-                params.set('subjectName', firstSub.subjectName);
+                params.set('subjectName', initSub.subjectName);
                 axios.get(`/admin/teachers-for-subject?${params.toString()}`)
                     .then(r => setCellTeachers(r.data || []))
                     .finally(() => setCellLoadingTeachers(false));
             }
         }
         
-        setActiveCell({ classLevel, dayId });
+        setActiveCell({ classLevel, date });
+        setCellForm(prev => ({ ...prev, board: boardFilter }));
     };
 
     const handleDeleteSession = async (sessionId) => {
@@ -313,7 +374,7 @@ const LiveMonitor = () => {
         }
     };
 
-    const handleCellSubmit = async (classLevel, dayId) => {
+    const handleCellSubmit = async (classLevel, date) => {
         if (!cellForm.teacherId || !cellForm.link) {
             alert('Please fill in Teacher and Link.');
             return;
@@ -321,12 +382,8 @@ const LiveMonitor = () => {
         const sub = cellSubjects.find(s => String(s.id) === String(cellForm.subjectId)) || cellSubjects[0];
         if (!sub) { alert('No subject found.'); return; }
 
-        const today = new Date();
         const [hour, minute] = cellForm.time.split(':');
-        let targetDate = new Date(today);
-        while (targetDate.getDay() !== dayId) {
-            targetDate.setDate(targetDate.getDate() + 1);
-        }
+        const targetDate = new Date(date);
         targetDate.setHours(parseInt(hour), parseInt(minute), 0, 0);
 
         setCellSaving(true);
@@ -337,6 +394,7 @@ const LiveMonitor = () => {
                 teacherId: cellForm.teacherId,
                 classLevel: classLevel,
                 subjectName: sub.subjectName,
+                board: cellForm.board || 'TS Board',
                 subjectId: sub.type === 'subject' && /^[0-9a-fA-F]{24}$/.test(String(sub.id)) ? sub.id : undefined,
                 startTime: targetDate.toISOString()
             };
@@ -370,7 +428,7 @@ const LiveMonitor = () => {
     );
 
     return (
-        <div className="space-y-10 p-6 md:p-10 relative">
+        <div className="space-y-6 md:space-y-8 relative w-full">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
                     <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase leading-none">Live & Schedule Class</h1>
@@ -416,11 +474,7 @@ const LiveMonitor = () => {
                 <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 rounded-2xl border border-slate-100">
                         <LayoutGrid className="w-4 h-4 text-slate-400" />
-                        <select 
-                            value={classFilter} 
-                            onChange={(e) => setClassFilter(e.target.value)}
-                            className="bg-transparent text-sm font-black text-slate-600 outline-none pr-4"
-                        >
+                        <select value={classFilter} onChange={(e) => setClassFilter(e.target.value)} className="bg-transparent text-sm font-black text-slate-600 outline-none pr-4">
                             <option value="All">All Classes</option>
                             {allClasses.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
@@ -428,11 +482,7 @@ const LiveMonitor = () => {
 
                     <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 rounded-2xl border border-slate-100">
                         <UserPlus className="w-4 h-4 text-slate-400" />
-                        <select 
-                            value={teacherFilter} 
-                            onChange={(e) => setTeacherFilter(e.target.value)}
-                            className="bg-transparent text-sm font-black text-slate-600 outline-none pr-4"
-                        >
+                        <select value={teacherFilter} onChange={(e) => setTeacherFilter(e.target.value)} className="bg-transparent text-sm font-black text-slate-600 outline-none pr-4">
                             <option value="All">All Teachers</option>
                             {teachers.map(t => <option key={t._id} value={t.name}>{t.name}</option>)}
                         </select>
@@ -440,11 +490,7 @@ const LiveMonitor = () => {
 
                     <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 rounded-2xl border border-slate-100">
                         <Activity className="w-4 h-4 text-slate-400" />
-                        <select 
-                            value={statusFilter} 
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className="bg-transparent text-sm font-black text-slate-600 outline-none pr-4"
-                        >
+                        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-transparent text-sm font-black text-slate-600 outline-none pr-4">
                             <option value="All">All Status</option>
                             <option value="live">Live Now</option>
                             <option value="upcoming">Upcoming</option>
@@ -452,9 +498,9 @@ const LiveMonitor = () => {
                         </select>
                     </div>
 
-                    {(classFilter !== 'All' || teacherFilter !== 'All' || statusFilter !== 'All' || searchQuery !== '') && (
+                    {(classFilter !== 'All' || boardFilter !== 'All' || teacherFilter !== 'All' || statusFilter !== 'All' || searchQuery !== '') && (
                         <button 
-                           onClick={() => { setClassFilter('All'); setTeacherFilter('All'); setStatusFilter('All'); setSearchQuery(''); }}
+                           onClick={() => { setClassFilter('All'); setBoardFilter('All'); setTeacherFilter('All'); setStatusFilter('All'); setSearchQuery(''); }}
                            className="p-3.5 bg-rose-50 text-rose-600 rounded-2xl hover:bg-rose-100 transition-colors"
                            title="Clear Filters"
                         >
@@ -466,43 +512,48 @@ const LiveMonitor = () => {
 
             {viewType === 'roster' ? (
                 /* --- TIMETABLE ROW-DRIVEN GRID --- */
-                <div className="bg-white border border-slate-100 rounded-[3rem] shadow-2xl shadow-slate-200/50 overflow-hidden">
-                    <div className="p-8 border-b border-slate-50 bg-slate-50/30">
-                        <h2 className="text-xl font-black uppercase tracking-tight text-slate-900">Class Timetable</h2>
+                <div className="bg-white border border-slate-100 rounded-3xl shadow-2xl flex-1 overflow-hidden w-full">
+                    {/* Timetable header — fixed current week, no navigation */}
+                    <div className="p-6 border-b border-slate-50 bg-slate-50/30 flex items-center justify-between">
+                        <div>
+                            <h2 className="text-xl font-black uppercase tracking-tight text-slate-900">Class Timetable</h2>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                                {FMT_DATE(weekDates[0])} — {FMT_DATE(weekDates[6])}
+                                <span className="ml-2 px-2 py-0.5 bg-indigo-100 text-indigo-600 rounded-full">This Week</span>
+                            </p>
+                        </div>
                     </div>
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto w-full">
                         <table className="w-full border-collapse">
                             <thead>
                                 <tr className="bg-white">
-                                    <th className="p-4 text-left border-r border-slate-50 w-32"></th>
-                                    {WEEKDAYS.map(day => (
-                                        <th key={day.id} className="p-4 text-center font-black uppercase tracking-widest text-slate-400 text-[10px] border-b border-slate-50 min-w-[140px]">
-                                            {day.label}
-                                        </th>
-                                    ))}
+                                    <th className="p-4 text-left border-r border-slate-50 w-[14%] min-w-[120px]"></th>
+                                    {weekDates.map((date, di) => {
+                                        const isToday = isSameDay(date, today);
+                                        const isSunday = date.getDay() === 0;
+                                        return (
+                                            <th key={di} className={`p-4 text-center font-black uppercase tracking-widest text-[10px] border-b transition-all relative ${
+                                                isToday ? 'bg-indigo-600 text-white border-indigo-500 shadow-xl z-10' : 'text-slate-400 border-slate-50 relative'
+                                            } ${isSunday ? 'w-[8%] min-w-[80px]' : 'w-[13%] min-w-[130px]'}`}>
+                                                {isToday && <div className="absolute top-0 left-0 right-0 h-1 bg-indigo-400"></div>}
+                                                <div>{FMT_DAY(date)}</div>
+                                                <div className={`text-[9px] mt-0.5 font-bold ${isToday ? 'text-indigo-100' : 'text-slate-300'}`}>{FMT_DATE(date)}</div>
+                                            </th>
+                                        );
+                                    })}
                                 </tr>
                             </thead>
                             <tbody>
                                 {allClasses
                                     .filter(lvl => {
-                                        // 1. Basic Class Filter
                                         if (classFilter !== 'All' && lvl !== classFilter) return false;
-
-                                        // 2. If any other filter is active (Status, Teacher, Search), 
-                                        // only show this row if it actually contains matching sessions.
+                                        // Board filter should NOT hide the class row itself, so we can always add classes to any board
                                         const hasFilters = statusFilter !== 'All' || teacherFilter !== 'All' || searchQuery !== '';
                                         if (hasFilters) {
-                                            const hasMatchingSessionInRow = allSessions.some(s => {
+                                            const hasMatch = allSessions.some(s => {
                                                 if (s.classLevel !== lvl) return false;
-                                                const d = new Date(s.startTime);
-                                                const sessionDateStr = d.toISOString().split('T')[0];
-                                                const now = new Date();
-                                                const todayStr = now.toISOString().split('T')[0];
-                                                
-                                                // Check basic time/day visibility
-                                                if (sessionDateStr < todayStr) return false;
-                                                
-                                                // Check current filters
+                                                const sDate = new Date(s.startTime);
+                                                if (!weekDates.some(wd => isSameDay(wd, sDate))) return false;
                                                 if (statusFilter !== 'All' && s.status !== statusFilter) return false;
                                                 if (teacherFilter !== 'All' && s.teacherId?.name !== teacherFilter) return false;
                                                 if (searchQuery) {
@@ -511,50 +562,87 @@ const LiveMonitor = () => {
                                                 }
                                                 return true;
                                             });
-                                            if (!hasMatchingSessionInRow) return false;
+                                            if (!hasMatch) return false;
                                         }
                                         return true;
                                     })
-                                    .map((lvl, ridx) => (
-                                    <tr key={ridx} className="group hover:bg-slate-50 transition-all border-b border-slate-50">
-                                        <td className="p-4 border-r border-slate-50 font-black text-slate-900 text-sm md:text-base uppercase tracking-tighter w-28 md:w-32 italic">
-                                            {lvl}
-                                        </td>
-                                        {WEEKDAYS.map(day => {
-                                            const now = new Date();
-                                            const todayStr = now.toISOString().split('T')[0];
+                                    .map((lvl, ridx) => {
+                                        const isExpanded = expandedClasses.includes(lvl);
+                                        return (
+                                        <React.Fragment key={ridx}>
+                                            {/* ACCORDION HEADER */}
+                                            <tr 
+                                                className="group hover:bg-slate-50 transition-all border-b border-slate-50 cursor-pointer"
+                                                onClick={() => setExpandedClasses(prev => isExpanded ? prev.filter(c => c !== lvl) : [...prev, lvl])}
+                                            >
+                                                <td colSpan={8} className="p-3 md:p-4">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="font-black text-slate-900 text-sm md:text-base uppercase tracking-tighter italic flex items-center gap-3">
+                                                            <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                                                                <BookOpen className="w-4 h-4" />
+                                                            </div>
+                                                            {lvl}
+                                                        </div>
 
-                                            const daySessions = allSessions
-                                                .filter(s => {
-                                                    const d = new Date(s.startTime);
-                                                    const sessionDateStr = d.toISOString().split('T')[0];
-                                                    
-                                                    // Filter for this class and day
-                                                    if (s.classLevel !== lvl || d.getDay() !== day.id) return false;
-                                                    
-                                                    // HIDE PAST SESSIONS: If session date is before today, hide it.
-                                                    if (sessionDateStr < todayStr) return false;
+                                                        <div className="flex items-center gap-3 text-slate-400 group-hover:text-indigo-600 transition-colors shrink-0">
+                                                            <span className="text-[10px] font-bold uppercase tracking-widest hidden sm:inline">
+                                                                {isExpanded ? 'Hide Schedule' : 'View Schedule'}
+                                                            </span>
+                                                            {isExpanded ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
 
-                                                    // TEACHER FILTER
-                                                    if (teacherFilter !== 'All' && s.teacherId?.name !== teacherFilter) return false;
-                                                    
-                                                    // STATUS FILTER
-                                                    if (statusFilter !== 'All' && s.status !== statusFilter) return false;
+                                            {/* ACCORDION CONTENT (THE GRID) */}
+                                            {isExpanded && (
+                                                <tr className="transition-all border-b border-slate-50 bg-white">
+                                                    <td className="p-4 border-r border-slate-50 bg-slate-50/30"></td>
+                                                    <td colSpan={7} className="p-0">
+                                                        {/* BOARD TABS INSIDE EXPANDED VIEW */}
+                                                        <div className="flex items-center gap-2 p-4 bg-slate-50 border-b border-slate-100 overflow-x-auto no-scrollbar">
+                                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mr-2">Select Board:</span>
+                                                            {BOARDS.map(b => (
+                                                                <button 
+                                                                    key={b}
+                                                                    onClick={(e) => { e.stopPropagation(); setBoardFilter(b); }}
+                                                                    className={`px-4 py-2 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all border-2 whitespace-nowrap ${
+                                                                        boardFilter === b 
+                                                                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg' 
+                                                                        : 'bg-white text-slate-400 border-slate-100 hover:border-indigo-100 hover:text-slate-600'
+                                                                    }`}
+                                                                >
+                                                                    {b}
+                                                                </button>
+                                                            ))}
+                                                        </div>
 
-                                                    // SEARCH FILTER
-                                                    if (searchQuery) {
-                                                        const q = searchQuery.toLowerCase();
-                                                        const match = s.subjectName?.toLowerCase().includes(q) || 
-                                                                      s.teacherId?.name?.toLowerCase().includes(q);
-                                                        if (!match) return false;
-                                                    }
+                                                        <div className="overflow-x-auto w-full">
+                                                            <table className="w-full border-collapse">
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td className="p-4 border-r border-slate-50 bg-slate-50/20 w-[14%] min-w-[120px] font-black text-[9px] text-slate-400">CLASS GRID</td>
+                                                                        {weekDates.map((date, di) => {
+                                                                            const isToday = isSameDay(date, today);
+                                                                            const daySessions = allSessions
+                                                                                .filter(s => {
+                                                                                    const sDate = new Date(s.startTime);
+                                                                                    if (s.classLevel !== lvl) return false;
+                                                                                    if (!isSameDay(sDate, date)) return false;
+                                                                                    if (s.board && s.board !== boardFilter) return false;
+                                                                                    if (teacherFilter !== 'All' && s.teacherId?.name !== teacherFilter) return false;
+                                                                                    if (statusFilter !== 'All' && s.status !== statusFilter) return false;
+                                                                                    if (searchQuery) {
+                                                                                        const q = searchQuery.toLowerCase();
+                                                                                        return s.subjectName?.toLowerCase().includes(q) || s.teacherId?.name?.toLowerCase().includes(q);
+                                                                                    }
+                                                                                })
+                                                                                .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
 
-                                                    return true;
-                                                })
-                                                .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
-
-                                            return (
-                                                <td key={day.id} className="p-2 md:p-3 align-top border-r border-slate-50 last:border-r-0" style={{minWidth: '140px'}}>
+                                                                            return (
+                                                                                <td key={di} className={`p-2 md:p-3 align-top border-slate-50 ${
+                                                    isToday ? 'bg-indigo-50/80 border-x-2 border-x-indigo-200' : 'border-r last:border-r-0'
+                                                }`}>
                                                     <div className="space-y-2">
                                                         {daySessions.map((s, sidx) => {
                                                             const isEnded = s.status === 'ended';
@@ -588,7 +676,7 @@ const LiveMonitor = () => {
                                                                         <div className="flex items-center gap-1">
                                                                             {!isEnded && !isLive && (
                                                                                 <div className="hidden group-hover/card:flex items-center gap-1.5 mr-1">
-                                                                                    <button onClick={() => openCellScheduler(lvl, day.id, s)} className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-indigo-600 transition-colors">
+                                                                                    <button onClick={() => openCellScheduler(lvl, date, s)} className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-indigo-600 transition-colors">
                                                                                         <Edit2 className="w-3 h-3" />
                                                                                     </button>
                                                                                     <button onClick={() => handleDeleteSession(s._id)} className="p-1 hover:bg-rose-50 rounded text-slate-400 hover:text-rose-600 transition-colors">
@@ -624,7 +712,7 @@ const LiveMonitor = () => {
                                                         })}
 
                                                         {/* INLINE ADD FORM */}
-                                                        {activeCell?.classLevel === lvl && activeCell?.dayId === day.id ? (
+                                                        {activeCell?.classLevel === lvl && activeCell?.date && isSameDay(activeCell.date, date) ? (
                                                             <div className="border-2 border-indigo-200 rounded-2xl bg-indigo-50/60 p-3 space-y-2">
                                                                 {/* Subject Dropdown — from DB */}
                                                                 {cellSubjects.length > 1 ? (
@@ -671,6 +759,14 @@ const LiveMonitor = () => {
                                                                     onChange={e => setCellForm(f => ({...f, time: e.target.value}))}
                                                                     className="w-full text-[11px] font-bold bg-white border border-indigo-100 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
                                                                 />
+                                                                {/* Board */}
+                                                                <select
+                                                                    value={cellForm.board}
+                                                                    onChange={e => setCellForm(f => ({...f, board: e.target.value}))}
+                                                                    className="w-full text-[11px] font-bold bg-white border border-indigo-100 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+                                                                >
+                                                                    {BOARDS.map(b => <option key={b} value={b}>{b}</option>)}
+                                                                </select>
                                                                 {/* Platform */}
                                                                 <select
                                                                     value={cellForm.platform}
@@ -697,7 +793,7 @@ const LiveMonitor = () => {
                                                                         Cancel
                                                                     </button>
                                                                     <button
-                                                                        onClick={() => handleCellSubmit(lvl, day.id)}
+                                                                        onClick={() => handleCellSubmit(lvl, activeCell.date)}
                                                                         disabled={cellSaving}
                                                                         className="flex-1 py-2 text-[10px] font-black uppercase tracking-widest bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all disabled:opacity-50 flex items-center justify-center gap-1"
                                                                     >
@@ -705,21 +801,30 @@ const LiveMonitor = () => {
                                                                     </button>
                                                                 </div>
                                                             </div>
-                                                        ) : (
+                                                        ) : date.getDay() !== 0 ? (
+                                                            // Not Sunday — show + ADD
                                                             <button 
-                                                                onClick={() => openCellScheduler(lvl, day.id)}
-                                                                className="w-full py-3 border-2 border-dashed border-slate-100 rounded-2xl flex items-center justify-center gap-2 text-slate-300 hover:border-indigo-200 hover:text-indigo-600 transition-all"
+                                                                onClick={() => openCellScheduler(lvl, date, null)}
+                                                                className="w-full py-2.5 border-2 border-dashed border-slate-100 rounded-xl flex items-center justify-center gap-1.5 text-slate-300 hover:border-indigo-200 hover:text-indigo-600 transition-all"
                                                             >
-                                                                <Plus className="w-4 h-4" />
-                                                                <span className="text-[10px] font-black uppercase tracking-widest">+ Add</span>
+                                                                <Plus className="w-3.5 h-3.5" />
+                                                                <span className="text-[9px] font-black uppercase tracking-widest">Add</span>
                                                             </button>
-                                                        )}
+                                                        ) : null}
                                                     </div>
                                                 </td>
-                                            );
-                                        })}
-                                    </tr>
-                                ))}
+                                                                            );
+                                                                        })}
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </React.Fragment>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
@@ -935,31 +1040,20 @@ const LiveMonitor = () => {
                                    </div>
                                </div>
 
-                               <div className="p-6 bg-indigo-50 border border-indigo-100 rounded-3xl space-y-6">
-                                   <div>
-                                       <label className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-4 block flex items-center gap-2">
-                                           <Calendar className="w-4 h-4" /> Recurrence Settings (Weekly)
-                                       </label>
-                                       <div className="flex flex-wrap gap-3">
-                                           {WEEKDAYS.map(day => {
-                                               const isSelected = formData.selectedDays.includes(day.id);
-                                               return (
-                                                   <button
-                                                     type="button"
-                                                     key={day.id}
-                                                     onClick={() => toggleDay(day.id)}
-                                                     className={`px-5 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest border-2 transition-all flex items-center gap-2 ${isSelected ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'bg-white border-white text-slate-400 shadow-sm hover:border-indigo-200 hover:text-indigo-600'}`}
-                                                   >
-                                                      {isSelected && <Check className="w-3 h-3" />} {day.label}
-                                                   </button>
-                                               )
-                                           })}
-                                       </div>
+                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                   <div className="space-y-2">
+                                       <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2"><ShieldCheck className="w-3 h-3"/> Board</label>
+                                       <select
+                                         required
+                                         value={formData.board}
+                                         onChange={e => setFormData({...formData, board: e.target.value})}
+                                         className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none"
+                                       >
+                                           {BOARDS.map(b => <option key={b} value={b}>{b}</option>)}
+                                       </select>
                                    </div>
                                    <div className="space-y-2 max-w-[200px]">
-                                       <label className="text-[10px] font-black uppercase tracking-widest text-indigo-400 flex items-center gap-2">
-                                           <Clock className="w-3 h-3" /> Scheduled Time
-                                       </label>
+                                       <label className="text-[10px] font-black uppercase tracking-widest text-indigo-400 flex items-center gap-2"><Clock className="w-3 h-3" /> Scheduled Time</label>
                                        <input 
                                          required
                                          type="time"
@@ -968,6 +1062,53 @@ const LiveMonitor = () => {
                                          className="w-full bg-white border border-indigo-100 rounded-xl px-4 py-3 text-sm font-black text-indigo-900 focus:ring-2 focus:ring-indigo-600 outline-none"
                                        />
                                    </div>
+                               </div>
+
+                               <div className="p-6 bg-indigo-50 border border-indigo-100 rounded-3xl space-y-5">
+                                   <div>
+                                       <label className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-3 block flex items-center gap-2">
+                                           <Calendar className="w-4 h-4" /> Quick Schedule Preset
+                                       </label>
+                                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                           {[
+                                               { key: 'today', label: 'Today', sub: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) },
+                                               { key: 'thisWeek', label: 'This Week', sub: 'Mon – Sat' },
+                                               { key: 'next3', label: 'Next 3 Days', sub: 'Today + 2 days' },
+                                               { key: 'thisMonth', label: 'This Month', sub: new Date().toLocaleDateString('en-IN', { month: 'long' }) + ' (all)' },
+                                           ].map(p => (
+                                               <button
+                                                   type="button"
+                                                   key={p.key}
+                                                   onClick={() => setFormData(f => ({ ...f, preset: f.preset === p.key ? null : p.key, selectedDays: f.preset === p.key ? f.selectedDays : [] }))}
+                                                   className={`p-3 rounded-2xl border-2 text-left transition-all ${formData.preset === p.key ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'bg-white border-white text-slate-600 shadow-sm hover:border-indigo-200'}`}
+                                               >
+                                                   <p className="text-[11px] font-black uppercase tracking-widest">{p.label}</p>
+                                                   <p className={`text-[9px] font-bold mt-0.5 ${formData.preset === p.key ? 'text-indigo-200' : 'text-slate-400'}`}>{p.sub}</p>
+                                               </button>
+                                           ))}
+                                       </div>
+                                   </div>
+
+                                   {/* Specific day pickers for thisMonth or custom */}
+                                   {(formData.preset === 'thisMonth' || formData.preset === 'custom' || !formData.preset) && (
+                                       <div>
+                                           <label className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-3 block">
+                                               {formData.preset === 'thisMonth' ? 'Optionally restrict to these days:' : 'Pick specific days (4 weeks):'}
+                                           </label>
+                                           <div className="flex flex-wrap gap-3">
+                                               {[{id:1,l:'Mon'},{id:2,l:'Tue'},{id:3,l:'Wed'},{id:4,l:'Thu'},{id:5,l:'Fri'},{id:6,l:'Sat'}].map(day => {
+                                                   const isSel = formData.selectedDays.includes(day.id);
+                                                   return (
+                                                       <button type="button" key={day.id} onClick={() => toggleDay(day.id)}
+                                                           className={`px-5 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest border-2 transition-all flex items-center gap-2 ${isSel ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'bg-white border-white text-slate-400 shadow-sm hover:border-indigo-200 hover:text-indigo-600'}`}
+                                                       >
+                                                           {isSel && <Check className="w-3 h-3" />} {day.l}
+                                                       </button>
+                                                   );
+                                               })}
+                                           </div>
+                                       </div>
+                                   )}
                                </div>
 
                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

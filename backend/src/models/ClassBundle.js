@@ -4,7 +4,6 @@ const classBundleSchema = new mongoose.Schema({
   className: {
     type: String,
     required: true,
-    unique: true,
     trim: true
   },
   board: {
@@ -39,5 +38,8 @@ const classBundleSchema = new mongoose.Schema({
     default: Date.now
   }
 }, { timestamps: true });
+
+// Allow same class for different boards - compound unique index
+classBundleSchema.index({ className: 1, board: 1 }, { unique: true });
 
 module.exports = mongoose.model('ClassBundle', classBundleSchema);

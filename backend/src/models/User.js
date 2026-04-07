@@ -31,7 +31,8 @@ const userSchema = new mongoose.Schema({
       assignmentType: { type: String, enum: ['bundle', 'subject'], required: true },
       classLevel: { type: String, required: true },
       subjectName: { type: String, required: true },
-      subjectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject' }
+      subjectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject' },
+      board: { type: String, enum: ['CBSE', 'ICSE', 'TS Board', 'AP Board'] }
     }
   ],
   currentDeviceToken: { type: String, default: null } // for single device login

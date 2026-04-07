@@ -356,6 +356,10 @@ exports.getCourseContent = async (req, res, next) => {
       ]
     }).sort({ createdAt: -1 });
 
+    const boardFilter = student.board
+      ? { $or: [{ board: student.board }, { board: { $exists: false } }, { board: null }] }
+      : {};
+
     const materials = await Material.find({
       ...boardFilter,
       isVisible: true,

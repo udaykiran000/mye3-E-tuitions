@@ -214,7 +214,7 @@ const TeacherMaterials = () => {
           <button
             key={b}
             onClick={() => setActiveBoard(b)}
-            className={`px-6 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${activeBoard === b ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`px-6 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${activeBoard === b ? 'bg-white text-teal-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
             {b}
           </button>
@@ -254,7 +254,7 @@ const TeacherMaterials = () => {
                   onClick={() => toggleClass(classLvl)}
                   className="flex items-center gap-3 flex-1"
                 >
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${isExpanded ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-600'}`}>
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${isExpanded ? 'bg-teal-600 text-white' : 'bg-teal-50 text-teal-600'}`}>
                     <GraduationCap className="w-5 h-5" />
                   </div>
                   <div>
@@ -277,7 +277,7 @@ const TeacherMaterials = () => {
                       if (!expandedClasses.includes(classLvl)) toggleClass(classLvl);
                       setShowModal(true);
                     }}
-                    className="hidden sm:flex px-3 py-1.5 rounded-lg border border-indigo-100 bg-indigo-50/50 hover:bg-indigo-100 text-indigo-600 text-[11px] font-bold uppercase tracking-wide transition-all items-center gap-1"
+                    className="hidden sm:flex px-3 py-1.5 rounded-lg border border-teal-100 bg-teal-50/50 hover:bg-teal-100 text-teal-600 text-[11px] font-bold uppercase tracking-wide transition-all items-center gap-1"
                   >
                     <Plus className="w-3.5 h-3.5" /> Add Note
                   </button>
@@ -307,7 +307,7 @@ const TeacherMaterials = () => {
                                 <button
                                   key={sub}
                                   onClick={() => setActiveSubjects(prev => ({...prev, [classLvl]: sub}))}
-                                  className={`px-4 py-1.5 text-[11px] font-bold uppercase tracking-wide rounded-md transition-colors ${currentSub === sub ? 'bg-white text-indigo-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:bg-slate-100 border border-transparent'}`}
+                                  className={`px-4 py-1.5 text-[11px] font-bold uppercase tracking-wide rounded-md transition-colors ${currentSub === sub ? 'bg-white text-teal-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:bg-slate-100 border border-transparent'}`}
                                 >
                                   {sub}
                                 </button>
@@ -331,7 +331,7 @@ const TeacherMaterials = () => {
                               setModalClassFilter(classLvl);
                               setShowModal(true);
                             }}
-                            className="mt-3 text-xs font-bold text-indigo-600 underline hover:text-indigo-800"
+                            className="mt-3 text-xs font-bold text-teal-600 underline hover:text-teal-800"
                           >
                             Upload First Note
                           </button>
@@ -353,7 +353,7 @@ const TeacherMaterials = () => {
                               return (
                                 <tr key={m._id} className={`border-b border-slate-50 last:border-b-0 group transition-colors ${m.isVisible === false ? 'bg-slate-50/60 opacity-60' : 'hover:bg-slate-50/50'}`}>
                                   <td className="px-5 py-4">
-                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-bold rounded-md whitespace-nowrap">
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-teal-50 border border-teal-100 text-teal-700 text-xs font-bold rounded-md whitespace-nowrap">
                                       <BookOpen className="w-3 h-3 opacity-70" />
                                       {m.subjectName}
                                     </span>
@@ -366,7 +366,7 @@ const TeacherMaterials = () => {
                                       {isAdminMaterial ? (
                                         <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">Global Admin</span>
                                       ) : (
-                                        <span className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">My Note ({m.teacherId?.name || 'Me'})</span>
+                                        <span className="text-teal-600 bg-teal-50 px-2 py-0.5 rounded border border-teal-100">My Note ({m.teacherId?.name || 'Me'})</span>
                                       )}
                                     </div>
                                   </td>
@@ -397,7 +397,7 @@ const TeacherMaterials = () => {
                                         href={m.fileUrl}
                                         target="_blank"
                                         rel="noreferrer"
-                                        className="p-2 text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-600 hover:text-white transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 shadow-sm"
+                                        className="p-2 text-teal-600 bg-teal-50 rounded-lg hover:bg-teal-600 hover:text-white transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 shadow-sm"
                                         title="Download / View"
                                       >
                                         <Download className="w-4 h-4" />
@@ -451,7 +451,7 @@ const TeacherMaterials = () => {
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <h2 className="text-base font-bold text-slate-800">Upload Note</h2>
-                      <span className="px-2 py-0.5 bg-indigo-50 border border-indigo-100 text-indigo-700 text-[10px] font-black rounded-full uppercase tracking-wide">
+                      <span className="px-2 py-0.5 bg-teal-50 border border-teal-100 text-teal-700 text-[10px] font-black rounded-full uppercase tracking-wide">
                         {formData.board}
                       </span>
                     </div>
@@ -480,13 +480,13 @@ const TeacherMaterials = () => {
                       {/* TARGET CLASS / SUBJECT */}
                       <div className="space-y-1.5">
                         <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wide flex items-center gap-1.5">
-                          <GraduationCap className="w-3 h-3 text-indigo-500" /> Class / Subject
+                          <GraduationCap className="w-3 h-3 text-teal-500" /> Class / Subject
                         </label>
                         <select
                           required
                           value={formData.courseString}
                           onChange={(e) => setFormData({ ...formData, courseString: e.target.value })}
-                          className="w-full px-3 py-2.5 bg-white border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 rounded-xl outline-none font-semibold text-slate-800 text-sm appearance-none cursor-pointer transition-all"
+                          className="w-full px-3 py-2.5 bg-white border border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-50 rounded-xl outline-none font-semibold text-slate-800 text-sm appearance-none cursor-pointer transition-all"
                         >
                           <option value="" disabled>Select a subject...</option>
                           {assignments
@@ -502,7 +502,7 @@ const TeacherMaterials = () => {
                       {/* TITLE */}
                       <div className="space-y-1.5">
                         <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wide flex items-center gap-1.5">
-                          <FileSearch className="w-3 h-3 text-indigo-500" /> Note Title
+                          <FileSearch className="w-3 h-3 text-teal-500" /> Note Title
                         </label>
                         <input
                           required
@@ -510,7 +510,7 @@ const TeacherMaterials = () => {
                           placeholder="e.g. Chapter 3: Motion in a Straight Line"
                           value={formData.title}
                           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                          className="w-full px-3 py-2.5 bg-white border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 rounded-xl outline-none font-semibold text-slate-800 text-sm transition-all"
+                          className="w-full px-3 py-2.5 bg-white border border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-50 rounded-xl outline-none font-semibold text-slate-800 text-sm transition-all"
                         />
                       </div>
 
@@ -520,14 +520,14 @@ const TeacherMaterials = () => {
                           <button
                             type="button"
                             onClick={() => setUploadMode('upload')}
-                            className={`flex-1 py-1.5 rounded-md text-xs font-bold transition-all ${uploadMode === 'upload' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            className={`flex-1 py-1.5 rounded-md text-xs font-bold transition-all ${uploadMode === 'upload' ? 'bg-teal-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                           >
                             Upload PDF
                           </button>
                           <button
                             type="button"
                             onClick={() => setUploadMode('link')}
-                            className={`flex-1 py-1.5 rounded-md text-xs font-bold transition-all ${uploadMode === 'link' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            className={`flex-1 py-1.5 rounded-md text-xs font-bold transition-all ${uploadMode === 'link' ? 'bg-teal-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                           >
                             Paste Link
                           </button>
@@ -542,8 +542,8 @@ const TeacherMaterials = () => {
                               onChange={(e) => setSelectedFile(e.target.files[0])}
                               className="absolute inset-0 opacity-0 cursor-pointer z-10"
                             />
-                            <div className={`w-full px-4 py-5 border-2 border-dashed rounded-xl transition-all flex flex-col items-center justify-center gap-2 ${selectedFile ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-200 bg-white group-hover:border-indigo-400'}`}>
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${selectedFile ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                            <div className={`w-full px-4 py-5 border-2 border-dashed rounded-xl transition-all flex flex-col items-center justify-center gap-2 ${selectedFile ? 'border-teal-500 bg-teal-50/50' : 'border-slate-200 bg-white group-hover:border-teal-400'}`}>
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${selectedFile ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
                                 {selectedFile ? <CheckCircle2 className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
                               </div>
                               <p className="text-sm font-bold text-slate-700 text-center">
@@ -559,13 +559,13 @@ const TeacherMaterials = () => {
                             placeholder="https://drive.google.com/file/..."
                             value={formData.fileUrl}
                             onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value })}
-                            className="w-full px-3 py-2.5 bg-white border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 rounded-xl outline-none font-semibold text-slate-800 text-sm transition-all"
+                            className="w-full px-3 py-2.5 bg-white border border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-50 rounded-xl outline-none font-semibold text-slate-800 text-sm transition-all"
                           />
                         )}
                       </div>
 
                       {/* SUBMIT */}
-                      <button type="submit" className="w-full py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm shadow-indigo-200">
+                      <button type="submit" className="w-full py-2.5 bg-teal-600 text-white rounded-xl font-bold text-sm hover:bg-teal-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm shadow-teal-200">
                         <Upload className="w-4 h-4" /> Save Note
                       </button>
                     </>

@@ -29,8 +29,8 @@ const TeacherLayout = ({ children }) => {
 
       {/* Sidebar - Responsive */}
       <div className={`
-        fixed inset-y-0 left-0 z-[70] w-72 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
-        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        fixed inset-y-0 left-0 z-[70] w-72 transform transition-transform duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:shrink-0
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0
       `}>
         <TeacherSidebar onClose={() => setIsSidebarOpen(false)} />
       </div>

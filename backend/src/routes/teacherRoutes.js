@@ -1,16 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const { 
-  getMyClasses, 
+const {
+  getMyClasses,
   getMyAssignments,
-  getLiveSessions, 
+  getLiveSessions,
   updateSessionStatus,
-  uploadRecording, 
+  uploadRecording,
   getRecordings,
   getMaterials,
   uploadMaterial,
   deleteMaterial,
-  getDashboardStats
+  getDashboardStats,
+  toggleMaterialVisibility
 } = require('../controllers/teacherController');
 const { protect } = require('../middleware/authMiddleware');
 const { authorizeRoles } = require('../middleware/roleMiddleware');
@@ -29,6 +30,7 @@ router.get('/recordings', getRecordings);
 router.get('/materials', getMaterials);
 router.post('/materials', upload.single('file'), uploadMaterial);
 router.delete('/materials/:id', deleteMaterial);
+router.patch('/materials/:id/visibility', toggleMaterialVisibility);
 router.get('/dashboard-stats', getDashboardStats);
 
 module.exports = router;

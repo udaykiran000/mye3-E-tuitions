@@ -5,10 +5,10 @@ const subscriptionSchema = new mongoose.Schema({
   type: { type: String, enum: ['bundle', 'subject'], required: true },
   referenceId: { type: String, required: true }, // Refers to Class or Subject (Flexible for Mock/Real)
   name: { type: String, required: true }, // e.g. "Class 10 Bundle" or "Physics Class 11"
-  subscriptionType: { 
-    type: String, 
-    enum: ['full', 'single', 'oneMonth', 'threeMonths', 'sixMonths', 'twelveMonths'], 
-    default: 'full' 
+  subscriptionType: {
+    type: String,
+    enum: ['full', 'single', 'oneMonth', 'threeMonths', 'sixMonths', 'twelveMonths'],
+    default: 'full'
   },
   expiryDate: { type: Date, required: true }
 });
@@ -17,11 +17,11 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { 
-    type: String, 
-    enum: ['Admin', 'Teacher', 'Student', 'admin', 'teacher', 'student'], 
+  role: {
+    type: String,
+    enum: ['Admin', 'Teacher', 'Student', 'admin', 'teacher', 'student'],
     default: 'Student',
-    lowercase: true 
+    lowercase: true
   },
   board: { type: String, enum: ['CBSE', 'ICSE', 'TS Board', 'AP Board'] },
   className: { type: String },

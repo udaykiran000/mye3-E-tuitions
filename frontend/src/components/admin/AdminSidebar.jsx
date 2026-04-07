@@ -1,9 +1,8 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
 import { 
-  Link,
   LayoutDashboard, 
   IndianRupee, 
   Users, 
@@ -12,6 +11,7 @@ import {
   Settings,
   Activity,
   LogOut,
+  FileText,
   X
 } from 'lucide-react';
 import logoImg from '../../assets/output-onlinepngtools.png';
@@ -33,6 +33,7 @@ const AdminSidebar = ({ onClose }) => {
     { icon: Users, label: 'Students', path: '/admin/students' },
     { icon: Activity, label: 'Live & Schedule Class', path: '/admin/live-monitor' },
     { icon: CreditCard, label: 'Fee Payments', path: '/admin/transactions' },
+    { icon: FileText, label: 'Study Notes', path: '/admin/notes' },
     { icon: Settings, label: 'Options', path: '/admin/settings' },
   ];
 

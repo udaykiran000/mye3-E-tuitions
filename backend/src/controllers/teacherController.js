@@ -80,7 +80,7 @@ exports.getMyAssignments = async (req, res, next) => {
       } else {
         label = `${item.subjectName} (${item.classLevel})`;
       }
- 
+
       return {
         id: item.subjectId || null, // Ensure this is only an ObjectId
         name: label,
@@ -171,9 +171,9 @@ exports.updateSessionStatus = async (req, res, next) => {
       return res.status(400).json({ message: 'Invalid status update' });
     }
 
-    const session = await LiveSession.findOne({ 
-      _id: req.params.id, 
-      teacherId: req.user.role === 'admin' ? { $exists: true } : req.user._id 
+    const session = await LiveSession.findOne({
+      _id: req.params.id,
+      teacherId: req.user.role === 'admin' ? { $exists: true } : req.user._id
     });
 
     if (!session) return res.status(404).json({ message: 'Session not found' });
@@ -200,7 +200,7 @@ exports.updateSessionStatus = async (req, res, next) => {
 exports.uploadRecording = async (req, res, next) => {
   try {
     const { classLevel, subjectName, title, youtubeId } = req.body;
-    
+
     const recording = await Recording.create({
       teacherId: req.user._id,
       classLevel,
@@ -235,8 +235,8 @@ exports.getRecordings = async (req, res, next) => {
 exports.uploadMaterial = async (req, res, next) => {
   try {
 
-    const { classLevel, subjectName, title, fileUrl: externalUrl, type, assignmentId, sessionId } = req.body;
-    
+    const { classLevel, subjectName, title, fileUrl: externalUrl, type, assignmentId, sessionId, board } = req.body;
+
     // If a file was uploaded via multer, use that path. Otherwise use the provided URL.
     const finalFileUrl = req.file ? `/uploads/${req.file.filename}` : externalUrl;
 
@@ -253,7 +253,8 @@ exports.uploadMaterial = async (req, res, next) => {
       subjectName,
       title,
       fileUrl: finalFileUrl,
-      type: type || 'notes'
+      type: type || 'notes',
+      board: board || 'TS Board'
     });
 
     res.status(201).json({
@@ -271,9 +272,35 @@ exports.uploadMaterial = async (req, res, next) => {
 // @access  Teacher
 exports.getMaterials = async (req, res, next) => {
   try {
-    // Admin sees ALL materials; Teacher sees only their own
-    const query = req.user.role === 'admin' ? {} : { teacherId: req.user._id };
-    const materials = await Material.find(query).sort({ createdAt: -1 });
+    if (req.user.role === 'admin') {
+      const materials = await Material.find({}).sort({ createdAt: -1 });
+      return res.status(200).json(materials);
+    }
+
+    const teacherId = req.user._id;
+    const teacher = await User.findById(teacherId);
+    if (!teacher) return res.status(404).json({ message: 'Teacher not found' });
+
+    const assignments = teacher.assignedSubjects || [];
+    
+    const queryConditions = assignments.map(a => {
+      if (a.assignmentType === 'bundle') {
+        return { classLevel: a.classLevel };
+      }
+      return { classLevel: a.classLevel, subjectName: a.subjectName };
+    });
+
+    const query = {
+      $or: [
+        { teacherId },
+        ...(queryConditions.length > 0 ? [{
+          teacherId: null, // Admin materials
+          $or: queryConditions
+        }] : [])
+      ]
+    };
+
+    const materials = await Material.find(query).sort({ createdAt: -1 }).populate('teacherId', 'name email');
     res.status(200).json(materials);
   } catch (error) {
     next(error);
@@ -292,3 +319,38 @@ exports.deleteMaterial = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Toggle material visibility
+// @route   PATCH /api/teacher/materials/:id/visibility
+// @access  Teacher
+exports.toggleMaterialVisibility = async (req, res, next) => {
+  try {
+    const material = await Material.findById(req.params.id);
+    if (!material) return res.status(404).json({ message: 'Material not found' });
+    
+    // Check if authorized
+    let authorized = false;
+    if (material.teacherId && material.teacherId.toString() === req.user._id.toString()) {
+      authorized = true;
+    } else if (!material.teacherId) {
+      // It's Admin material, check if teacher is assigned to this class and subject
+      const teacher = await User.findById(req.user._id);
+      const assignments = teacher.assignedSubjects || [];
+      authorized = assignments.some(a => 
+        (a.assignmentType === 'bundle' && a.classLevel === material.classLevel) ||
+        (a.classLevel === material.classLevel && a.subjectName === material.subjectName)
+      );
+    }
+    
+    if (!authorized) {
+       return res.status(403).json({ message: 'Not authorized to toggle this material' });
+    }
+
+    material.isVisible = !material.isVisible;
+    await material.save();
+    res.status(200).json({ message: `Material ${material.isVisible ? 'shown' : 'hidden'}`, isVisible: material.isVisible });
+  } catch (error) {
+    next(error);
+  }
+};
+

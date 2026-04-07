@@ -4,7 +4,7 @@ const materialSchema = new mongoose.Schema({
   teacherId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false
   },
   assignmentId: {
     type: String, // Can be classLevel or subjectId
@@ -14,6 +14,11 @@ const materialSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'LiveSession',
     default: null
+  },
+  board: {
+    type: String,
+    enum: ['CBSE', 'ICSE', 'TS Board', 'AP Board'],
+    default: 'TS Board'
   },
   classLevel: {
     type: String,
@@ -35,6 +40,10 @@ const materialSchema = new mongoose.Schema({
     type: String,
     enum: ['notes', 'worksheet', 'assignment', 'other'],
     default: 'notes'
+  },
+  isVisible: {
+    type: Boolean,
+    default: true
   }
 }, { timestamps: true });
 

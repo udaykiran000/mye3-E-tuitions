@@ -26,6 +26,7 @@ import ManageClasses from './pages/admin/ManageClasses';
 import ManageSubjects from './pages/admin/ManageSubjects';
 import AdminTransactions from './pages/admin/AdminTransactions';
 import LiveMonitor from './pages/admin/LiveMonitor';
+import AdminMaterials from './pages/admin/AdminMaterials';
 
 // Teacher Pages
 import TeacherLayout from './components/teacher/TeacherLayout';
@@ -137,6 +138,7 @@ function AppContent() {
                       <Route path="transactions" element={<AdminTransactions />} />
                       <Route path="settings" element={<ProfileSettings role="Admin" />} />
                       <Route path="live-monitor" element={<LiveMonitor />} />
+                      <Route path="notes" element={<AdminMaterials />} />
                     </Routes>
                   </AdminLayout>
                 </ProtectedRoute>

@@ -11,7 +11,7 @@ const classBundleSchema = new mongoose.Schema({
     type: String,
     enum: ['CBSE', 'ICSE', 'TS Board', 'AP Board'],
     required: true,
-    default: 'CBSE'
+    default: 'TS Board'
   },
   price: {
     type: Number,

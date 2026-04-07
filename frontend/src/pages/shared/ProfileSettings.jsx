@@ -111,47 +111,46 @@ const ProfileSettings = ({ role }) => {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
+    <div className="max-w-5xl mx-auto px-4 py-8">
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col lg:flex-row gap-8 md:gap-10"
+        className="flex flex-col lg:flex-row gap-6"
       >
         {/* Sidebar Tabs */}
-        <div className="lg:w-80 shrink-0">
-          <div className="bg-white rounded-2xl md:rounded-3xl p-6 md:p-8 shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden sticky lg:top-24">
-             <div className="flex flex-col items-center mb-8 md:mb-10">
+        <div className="lg:w-64 shrink-0">
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-slate-200 overflow-hidden sticky lg:top-24">
+             <div className="flex flex-col items-center mb-6">
                 <div className="relative group">
-                   <div className={`w-24 h-24 md:w-28 md:h-28 ${t.bg} rounded-2xl md:rounded-3xl flex items-center justify-center text-white text-3xl md:text-4xl font-black shadow-2xl ${t.shadow} group-hover:scale-105 transition-transform duration-500`}>
+                   <div className={`w-20 h-20 ${t.bg} rounded-full flex items-center justify-center text-white text-2xl font-bold transition-transform duration-300`}>
                       {userInfo?.name?.charAt(0)}
                    </div>
-                   <button className="absolute -bottom-2 -right-2 w-10 h-10 bg-white rounded-xl shadow-lg border border-slate-100 flex items-center justify-center text-slate-600 hover:text-indigo-600 transition-colors">
-                      <Camera className="w-5 h-5" />
+                   <button className="absolute 0 bottom-0 right-0 w-8 h-8 bg-white rounded-full shadow-sm border border-slate-200 flex items-center justify-center text-slate-500 hover:text-indigo-600 transition-colors">
+                      <Camera className="w-4 h-4" />
                    </button>
                 </div>
-                <h3 className="mt-6 text-xl font-black text-slate-900 tracking-tight uppercase">{userInfo?.name}</h3>
-                <p className={`px-4 py-1.5 mt-2 rounded-lg text-[10px] font-black uppercase tracking-widest ${t.light} ${t.lightText}`}>
-                   {role} Verification
+                <h3 className="mt-4 text-lg font-bold text-slate-800 tracking-tight">{userInfo?.name}</h3>
+                <p className={`px-2 py-0.5 mt-1 rounded text-xs font-semibold uppercase tracking-wide ${t.light} ${t.lightText}`}>
+                   {role}
                 </p>
              </div>
 
-            <nav className="grid grid-cols-2 lg:grid-cols-1 gap-2 md:gap-1">
+            <nav className="flex flex-col gap-1">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-3 md:gap-4 px-4 md:px-6 py-3 md:py-4 rounded-xl font-black text-[10px] md:text-sm uppercase tracking-widest transition-all ${
+                  className={`flex items-center gap-3 px-4 py-2.5 rounded-md font-semibold text-sm transition-colors ${
                     activeTab === tab.id 
-                      ? `${t.bg} text-white shadow-lg ${t.shadow}` 
-                      : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+                      ? `${t.bg} text-white shadow-sm` 
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
-                  <tab.icon className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
+                  <tab.icon className="w-4 h-4 shrink-0" />
                   <span className="flex-1 text-left hidden sm:inline md:inline">{tab.label}</span>
                   <span className="flex-1 text-left sm:hidden">
                     {tab.id === 'personal' ? 'Info' : tab.id === 'subscriptions' ? 'Billing' : 'Security'}
                   </span>
-                  <ChevronRight className={`w-3 h-3 md:w-4 md:h-4 transition-transform hidden lg:block ${activeTab === tab.id ? 'rotate-90' : ''}`} />
                 </button>
               ))}
             </nav>
@@ -166,72 +165,67 @@ const ProfileSettings = ({ role }) => {
               initial={{ opacity: 0, x: 10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.3 }}
-              className="bg-white rounded-2xl md:rounded-3xl p-6 md:p-10 lg:p-16 shadow-2xl shadow-slate-200/40 border border-slate-100 min-h-[500px] md:min-h-[600px]"
+              transition={{ duration: 0.2 }}
+              className="bg-white rounded-lg p-6 lg:p-8 shadow-sm border border-slate-200 min-h-[400px]"
             >
               {activeTab === 'personal' && (
-                <div className="space-y-8 md:space-y-10">
-                  <div className="flex items-center gap-4">
-                     <div className={`p-3 md:p-4 ${t.light} ${t.text} rounded-xl md:rounded-2xl`}>
-                        <User className="w-6 h-6 md:w-8 md:h-8" />
-                     </div>
-                     <div>
-                        <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Identity Settings</h2>
-                        <p className="text-slate-500 font-bold text-sm">Manage your personal portal information</p>
-                     </div>
+                <div className="space-y-6">
+                  <div className="border-b border-slate-100 pb-4">
+                     <h2 className="text-lg font-bold text-slate-800 tracking-tight">Identity Settings</h2>
+                     <p className="text-slate-500 font-medium text-sm mt-0.5">Manage your personal portal information</p>
                   </div>
 
-                  <form onSubmit={submitHandler} className="max-w-2xl space-y-6 md:space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                       <div className="space-y-3">
-                          <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Portal Name</label>
+                  <form onSubmit={submitHandler} className="max-w-xl space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                       <div className="space-y-1.5">
+                          <label className="text-xs font-semibold text-slate-600 ml-1">Portal Name</label>
                           <div className="relative group">
-                             <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none text-slate-300 group-focus-within:text-indigo-600 transition-colors">
-                                <User className="w-4 h-4 md:w-5 md:h-5" />
+                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                                <User className="w-4 h-4" />
                              </div>
                              <input 
                                 type="text"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="w-full pl-14 pr-6 py-4 md:py-5 rounded-xl md:rounded-2xl border-2 border-slate-100 focus:border-indigo-600 focus:bg-white bg-slate-50 outline-none transition-all font-black text-slate-900 text-sm md:text-base shadow-inner"
+                                className="w-full pl-9 pr-4 py-2 rounded-md border border-slate-200 focus:border-indigo-500 focus:bg-white bg-slate-50 outline-none transition-all font-medium text-slate-800 text-sm shadow-sm"
                                 placeholder="Full name"
                              />
                           </div>
                        </div>
-                       <div className="space-y-3">
-                          <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Account Email</label>
+                       <div className="space-y-1.5">
+                          <label className="text-xs font-semibold text-slate-600 ml-1">Account Email</label>
                           <div className="relative group">
-                             <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none text-slate-300 group-focus-within:text-indigo-600 transition-colors">
-                                <Mail className="w-4 h-4 md:w-5 md:h-5" />
+                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                                <Mail className="w-4 h-4" />
                              </div>
                              <input 
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full pl-14 pr-6 py-4 md:py-5 rounded-xl md:rounded-2xl border-2 border-slate-100 focus:border-indigo-600 focus:bg-white bg-slate-50 outline-none transition-all font-black text-slate-900 text-sm md:text-base shadow-inner"
+                                className="w-full pl-9 pr-4 py-2 rounded-md border border-slate-200 focus:border-indigo-500 focus:bg-white bg-slate-50 outline-none transition-all font-medium text-slate-800 text-sm shadow-sm"
                                 placeholder="Email address"
                              />
                           </div>
                        </div>
                     </div>
 
-                    <div className={`p-6 ${t.light} rounded-2xl border border-${t.accent}-100 flex items-start gap-4`}>
-                       <ShieldCheck className={`w-5 h-5 md:w-6 md:h-6 ${t.text} shrink-0`} />
+                    <div className={`p-4 ${t.light} rounded-md border border-${t.accent}-100 flex items-start gap-3`}>
+                       <ShieldCheck className={`w-5 h-5 ${t.text} shrink-0`} />
                        <div>
-                          <p className={`text-[10px] font-black ${t.lightText} uppercase tracking-widest`}>Security Alert</p>
-                          <p className="text-xs md:text-sm text-slate-600 font-bold leading-relaxed mt-1 italic">
+                          <p className={`text-xs font-semibold ${t.lightText}`}>Security Alert</p>
+                          <p className="text-xs text-slate-600 mt-0.5">
                              Updates to your email will also synchronize your login credentials for all linked devices.
                           </p>
                        </div>
                     </div>
 
-                    <div className="pt-6">
+                    <div className="pt-2">
                        <button 
                           type="submit" 
                           disabled={loading}
-                          className={`w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-5 ${t.bg} text-white rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest shadow-xl ${t.shadow} ${t.hover} disabled:opacity-50 transition-all`}
+                          className={`w-full md:w-auto flex items-center justify-center px-4 py-2 ${t.bg} text-white rounded-md font-semibold text-sm shadow-sm ${t.hover} disabled:opacity-50 transition-colors`}
                        >
-                          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Synchronize Identity'}
+                          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Changes'}
                        </button>
                     </div>
                   </form>
@@ -313,57 +307,52 @@ const ProfileSettings = ({ role }) => {
               )}
 
               {activeTab === 'security' && (
-                <div className="space-y-8 md:space-y-10">
-                  <div className="flex items-center gap-4">
-                     <div className={`p-3 md:p-4 ${t.light} ${t.text} rounded-xl md:rounded-2xl`}>
-                        <Lock className="w-6 h-6 md:w-8 md:h-8" />
-                     </div>
-                     <div>
-                        <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Security Access</h2>
-                        <p className="text-slate-500 font-bold text-sm">Update your vault password</p>
-                     </div>
+                <div className="space-y-6">
+                  <div className="border-b border-slate-100 pb-4">
+                     <h2 className="text-lg font-bold text-slate-800 tracking-tight">Security Access</h2>
+                     <p className="text-slate-500 font-medium text-sm mt-0.5">Update your password</p>
                   </div>
 
-                  <form onSubmit={submitHandler} className="max-w-2xl space-y-6 md:space-y-8">
-                     <div className="space-y-3">
-                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">New Vault Password</label>
+                  <form onSubmit={submitHandler} className="max-w-md space-y-5">
+                     <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-600 ml-1">New Password</label>
                         <div className="relative group">
-                           <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none text-slate-300 group-focus-within:text-indigo-600 transition-colors">
-                              <Fingerprint className="w-4 h-4 md:w-5 md:h-5" />
+                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                              <Fingerprint className="w-4 h-4" />
                            </div>
                            <input 
                               type="password"
                               value={password}
                               onChange={(e) => setPassword(e.target.value)}
-                              className="w-full pl-14 pr-6 py-4 md:py-5 rounded-xl md:rounded-2xl border-2 border-slate-100 focus:border-indigo-600 focus:bg-white bg-slate-50 outline-none transition-all font-black text-slate-900 text-sm md:text-base shadow-inner"
+                              className="w-full pl-9 pr-4 py-2 rounded-md border border-slate-200 focus:border-indigo-500 focus:bg-white bg-slate-50 outline-none transition-all font-medium text-slate-800 text-sm shadow-sm"
                               placeholder="New password..."
                            />
                         </div>
                      </div>
 
-                     <div className="space-y-3">
-                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Verify Password</label>
+                     <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-600 ml-1">Verify Password</label>
                         <div className="relative group">
-                           <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none text-slate-300 group-focus-within:text-indigo-600 transition-colors">
-                              <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" />
+                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                              <CheckCircle2 className="w-4 h-4" />
                            </div>
                            <input 
                               type="password"
                               value={confirmPassword}
                               onChange={(e) => setConfirmPassword(e.target.value)}
-                              className="w-full pl-14 pr-6 py-4 md:py-5 rounded-xl md:rounded-2xl border-2 border-slate-100 focus:border-indigo-600 focus:bg-white bg-slate-50 outline-none transition-all font-black text-slate-900 text-sm md:text-base shadow-inner"
+                              className="w-full pl-9 pr-4 py-2 rounded-md border border-slate-200 focus:border-indigo-500 focus:bg-white bg-slate-50 outline-none transition-all font-medium text-slate-800 text-sm shadow-sm"
                               placeholder="Confirm password"
                            />
                         </div>
                      </div>
 
-                     <div className="pt-6">
+                     <div className="pt-2">
                         <button 
                            type="submit" 
                            disabled={loading}
-                           className={`w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-5 ${t.bg} text-white rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest shadow-xl ${t.shadow} ${t.hover} disabled:opacity-50 transition-all`}
+                           className={`w-full md:w-auto flex items-center justify-center px-4 py-2 ${t.bg} text-white rounded-md font-semibold text-sm shadow-sm ${t.hover} disabled:opacity-50 transition-colors`}
                         >
-                           {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Update Vault Key'}
+                           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Update Password'}
                         </button>
                      </div>
                   </form>

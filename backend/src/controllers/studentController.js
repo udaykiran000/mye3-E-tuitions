@@ -61,7 +61,7 @@ exports.processMockPayment = async (req, res, next) => {
     if (subscriptionType === 'threeMonths') monthsToAdd = 3;
     else if (subscriptionType === 'sixMonths') monthsToAdd = 6;
     else if (subscriptionType === 'twelveMonths') monthsToAdd = 12;
-    
+
     // Create the transaction record
     const transaction = await Transaction.create({
       studentId: req.user._id,
@@ -74,11 +74,11 @@ exports.processMockPayment = async (req, res, next) => {
 
     // Update student's subscriptions
     if (!student.activeSubscriptions) student.activeSubscriptions = [];
-    
-    const existingSubIndex = student.activeSubscriptions.findIndex(sub => 
+
+    const existingSubIndex = student.activeSubscriptions.findIndex(sub =>
       String(sub.referenceId) === String(referenceId)
     );
-    
+
     let baseDate = new Date(); // Default: Start from today
     if (existingSubIndex > -1) {
       const currentExpiry = new Date(student.activeSubscriptions[existingSubIndex].expiryDate);
@@ -153,17 +153,18 @@ exports.getMySubscriptions = async (req, res, next) => {
 // @route   GET /api/student/my-learning
 // @access  Student
 exports.getMyLearning = async (req, res, next) => {
-  try {    const now = new Date();
-    
+  try {
+    const now = new Date();
+
     // Helper function to expand a bundle name into multiple subject entries
     const expandBundle = async (item) => {
       if (item.type !== 'bundle' || item.isExpired) return [item];
-      
+
       const classLevelNum = parseInt(item.name.replace(/\D/g, ''));
       if (!classLevelNum) return [item];
 
       let subjects = await Subject.find({ classLevel: classLevelNum, isActive: true }).sort({ name: 1 });
-      
+
       // FALLBACK: If no subjects in DB for this class level, provide defaults for 6-10
       if (subjects.length === 0 && classLevelNum >= 6 && classLevelNum <= 10) {
         const defaults = ['Mathematics', 'Science', 'Social Studies', 'English'];
@@ -229,8 +230,8 @@ exports.getLiveAlerts = async (req, res, next) => {
   try {
     // Admin bypass: return all live and upcoming sessions for testing
     if (req.user.role === 'admin') {
-      const liveSessions = await LiveSession.find({ 
-        status: { $in: ['live', 'upcoming', 'ended'] } 
+      const liveSessions = await LiveSession.find({
+        status: { $in: ['live', 'upcoming', 'ended'] }
       }).populate('teacherId', 'name').sort({ startTime: -1 });
       return res.status(200).json(liveSessions);
     }
@@ -295,7 +296,7 @@ exports.getCourseContent = async (req, res, next) => {
   try {
     const { courseName } = req.params;
     const student = await User.findById(req.user._id);
-    
+
     if (!student) return res.status(404).json({ message: 'Student not found' });
 
     // Clean names (e.g., "Class 10 (All Subjects)" -> "Class 10")
@@ -304,7 +305,7 @@ exports.getCourseContent = async (req, res, next) => {
       .replace(' (All Subjects)', '')
       .replace(' (Full Bundle)', '');
     const classLevelMatch = courseName.match(/Class \d+/i)?.[0];
-    
+
     // 0. Lookup subject to find its class level if it's a direct subject name
     let subjectClassLevel = null;
     const subjectEntry = await Subject.findOne({ name: courseName });
@@ -317,7 +318,7 @@ exports.getCourseContent = async (req, res, next) => {
     const fullCourseSub = student.activeSubscriptions.find(sub => {
       const subNameClean = sub.name.replace(' (All Subjects)', '').replace(' (Full Course)', '').replace(' (Full Bundle)', '').trim();
       const isActive = new Date() < new Date(sub.expiryDate);
-      
+
       // Match if: 
       // - Exact name match
       // - Sub name is "Class X" and course is in that class
@@ -339,14 +340,14 @@ exports.getCourseContent = async (req, res, next) => {
     const isBypass = req.user.role === 'admin' || req.user.role === 'teacher' || courseName.includes('(Mock)');
 
     if (!fullCourseSub && !singleSubjectSub && !isBypass) {
-      return res.status(403).json({ 
-        message: 'No active subscription found. Subscribe to the All Subjects package or this individual subject to unlock.', 
-        type: 'buy' 
+      return res.status(403).json({
+        message: 'No active subscription found. Subscribe to the All Subjects package or this individual subject to unlock.',
+        type: 'buy'
       });
     }
 
     // Fetch recordings and materials using the clean name
-    const recordings = await Recording.find({ 
+    const recordings = await Recording.find({
       $or: [
         { classLevel: cleanName },
         { subjectName: cleanName },
@@ -356,11 +357,13 @@ exports.getCourseContent = async (req, res, next) => {
     }).sort({ createdAt: -1 });
 
     const materials = await Material.find({
+      ...boardFilter,
+      isVisible: true,
       $or: [
         { classLevel: cleanName },
         { subjectName: cleanName },
-        { classLevel: courseName }, // Backup for legacy
-        { subjectName: courseName }  // Backup for legacy
+        { classLevel: courseName },
+        { subjectName: courseName }
       ]
     }).sort({ createdAt: -1 });
 
@@ -402,7 +405,7 @@ exports.getAllMaterials = async (req, res, next) => {
     if (!student) return res.status(404).json({ message: 'Student not found' });
 
     const activeSubs = (student.activeSubscriptions || []).filter(sub => new Date() < new Date(sub.expiryDate));
-    
+
     // Normalize names to match Materials
     const enrolledNames = activeSubs.map(sub => {
       const clean = sub.name
@@ -415,7 +418,13 @@ exports.getAllMaterials = async (req, res, next) => {
 
     const uniqueEnrolledNames = [...new Set(enrolledNames)];
 
+    const boardFilter = student.board
+      ? { $or: [{ board: student.board }, { board: { $exists: false } }, { board: null }] }
+      : {};
+
     const materials = await Material.find({
+      ...boardFilter,
+      isVisible: true,
       $or: [
         { classLevel: { $in: uniqueEnrolledNames } },
         { subjectName: { $in: uniqueEnrolledNames } }

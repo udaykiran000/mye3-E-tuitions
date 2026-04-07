@@ -18,7 +18,9 @@ const {
   deleteUser, 
   updateBundleSubjects, 
   addMaterial, 
-  getMaterials, 
+  getAllMaterials,
+  deleteMaterial,
+  toggleMaterialVisibility,
   assignSubjectToTeacher, 
   removeAssignmentFromTeacher, 
   addStudent, 
@@ -49,9 +51,10 @@ router.put('/live-sessions/:id', protect, authorizeRoles('admin'), updateLiveSes
 router.delete('/live-sessions/:id', protect, authorizeRoles('admin'), deleteLiveSession); // New
 router.get('/live-sessions', protect, authorizeRoles('admin'), getAllLiveSessions); // New
 
-router.get('/materials/:classId', protect, authorizeRoles('admin'), getMaterials);
+router.get('/materials/all', protect, authorizeRoles('admin'), getAllMaterials);
 router.post('/materials', protect, authorizeRoles('admin'), upload.single('file'), addMaterial);
-
+router.delete('/materials/:id', protect, authorizeRoles('admin'), deleteMaterial);
+router.patch('/materials/:id/visibility', protect, authorizeRoles('admin'), toggleMaterialVisibility);
 router.get('/subjects', protect, authorizeRoles('admin'), getSubjects);
 router.post('/subjects', protect, authorizeRoles('admin'), addSubject);
 router.put('/subjects/:id', protect, authorizeRoles('admin'), updateSubject);

@@ -252,66 +252,87 @@ const TeacherManagement = () => {
                           </div>
                        </div>
                     </td>
-                    <td className="px-5 py-4">
-                       <div className="space-y-2 min-w-[300px]">
-                          {teacher.assignedSubjects?.length > 0 ? (
-                             Object.entries(
-                                teacher.assignedSubjects.reduce((acc, sub) => {
-                                   const lvl = sub.classLevel;
-                                   if (!acc[lvl]) acc[lvl] = [];
-                                   acc[lvl].push(sub);
-                                   return acc;
-                                }, {})
-                             ).map(([lvl, subs], i) => (
-                               <div key={i} className="space-y-1.5">
-                                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wide">{lvl}</div>
-                                  <div className="flex flex-wrap gap-1.5">
-                                     {subs.map((sub, j) => (
-                                       <span
-                                         key={j}
-                                         className={`pl-2 pr-1 py-0.5 text-xs rounded border flex items-center gap-1 ${
-                                           sub.assignmentType === 'bundle'
-                                           ? 'bg-purple-50 text-purple-700 border-purple-200 font-medium'
-                                           : 'bg-white text-slate-600 border-slate-200 shadow-sm font-medium'
-                                         }`}
-                                       >
-                                          {sub.subjectName}
-                                          {sub.board && (
-                                            <span className="ml-1 px-1 py-px text-[10px] bg-indigo-100 text-indigo-600 rounded font-semibold">{sub.board}</span>
-                                          )}
-                                          <button
-                                            onClick={() => handleRemoveAssignment(teacher._id, sub._id)}
-                                            className="text-slate-400 hover:text-red-500 transition-colors"
-                                            title="Remove subject"
-                                          >
-                                             <X className="w-3 h-3" />
-                                          </button>
-                                       </span>
-                                     ))}
-                                  </div>
-                               </div>
-                             ))
-                          ) : (
-                            <span className="text-sm text-slate-400 italic">No assignments configured</span>
-                          )}
-                          <button
-                            onClick={() => { 
-                               setSelectedTeacher(teacher); 
-                               setSelectedAssignments([]); 
-                               setShowAssignModal(true); 
-                               const boardKeys = Object.keys(groupedByBoard);
-                               if (boardKeys.length > 0) {
-                                 setActiveBoard(boardKeys[0]);
-                                 const clsKeys = Object.keys(groupedByBoard[boardKeys[0]]);
-                                 if (clsKeys.length > 0) setActiveClasses([clsKeys[0]]);
-                               }
-                            }}
-                            className="mt-1 px-3 py-1.5 text-xs font-medium bg-white text-indigo-600 border border-slate-200 rounded-md hover:bg-slate-50 hover:border-indigo-200 transition-colors flex items-center gap-1.5 w-fit shadow-sm"
-                          >
-                             <Plus className="w-3.5 h-3.5" /> Assign Subjects
-                          </button>
-                       </div>
-                    </td>
+                     <td className="px-5 py-4">
+                        <div className="space-y-3 min-w-[320px]">
+                           {teacher.assignedSubjects?.length > 0 ? (
+                              <div className="flex flex-wrap gap-3">
+                                 {Object.entries(
+                                    teacher.assignedSubjects.reduce((acc, sub) => {
+                                       const board = sub.board || 'Unassigned Board';
+                                       const lvl = sub.classLevel;
+                                       if (!acc[board]) acc[board] = {};
+                                       if (!acc[board][lvl]) acc[board][lvl] = [];
+                                       acc[board][lvl].push(sub);
+                                       return acc;
+                                    }, {})
+                                 ).sort(([a], [b]) => a.localeCompare(b)).map(([board, classes], idx) => (
+                                   <div key={idx} className="bg-slate-50/50 rounded-lg border border-slate-100 p-2.5 space-y-3 min-w-[200px] flex-1 max-w-[300px]">
+                                      <div className="flex items-center gap-2">
+                                         <div className={`w-1.5 h-1.5 rounded-full ${board.includes('TS') ? 'bg-indigo-500' : board.includes('AP') ? 'bg-orange-500' : 'bg-purple-500'}`}></div>
+                                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">{board}</span>
+                                      </div>
+                                      
+                                      <div className="space-y-2.5">
+                                         {Object.entries(classes).sort((a,b) => {
+                                            const numA = parseInt(a[0].replace(/\D/g,'')) || 0;
+                                            const numB = parseInt(b[0].replace(/\D/g,'')) || 0;
+                                            return numA - numB;
+                                         }).map(([lvl, subs], i) => (
+                                           <div key={i} className="flex flex-col gap-1.5">
+                                              <div className="text-[10px] font-bold text-slate-500 flex items-center gap-1.5 ml-1">
+                                                 <GraduationCap className="w-3 h-3 text-slate-400" /> {lvl}
+                                              </div>
+                                              <div className="flex flex-wrap gap-1.5">
+                                                 {subs.map((sub, j) => (
+                                                   <span
+                                                     key={j}
+                                                     className={`pl-2 pr-1 py-0.5 text-[11px] rounded border flex items-center gap-1.5 group/tag ${
+                                                       sub.assignmentType === 'bundle'
+                                                       ? 'bg-purple-50 text-purple-700 border-purple-200 font-semibold'
+                                                       : 'bg-white text-slate-600 border-slate-200 shadow-sm font-semibold'
+                                                     }`}
+                                                   >
+                                                      {sub.subjectName}
+                                                      <button
+                                                        onClick={() => handleRemoveAssignment(teacher._id, sub._id)}
+                                                        className="text-slate-300 hover:text-red-500 transition-colors p-0.5 rounded hover:bg-red-50"
+                                                        title="Remove subject"
+                                                      >
+                                                         <X className="w-2.5 h-2.5" />
+                                                      </button>
+                                                   </span>
+                                                 ))}
+                                              </div>
+                                           </div>
+                                         ))}
+                                      </div>
+                                   </div>
+                                 ))}
+                              </div>
+                           ) : (
+                             <div className="flex items-center gap-2 text-slate-400 p-2 bg-slate-50 rounded-md border border-dashed border-slate-200">
+                                <AlertCircle className="w-3.5 h-3.5" />
+                                <span className="text-[11px] font-medium italic">No curriculum configured yet</span>
+                             </div>
+                           )}
+                           <button
+                             onClick={() => { 
+                                setSelectedTeacher(teacher); 
+                                setSelectedAssignments([]); 
+                                setShowAssignModal(true); 
+                                const boardKeys = Object.keys(groupedByBoard);
+                                if (boardKeys.length > 0) {
+                                  setActiveBoard(boardKeys[0]);
+                                  const clsKeys = Object.keys(groupedByBoard[boardKeys[0]]);
+                                  if (clsKeys.length > 0) setActiveClasses([clsKeys[0]]);
+                                }
+                             }}
+                             className="mt-1 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider bg-white text-indigo-600 border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-indigo-300 hover:shadow-sm transition-all flex items-center gap-2 w-fit"
+                           >
+                              <Plus className="w-3 h-3" /> Assign New Subject
+                           </button>
+                        </div>
+                     </td>
                     <td className="px-5 py-4">
                        <div className="flex items-center justify-end gap-2">
                           <button 

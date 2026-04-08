@@ -22,11 +22,11 @@ const NAV_ITEMS = [
     label: 'Tuitions', 
     to: '#', 
     dropdown: [
+      { label: 'All', to: '/courses' },
       { label: 'AP BOARD', to: '/courses/board/ap-board' },
       { label: 'TS BOARD', to: '/courses/board/ts-board' },
       { label: 'CBSE BOARD', to: '/courses/board/cbse-board' },
       { label: 'ICSE BOARD', to: '/courses/board/icse-board' },
-      { label: 'All', to: '/courses' },
     ]
   },
   { label: 'Teachers', to: '/teachers' },

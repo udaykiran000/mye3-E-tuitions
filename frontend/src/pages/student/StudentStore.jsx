@@ -182,6 +182,8 @@ const StudentStore = () => {
   // Helper to format board name from URL (e.g., 'ts-board' -> 'TS Board')
   const getFormattedBoard = (slug) => {
     if (!slug) return null;
+    const clean = slug.replace('-board', '').toUpperCase();
+    if (clean === 'CBSE' || clean === 'ICSE') return clean;
     return slug.split('-').map(word => word === 'board' ? 'Board' : word.toUpperCase()).join(' ');
   };
   const activeBoardFilter = getFormattedBoard(boardName);
@@ -350,9 +352,9 @@ const StudentStore = () => {
     boards.forEach(b => {
       const baseBoard = b.replace(' Board', '');
       const filtered = courseList.filter(c => {
-        const cBoard = c.board || 'TS Board';
-        return cBoard.toUpperCase().trim() === b.toUpperCase().trim() || 
-               cBoard.toUpperCase().trim() === baseBoard.toUpperCase().trim();
+        const cBoard = (c.board || 'TS Board').toUpperCase().trim();
+        return cBoard === b.toUpperCase().trim() || 
+               cBoard === baseBoard.toUpperCase().trim();
       });
       grouped[b] = filtered;
     });

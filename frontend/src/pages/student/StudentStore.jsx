@@ -91,7 +91,11 @@ const CourseCard = ({ c, setSelectedCourse, setShowCheckout, userInfo }) => {
       <div className="relative z-10">
         {isEligible ? (
             <button
-              onClick={() => { setSelectedCourse(c); setShowCheckout(true); }}
+              onClick={() => { 
+                setSelectedCourse(c); 
+                setSelectedDuration('oneMonth'); // Default to monthly
+                setShowCheckout(true); 
+              }}
               className="w-full bg-[#002147] text-white py-6 rounded-[28px] font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-orange-600 transition-all shadow-2xl active:scale-95 group/buy relative overflow-hidden"
             >
               <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -258,6 +262,7 @@ const StudentStore = () => {
 
       if (match) {
         setSelectedCourse(match);
+        setSelectedDuration('oneMonth'); // Default to monthly
         setShowCheckout(true);
         // Clean up URL to prevent repeat triggers on reload
         window.history.replaceState({}, '', '/student/courses');

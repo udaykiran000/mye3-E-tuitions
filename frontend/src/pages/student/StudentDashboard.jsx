@@ -10,7 +10,8 @@ import {
   Trophy,
   MonitorPlay,
   Play,
-  CheckCircle2
+  CheckCircle2,
+  ArrowRight
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import SessionRecapModal from '../../components/student/SessionRecapModal';
@@ -130,10 +131,23 @@ const StudentDashboard = () => {
 
   const hasSubscriptions = (learning.length > 0) || (userInfo?.activeSubscriptions?.length > 0);
 
-  return (
-    <div className="space-y-6 animate-in fade-in duration-700 pb-8 p-4 md:p-6 md:pt-0">
+  if (loading) {
+    return (
+      <div className="space-y-8 p-4 md:p-6 lg:p-10 animate-pulse bg-slate-50/10 min-h-screen">
+        <div className="h-32 bg-slate-100 rounded-[40px] border border-slate-50" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map(i => <div key={i} className="h-40 bg-slate-100 rounded-[32px]" />)}
+        </div>
+        <div className="h-[400px] bg-slate-100 rounded-[48px]" />
+      </div>
+    );
+  }
 
-      {/* 0. SUBSCRIPTION EXPIRY WARNING */}
+  return (
+    <div className="space-y-8 animate-in fade-in duration-700 pb-20 p-4 md:p-6 lg:p-10 bg-[#f8fbff]/50 min-h-screen">
+      <Toaster position="top-right" />
+
+      {/* 0. SUBSCRIPTION EXPIRY WARNING (CLEANER) */}
       {(() => {
         const expiringSoon = learning.filter(sub => {
           const days = Math.ceil((new Date(sub.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
@@ -144,193 +158,207 @@ const StudentDashboard = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-orange-50 border-2 border-orange-200 rounded-[32px] p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl shadow-orange-900/5"
+            className="bg-orange-50 border-2 border-orange-200 rounded-[40px] p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl shadow-orange-900/5"
           >
             <div className="flex items-center gap-6 text-center md:text-left flex-col md:flex-row">
-              <div className="w-16 h-16 bg-orange-600 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-lg">
+              <div className="w-16 h-16 bg-[#f16126] rounded-3xl flex items-center justify-center text-white shrink-0 shadow-lg group-hover:rotate-6 transition-transform">
                 <Clock className="w-8 h-8 animate-pulse" />
               </div>
               <div className="space-y-1">
-                <p className="text-[10px] font-black text-orange-600 uppercase tracking-[0.3em]">Account Alert</p>
-                <h3 className="text-xl md:text-2xl font-black text-slate-900 uppercase tracking-tight italic">
-                  Your access for <span className="text-orange-600">{expiringSoon[0].name}</span> expires soon!
+                <p className="text-[10px] font-black text-orange-400 uppercase tracking-[0.3em] italic">Access Alert</p>
+                <h3 className="text-xl md:text-2xl font-black text-[#002147] uppercase tracking-tight italic leading-none">
+                  Your access for <span className="text-[#f16126]">{expiringSoon[0].name}</span> expires soon!
                 </h3>
               </div>
             </div>
-            <Link to="/student/courses" className="px-8 py-4 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-orange-600 transition-all shadow-lg active:scale-95">Renew Now</Link>
+            <Link to="/student/courses" className="px-10 py-5 bg-[#002147] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#f16126] transition-all shadow-xl active:scale-95">Renew Immediately</Link>
           </motion.div>
         );
       })()}
 
-      {/* 1. STATE CARDS (STATS AT TOP) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      {/* 1. STATE CARDS (STATS) */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         {[
-          { icon: Star, label: 'LEARNING POINTS', val: '12,450', color: 'bg-indigo-50 text-[#002147]' },
-          { icon: Trophy, label: 'Certificates', val: '08', color: 'bg-emerald-50 text-emerald-600' },
+          { icon: Star, label: 'Learning Pts', val: '12,450', color: 'bg-indigo-50 text-[#002147]', border: 'group-hover:border-indigo-200' },
+          { icon: Trophy, label: 'Certificates', val: '08', color: 'bg-emerald-50 text-emerald-600', border: 'group-hover:border-emerald-200' },
+          { icon: Clock, label: 'Class Hours', val: '142h', color: 'bg-orange-50 text-orange-600', border: 'group-hover:border-orange-200' },
+          { icon: Zap, label: 'Active Streak', val: '12 Days', color: 'bg-rose-50 text-rose-600', border: 'group-hover:border-rose-200' },
         ].map((stat, i) => (
-          <div key={i} className="bg-white p-6 rounded-[32px] border border-slate-100 flex flex-col justify-between group hover:border-[#f16126]/20 transition-all shadow-md relative overflow-hidden">
-            <div className={`w-12 h-12 ${stat.color} rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:rotate-12`}>
+          <div key={i} className={`bg-white p-6 rounded-[36px] border border-slate-50 flex flex-col justify-between group transition-all shadow-sm hover:shadow-xl relative overflow-hidden ${stat.border}`}>
+            <div className={`w-12 h-12 ${stat.color} rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:rotate-12 duration-500`}>
               <stat.icon className="w-6 h-6" />
             </div>
             <div className="relative z-10">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
-              <p className="text-2xl font-black text-[#002147] tracking-tight">{stat.val}</p>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">{stat.label}</p>
+              <p className="text-xl md:text-2xl font-black text-[#002147] tracking-tighter italic leading-none">{stat.val}</p>
             </div>
           </div>
         ))}
       </div>
 
-      {/* 2. MAIN CONTENT HUB */}
-      {!hasSubscriptions && !loading ? (
-        <div className="pt-4 flex flex-col items-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="w-full max-w-[280px] bg-white rounded-[40px] border border-slate-100 shadow-2xl p-4 relative overflow-hidden group flex flex-col"
-          >
-            <div className="absolute top-0 left-0 w-1.5 h-full bg-[#f16126]" />
-            <div className="absolute top-0 right-0 px-4 py-1.5 bg-[#f16126] text-white font-black text-[9px] uppercase tracking-widest rounded-bl-xl z-10">All Subjects</div>
-            <div className="flex items-start justify-between mb-4 mt-1">
-              <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center p-2.5 border border-slate-100 shadow-sm">
-                <img src={logoImg} alt="logo" className="w-full h-full object-contain" />
+      {/* 2. MAIN HUB */}
+      {!hasSubscriptions ? (
+        <div className="space-y-10">
+           <motion.div
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             className="bg-[#002147] rounded-[56px] p-8 md:p-14 text-white relative overflow-hidden shadow-2xl border-b-[12px] border-indigo-600/10"
+           >
+              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#f16126] rounded-full blur-[140px] -mr-64 -mt-64 opacity-10 pointer-events-none" />
+              <div className="flex flex-col lg:flex-row items-center gap-12 relative z-10">
+                 <div className="flex-1 space-y-8 text-center lg:text-left">
+                    <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-white/10 text-[#f16126] rounded-full border border-white/5 text-[10px] font-black uppercase tracking-widest backdrop-blur-md">
+                       Restricted Access Mode
+                    </div>
+                    <h2 className="text-4xl md:text-7xl font-black uppercase italic tracking-tighter leading-none">Unlock your <br/><span className="text-[#f16126]">Academic Future</span></h2>
+                    <p className="text-indigo-200/60 font-bold text-xs md:text-sm uppercase tracking-[0.3em] italic max-w-xl leading-relaxed">Join your specialized class bubble today to access live curated sessions, strategic notes, and weekly exams.</p>
+                 </div>
+                 
+                 <div className="w-full lg:w-[340px] bg-white rounded-[44px] p-8 text-slate-900 shadow-2xl transform lg:rotate-2 hover:rotate-0 transition-transform duration-700">
+                    <div className="flex justify-between items-start mb-8">
+                       <img src={logoImg} className="h-10 object-contain" alt="logo" />
+                       <div className="text-right">
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Entry Fee</p>
+                          <p className="text-2xl font-black text-[#002147] italic leading-none">₹200</p>
+                       </div>
+                    </div>
+                    <div className="space-y-5 mb-10">
+                       <h4 className="text-xl font-black uppercase italic text-[#002147] tracking-tight">{userInfo?.className || 'Class Bundle'}</h4>
+                       <div className="space-y-3">
+                          {['Live Daily Classes', 'Full Subject Notes', 'Recorded Recaps', 'Weekly Mock Tests'].map((item, i) => (
+                             <div key={i} className="flex items-center gap-4 group/item">
+                                <div className="w-5 h-5 bg-emerald-50 rounded-full flex items-center justify-center group-hover/item:bg-emerald-500 transition-colors">
+                                   <CheckCircle2 className="w-3 h-3 text-emerald-500 group-hover/item:text-white transition-colors" />
+                                </div>
+                                <span className="text-[11px] font-black uppercase italic text-slate-500 tracking-wide">{item}</span>
+                             </div>
+                          ))}
+                       </div>
+                    </div>
+                    <button 
+                      onClick={openCheckout}
+                      className="w-full py-6 bg-[#002147] text-white rounded-[24px] font-black text-[13px] uppercase tracking-widest hover:bg-[#f16126] transition-all shadow-2xl flex items-center justify-center gap-4 active:scale-95 group/btn"
+                    >
+                       Enroll Now <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-2 transition-transform" />
+                    </button>
+                 </div>
               </div>
-              <div className="text-right pt-2">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic mb-0.5">Total Fee</p>
-                <p className="text-2xl font-black text-[#002147] italic tracking-tighter leading-none tabular-nums">₹200</p>
-              </div>
-            </div>
-            <div className="mb-4 flex-1">
-              <div className="flex items-center gap-2 mb-2 px-3 py-1 bg-orange-50 text-orange-600 rounded-full w-fit border border-orange-200 shadow-sm">
-                <span className="text-[9px] font-black uppercase tracking-widest">{userInfo?.board} • Class Bundle</span>
-              </div>
-              <h3 className="text-[24px] md:text-[26px] font-black text-[#002147] tracking-tighter uppercase italic leading-none mb-1">{userInfo?.className}</h3>
-              <div className="mt-6 space-y-3">
-                {['Mathematics', 'Science (PS/NS)', 'Social Studies', 'English'].map((sub, idx) => (
-                  <div key={idx} className="flex items-center gap-3 text-slate-600">
-                    <div className="w-1.5 h-1.5 bg-[#f16126] rounded-full" />
-                    <span className="text-[11px] font-black italic uppercase tracking-wider text-slate-500">{sub}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="pt-6 border-t border-slate-50">
-              <button
-                onClick={openCheckout}
-                className="w-full bg-[#002147] text-white py-5 rounded-[22px] font-black text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-3 hover:bg-[#f16126] transition-all shadow-2xl active:scale-95 group/btn"
-              >
-                Enroll Now <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1.5 transition-transform" />
-              </button>
-            </div>
-          </motion.div>
-          <div className="max-w-md w-full bg-white/40 backdrop-blur-md p-6 rounded-[32px] border-2 border-dashed border-slate-200 text-center mt-8">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">Hey {userInfo?.username || userInfo?.name}! Enroll in your class to access full features.</p>
-          </div>
+           </motion.div>
+           
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                { title: 'Live Mentorship', desc: 'Real-time doubt clearing with top faculty.', icon: MonitorPlay, bg: 'bg-indigo-50/50', iconColor: 'text-[#002147]' },
+                { title: 'Full Curriculum', desc: 'Specially targeted for Board Excellence.', icon: Zap, bg: 'bg-orange-50/50', iconColor: 'text-[#f16126]' },
+                { title: 'Smart Analytics', desc: 'Track your growth and learning speed.', icon: Trophy, bg: 'bg-emerald-50/50', iconColor: 'text-emerald-500' }
+              ].map((box, i) => (
+                <div key={i} className="bg-white p-10 rounded-[52px] border border-slate-50 shadow-sm hover:shadow-xl transition-all text-center space-y-6 group">
+                   <div className={`w-16 h-16 ${box.bg} rounded-[24px] flex items-center justify-center mx-auto ${box.iconColor} group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500`}>
+                      <box.icon className="w-8 h-8" />
+                   </div>
+                   <div className="space-y-2 text-center">
+                      <h4 className="text-sm font-black uppercase italic text-[#002147] tracking-[0.2em]">{box.title}</h4>
+                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed italic line-clamp-2">{box.desc}</p>
+                   </div>
+                </div>
+              ))}
+           </div>
         </div>
-      ) : hasSubscriptions ? (
-        <div className="space-y-8">
-          {/* ENROLLED HERO */}
+      ) : (
+        <div className="space-y-10">
+          {/* ENROLLED HERO (POLISHED) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-br from-[#002147] to-[#003366] rounded-[48px] p-8 md:p-12 text-white relative overflow-hidden shadow-2xl"
+            className="bg-gradient-to-br from-[#002147] to-[#003366] rounded-[56px] p-10 md:p-14 text-white relative overflow-hidden shadow-2xl"
           >
-            <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
-            <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
-              <div className="space-y-4 text-center md:text-left">
-                <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/20 text-[9px] font-black uppercase tracking-widest backdrop-blur-md">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-[#f16126] rounded-full blur-[140px] -mr-32 -mt-32 opacity-15 pointer-events-none" />
+            <div className="flex flex-col md:flex-row items-center justify-between gap-10 relative z-10">
+              <div className="space-y-6 text-center md:text-left">
+                <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-white/10 text-emerald-400 rounded-full border border-white/5 text-[10px] font-black uppercase tracking-widest backdrop-blur-md">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" /> Access Active
                 </div>
-                <h2 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter leading-none">MY <span className="text-[#f16126]">DASHBOARD</span></h2>
-                <p className="text-slate-300/80 font-bold text-xs md:text-sm uppercase tracking-[0.2em] italic max-w-lg">Access your live classes and schedule below.</p>
+                <h2 className="text-4xl md:text-7xl font-black uppercase italic tracking-tighter leading-none">MY <span className="text-[#f16126]">DASHBOARD</span></h2>
+                <p className="text-indigo-200/60 font-bold text-xs md:text-sm uppercase tracking-[0.3em] italic max-w-lg">Welcome back. Access your daily live lessons and digital repository below.</p>
               </div>
-              <Link to="/student/live-schedule" className="w-full md:w-auto px-12 py-6 bg-[#f16126] text-white rounded-[28px] font-black text-xs uppercase tracking-[0.25em] shadow-2xl hover:bg-white hover:text-[#002147] transition-all flex items-center justify-center gap-4 active:scale-95 group/live relative overflow-hidden">
-                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Link to="/student/live-schedule" className="w-full md:w-auto px-14 py-7 bg-[#f16126] text-white rounded-[32px] font-black text-xs uppercase tracking-[0.3em] shadow-2xl hover:bg-white hover:text-[#002147] transition-all flex items-center justify-center gap-4 active:scale-95 group/live">
                 Start Live Session <Play className="w-5 h-5 fill-current ml-2 group-hover:scale-110 transition-transform" />
               </Link>
             </div>
           </motion.div>
 
-          {/* ACTIVE PLAN SUMMARY */}
-          <div className="bg-white p-8 md:p-10 rounded-[48px] border-2 border-slate-50 flex flex-col md:flex-row items-center justify-between relative overflow-hidden group shadow-xl gap-8 transition-all hover:border-[#002147]/10">
-            <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none hidden md:block">
-              <MonitorPlay className="w-48 h-48 text-[#002147]" />
-            </div>
+          {/* ACTIVE PLAN (CLEANER) */}
+          <div className="bg-white p-10 rounded-[52px] border-2 border-slate-50 flex flex-col md:flex-row items-center justify-between relative overflow-hidden shadow-xl gap-10 hover:border-indigo-100 transition-all">
             <div className="text-center md:text-left flex-1 relative z-10">
-              <div className="flex items-center justify-center md:justify-start gap-2 mb-3">
-                <Zap className="w-4 h-4 text-orange-500 fill-current" />
-                <p className="text-[10px] font-black text-[#002147] uppercase tracking-[0.25em]">Active Subscription</p>
+              <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
+                <Zap className="w-4 h-4 text-[#f16126] fill-current" />
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Institutional Access</p>
               </div>
-              <h3 className="text-3xl md:text-5xl font-black text-[#002147] uppercase italic tracking-tighter leading-none mb-3">{learning[0]?.originalBundleName || learning[0]?.name || 'My Subscription'}</h3>
+              <h3 className="text-3xl md:text-5xl font-black text-[#002147] uppercase italic tracking-tighter leading-none mb-4">{learning[0]?.originalBundleName || learning[0]?.name || 'My Subscription'}</h3>
               <div className="flex items-center justify-center md:justify-start gap-4">
-                <div className="px-4 py-1.5 bg-slate-50 rounded-full text-[9px] font-black text-slate-400 uppercase tracking-widest border border-slate-100">Valid Until</div>
-                <p className="text-sm font-black text-[#002147] tabular-nums tracking-tight">{learning[0]?.expiryDate ? new Date(learning[0].expiryDate).toLocaleDateString('en-GB') : 'Full Session'}</p>
+                <div className="px-5 py-2 bg-[#f8fbff] rounded-full text-[10px] font-black text-indigo-500 uppercase tracking-widest border border-indigo-50">Validity</div>
+                <p className="text-sm font-black text-[#002147] tabular-nums">{learning[0]?.expiryDate ? new Date(learning[0].expiryDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Permanent Access'}</p>
               </div>
             </div>
-            <Link to="/student/notes" className="w-full md:w-auto px-12 py-6 bg-[#002147] text-white rounded-[28px] font-black text-xs uppercase tracking-[0.3em] hover:bg-[#f16126] transition-all shadow-2xl text-center active:scale-95 relative overflow-hidden group/notes">
-              <div className="absolute inset-0 bg-white/5 opacity-0 group-hover/notes:opacity-100 transition-opacity" />
-              VIEW NOTES
+            <Link to="/student/notes" className="w-full md:w-auto px-14 py-7 bg-[#002147] text-white rounded-[32px] font-black text-xs uppercase tracking-[0.3em] hover:bg-[#f16126] transition-all shadow-2xl text-center active:scale-95">
+              VIEW NOTES ARCHIVE
             </Link>
           </div>
 
-          {/* SCHEDULE & RECAPS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            {/* SCHEDULED */}
             <div className="space-y-6">
-              <div className="flex items-center justify-between px-4">
-                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-[#002147] flex items-center gap-3">
-                  <Calendar className="w-5 h-5 text-[#f16126]" /> Scheduled Class
+              <div className="flex items-center justify-between px-6">
+                <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-[#002147] flex items-center gap-3">
+                  <Calendar className="w-5 h-5 text-[#f16126]" /> Scheduled Today
                 </h3>
-                <Link to="/student/live-schedule" className="text-[10px] font-black text-indigo-600 hover:text-orange-500 transition-colors uppercase tracking-widest">View All</Link>
               </div>
-              <div className="space-y-5">
+              <div className="space-y-6">
                 {liveAlerts.filter(s => s.status === 'upcoming').length > 0 ? (
                   liveAlerts.filter(s => s.status === 'upcoming').slice(0, 3).map((s, i) => (
-                    <div key={i} className="flex items-center justify-between p-7 bg-white rounded-[32px] border border-slate-50 hover:border-orange-500/20 transition-all group shadow-sm hover:shadow-xl hover:-translate-y-1 duration-500">
-                      <div className="flex items-center gap-6">
-                        <div className="w-14 h-14 bg-orange-50 text-[#f16126] rounded-2xl flex items-center justify-center font-black text-[13px] italic group-hover:bg-[#f16126] group-hover:text-white transition-all shadow-sm">
+                    <div key={i} className="flex items-center justify-between p-8 bg-white rounded-[40px] border border-slate-50 hover:border-indigo-100 transition-all group shadow-sm hover:shadow-xl hover:-translate-y-1 duration-500">
+                      <div className="flex items-center gap-8">
+                        <div className="w-16 h-16 bg-[#f8fbff] text-[#f16126] rounded-2xl flex items-center justify-center font-black text-xs italic group-hover:bg-[#f16126] group-hover:text-white transition-all shadow-sm border border-indigo-50">
                           {new Date(s.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
                         <div className="space-y-1">
-                          <p className="font-black text-[#002147] text-lg leading-none uppercase italic group-hover:text-orange-600 transition-colors">{s.title}</p>
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none italic">{new Date(s.startTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</p>
+                          <p className="font-black text-[#002147] text-xl leading-none uppercase italic group-hover:text-[#f16126] transition-colors tracking-tight">{s.title}</p>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none italic">{new Date(s.startTime).toLocaleDateString('en-GB')}</p>
                         </div>
                       </div>
-                      <ChevronRight className="w-6 h-6 text-slate-200 group-hover:text-[#f16126] group-hover:translate-x-2 transition-all duration-500" />
+                      <ChevronRight className="w-6 h-6 text-slate-200 group-hover:text-[#f16126] group-hover:translate-x-2 transition-all" />
                     </div>
                   ))
-                ) : <div className="p-16 bg-white border border-slate-50 rounded-[32px] text-center uppercase text-[10px] font-black text-slate-400 italic tracking-[0.3em] shadow-sm">No classes scheduled.</div>}
+                ) : <div className="p-20 bg-white border border-slate-50 rounded-[40px] text-center uppercase text-[10px] font-black text-slate-300 italic tracking-[0.3em]">No classes on agenda.</div>}
               </div>
             </div>
 
-            {/* RECAPS */}
             <div className="space-y-6">
-              <div className="flex items-center justify-between px-4">
-                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-[#002147] flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500" /> Recent Recaps
+              <div className="flex items-center justify-between px-6">
+                <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-[#002147] flex items-center gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500" /> Digital Recaps
                 </h3>
               </div>
-              <div className="space-y-5">
+              <div className="space-y-6">
                 {liveAlerts.filter(s => s.status === 'ended').length > 0 ? (
                   liveAlerts.filter(s => s.status === 'ended').slice(0, 3).map((s, i) => (
-                    <div key={i} className="flex items-center justify-between p-7 bg-white rounded-[32px] border border-slate-50 hover:border-emerald-500/20 transition-all group shadow-sm hover:shadow-xl hover:-translate-y-1 duration-500">
-                      <div className="flex items-center gap-6">
-                        <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center font-black text-xs italic group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-sm">
-                          <MonitorPlay className="w-7 h-7" />
+                    <div key={i} className="flex items-center justify-between p-8 bg-white rounded-[40px] border border-slate-50 hover:border-emerald-100 transition-all group shadow-sm hover:shadow-xl hover:-translate-y-1 duration-500">
+                      <div className="flex items-center gap-8">
+                        <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center font-black text-xs italic group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-sm border border-emerald-100">
+                          <MonitorPlay className="w-8 h-8" />
                         </div>
                         <div className="space-y-1">
-                          <p className="font-black text-[#002147] text-lg leading-none uppercase italic group-hover:text-emerald-600 transition-colors">{s.title}</p>
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Recording Ready</p>
+                          <p className="font-black text-[#002147] text-xl leading-none uppercase italic group-hover:text-emerald-600 transition-colors tracking-tight">{s.title}</p>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none italic">Library Updated</p>
                         </div>
                       </div>
-                      <Link to="/student/notes" className="w-12 h-12 bg-slate-50 text-slate-300 rounded-2xl flex items-center justify-center hover:bg-emerald-50 hover:text-emerald-600 transition-all duration-500 group-hover:shadow-md"><ChevronRight className="w-6 h-6" /></Link>
+                      <Link to="/student/notes" className="w-12 h-12 bg-slate-50 text-slate-200 rounded-2xl flex items-center justify-center hover:bg-emerald-50 hover:text-emerald-500 transition-all"><ArrowRight className="w-5 h-5" /></Link>
                     </div>
                   ))
-                ) : <div className="p-16 bg-white border border-slate-50 rounded-[32px] text-center uppercase text-[10px] font-black text-slate-400 italic tracking-[0.3em] shadow-sm">No recent sessions.</div>}
+                ) : <div className="p-20 bg-white border border-slate-50 rounded-[40px] text-center uppercase text-[10px] font-black text-slate-300 italic tracking-[0.3em]">Recordings library empty.</div>}
               </div>
             </div>
           </div>
         </div>
-      ) : null}
+      )}
 
       <SessionRecapModal
         isOpen={recapModal.open}
@@ -338,79 +366,43 @@ const StudentDashboard = () => {
         session={recapModal.session}
       />
 
-      <Toaster position="top-right" />
-
+      {/* CHECKOUT MODAL (NEAT) */}
       <AnimatePresence>
         {showCheckout && selectedCourse && (
-          <div
-            className="fixed inset-0 z-[2100] flex items-center justify-center p-4 backdrop-blur-2xl bg-[#002147]/60"
-            onClick={() => setShowCheckout(false)}
-          >
+          <div className="fixed inset-0 z-[2100] flex items-center justify-center p-4 backdrop-blur-3xl bg-[#002147]/70" onClick={() => setShowCheckout(false)}>
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="relative w-full max-w-md bg-white rounded-[40px] overflow-hidden shadow-2xl"
+              className="relative w-full max-w-md bg-white rounded-[48px] overflow-hidden shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="bg-[#f16126] p-8 text-white relative">
-                <button
-                  onClick={() => setShowCheckout(false)}
-                  className="absolute top-6 right-6 w-10 h-10 rounded-full bg-black/20 flex items-center justify-center hover:bg-black/40 transition-colors z-[60] cursor-pointer"
-                  aria-label="Close"
-                >
-                  <FiX className="w-5 h-5" />
-                </button>
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-2 opacity-80">Finalize Enrollment</p>
-                <h3 className="text-2xl font-black uppercase italic tracking-tight uppercase tracking-tight">{selectedCourse.className || selectedCourse.name}</h3>
+              <div className="bg-[#002147] p-10 text-white relative border-b-8 border-[#f16126]">
+                <button onClick={() => setShowCheckout(false)} className="absolute top-8 right-8 w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center hover:bg-[#f16126] transition-all"><FiX className="w-6 h-6" /></button>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-3 text-indigo-300">Class Selection</p>
+                <h3 className="text-3xl font-black uppercase italic tracking-tighter">{selectedCourse.className || selectedCourse.name}</h3>
               </div>
-              <div className="p-8 space-y-5">
-                <div className="space-y-3">
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Select Duration</p>
+              <div className="p-10 space-y-8">
+                <div className="space-y-4">
                   {['oneMonth', 'threeMonths', 'sixMonths', 'twelveMonths'].map(dur => {
-                    const labelMap = {
-                      oneMonth: 'Monthly Access',
-                      threeMonths: 'Quarterly (3 Months)',
-                      sixMonths: 'Half-Yearly (6 Months)',
-                      twelveMonths: 'Annual (12 Months)'
-                    };
-                    const price = selectedCourse.pricing?.[dur] || 0;
+                    const price = selectedCourse.pricing?.[dur];
                     if (price === 0 && dur !== 'oneMonth') return null;
-
                     const isSelected = selectedDuration === dur;
-
                     return (
-                      <button
-                        key={dur}
-                        onClick={() => setSelectedDuration(dur)}
-                        className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all group ${isSelected
-                          ? 'border-[#002147] bg-[#f8fbff] shadow-md ring-1 ring-[#002147]/5'
-                          : 'border-slate-100 bg-white hover:border-slate-200 shadow-sm'
-                          }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-[#f16126] bg-[#f16126]' : 'border-slate-200 bg-white'
-                            }`}>
-                            {isSelected && <div className="w-2 h-2 bg-white rounded-full" />}
+                      <button key={dur} onClick={() => setSelectedDuration(dur)} className={`w-full flex items-center justify-between p-5 rounded-3xl border-2 transition-all ${isSelected ? 'border-[#f16126] bg-orange-50/50 shadow-lg' : 'border-slate-50 hover:border-slate-100'}`}>
+                        <div className="flex items-center gap-4">
+                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-[#f16126] bg-[#f16126]' : 'border-slate-200'}`}>
+                            {isSelected && <div className="w-2.5 h-2.5 bg-white rounded-full" />}
                           </div>
-                          <div className="text-left">
-                            <p className={`text-xs font-black uppercase tracking-tight italic ${isSelected ? 'text-[#002147]' : 'text-slate-500'}`}>
-                              {labelMap[dur]}
-                            </p>
-                            {dur === 'twelveMonths' && <span className="text-[8px] font-black text-emerald-500 tracking-widest uppercase">Best Value</span>}
-                          </div>
+                          <p className={`text-xs font-black uppercase italic ${isSelected ? 'text-[#002147]' : 'text-slate-400'}`}>{dur.replace(/([A-Z])/g, ' $1')}</p>
                         </div>
-                        <div className="text-right">
-                          <p className={`text-lg font-black italic tracking-tighter ${isSelected ? 'text-[#f16126]' : 'text-[#002147]'}`}>
-                            ₹{price.toLocaleString()}
-                          </p>
-                        </div>
+                        <p className={`text-xl font-black italic ${isSelected ? 'text-[#f16126]' : 'text-[#002147]'}`}>₹{price?.toLocaleString()}</p>
                       </button>
                     );
                   })}
                 </div>
-                <button disabled={buyLoading} onClick={handlePayment} className="w-full bg-[#002147] text-white py-5 rounded-2xl font-black text-[13px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-orange-600 transition-all shadow-xl active:scale-95 disabled:opacity-50">
-                  {buyLoading ? 'Processing...' : <>Confirm & Pay <FiCreditCard className="w-5 h-5" /></>}
+                <button disabled={buyLoading} onClick={handlePayment} className="w-full bg-[#f16126] text-white py-6 rounded-3xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-4 hover:bg-[#002147] transition-all shadow-xl active:scale-95 disabled:opacity-50">
+                  {buyLoading ? 'Authorizing...' : <><span className="mt-0.5">Approve & Pay</span> <FiCreditCard className="w-6 h-6" /></>}
                 </button>
               </div>
             </motion.div>

@@ -3,15 +3,15 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
    BookOpen,
-   Search,
    ChevronRight,
    Clock,
    Zap,
    Radio,
    FileText,
-   Filter,
    Layers,
-   Sparkles
+   Sparkles,
+   Video,
+   ArrowRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePreview } from '../../context/PreviewContext';
@@ -22,8 +22,6 @@ const MyLearning = () => {
    const { userInfo } = useSelector((state) => state.auth);
    const [learning, setLearning] = useState([]);
    const [loading, setLoading] = useState(true);
-   const [searchQuery, setSearchQuery] = useState('');
-   const [activeFilter, setActiveFilter] = useState('all');
 
    useEffect(() => {
       const fetchLearning = async () => {
@@ -32,7 +30,6 @@ const MyLearning = () => {
             const { data } = await axios.get('/student/my-learning');
             setLearning(data);
 
-            // MOCK DATA FOR ADMIN PREVIEW
             const isStaff = activeView === 'admin' ||
                activeView === 'teacher' ||
                userInfo?.role?.toLowerCase() === 'admin' ||
@@ -40,14 +37,13 @@ const MyLearning = () => {
 
             if (isStaff && data.length === 0) {
                setLearning([
-                  { name: 'Mathematics', type: 'subject', expiryDate: new Date(Date.now() + 5 * 86400000), originalBundleName: 'Class 10', isExpandedFromBundle: true },
-                  { name: 'Physics', type: 'subject', expiryDate: new Date(Date.now() + 5 * 86400000), originalBundleName: 'Class 10', isExpandedFromBundle: true },
-                  { name: 'Chemistry', type: 'subject', expiryDate: new Date(Date.now() + 5 * 86400000), originalBundleName: 'Class 10', isExpandedFromBundle: true },
-                  { name: 'Biology (Class 12)', type: 'subject', expiryDate: new Date(Date.now() + 15 * 86400000), isExpired: false },
-                  { name: 'Mathematics (Class 11)', type: 'subject', expiryDate: new Date(Date.now() - 5 * 86400000), isExpired: true }
+                  { name: 'Mathematics', type: 'subject', expiryDate: new Date(Date.now() + 5 * 86400000), originalBundleName: 'Class 12', isExpandedFromBundle: true },
+                  { name: 'Physics', type: 'subject', expiryDate: new Date(Date.now() + 5 * 86400000), originalBundleName: 'Class 12', isExpandedFromBundle: true },
+                  { name: 'Chemistry', type: 'subject', expiryDate: new Date(Date.now() + 5 * 86400000), originalBundleName: 'Class 12', isExpandedFromBundle: true },
+                  { name: 'Biology', type: 'subject', expiryDate: new Date(Date.now() + 15 * 86400000), isExpired: false },
+                  { name: 'English', type: 'subject', expiryDate: new Date(Date.now() - 5 * 86400000), isExpired: true }
                ]);
             }
-
             setLoading(false);
          } catch (error) {
             setLoading(false);
@@ -56,168 +52,147 @@ const MyLearning = () => {
       fetchLearning();
    }, [activeView, userInfo]);
 
-   const filteredLearning = learning.filter(l => {
-      const matchesSearch = l.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-         (l.originalBundleName && l.originalBundleName.toLowerCase().includes(searchQuery.toLowerCase()));
-
-      if (activeFilter === 'expired') return matchesSearch && (new Date(l.expiryDate) <= new Date());
-      if (activeFilter === 'active') return matchesSearch && (new Date(l.expiryDate) > new Date());
-      return matchesSearch;
-   });
-
-   // Group by "Source" (Class or Single Purchase)
-   const groupedLearning = filteredLearning.reduce((acc, item) => {
+   const groupedLearning = learning.reduce((acc, item) => {
       const key = item.originalBundleName || 'Single Subjects';
       if (!acc[key]) acc[key] = [];
       acc[key].push(item);
       return acc;
    }, {});
 
-   return (
-      <div className="space-y-8 md:space-y-12 animate-in fade-in duration-700 pb-24 p-4 md:p-8 lg:px-12 bg-slate-50/30">
-         {/* Dynamic Header */}
-         <div className="bg-[#002147] p-8 md:p-12 rounded-[40px] text-white shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-orange-500 rounded-full -mr-48 -mt-48 blur-[100px] opacity-20" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500 rounded-full -ml-32 -mb-32 blur-[80px] opacity-10" />
+   if (loading) {
+      return (
+         <div className="p-6 space-y-8 animate-pulse">
+            <div className="h-32 bg-slate-100 rounded-[32px]" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+               {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="h-64 bg-slate-50 rounded-[40px] border border-slate-100" />
+               ))}
+            </div>
+         </div>
+      );
+   }
 
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 relative z-10">
-               <div className="space-y-4">
-                  <div className="flex items-center gap-3 px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full w-fit border border-white/10">
-                     <BookOpen className="w-4 h-4 text-orange-400" />
-                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-100">Course Overview</span>
+   return (
+      <div className="space-y-6 animate-in fade-in duration-700 pb-20 p-4 md:p-6 lg:px-10 bg-[#f8fbff]/50 min-h-screen">
+         
+         <div className="bg-[#002147] p-8 md:p-10 rounded-[40px] text-white shadow-2xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#f16126] rounded-full -mr-32 -mt-32 blur-[80px] opacity-10" />
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+               <div className="text-center md:text-left space-y-2">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full border border-white/5 backdrop-blur-sm">
+                     <Sparkles className="w-3 h-3 text-[#f16126]" />
+                     <span className="text-[9px] font-black uppercase tracking-[0.2em] text-orange-100">Portal Dashboard</span>
                   </div>
-                  <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter leading-none uppercase">
-                     MY <span className="text-orange-500 not-italic">CLASSES</span>
+                  <h1 className="text-3xl md:text-5xl font-black italic tracking-tighter uppercase leading-none">
+                     MY <span className="text-[#f16126] not-italic">CLASSES</span>
                   </h1>
-                  <p className="text-indigo-200/70 font-bold italic text-sm md:text-lg max-w-xl">
-                     Access your subjects and study materials below.
+                  <p className="text-indigo-200/60 font-bold italic text-xs md:text-sm uppercase tracking-widest leading-none">
+                     Your specialized learning hub & notes archive
                   </p>
                </div>
-
-               <div className="flex flex-col gap-4">
-                  {/* Search and Filters Removed as per request */}
+               <div className="hidden lg:flex items-center gap-8 border-l border-white/10 pl-8">
+                  <div className="text-center">
+                     <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest mb-1 leading-none">ACTIVE</p>
+                     <p className="text-2xl font-black italic leading-none">{learning.filter(l => !l.isExpired).length}</p>
+                  </div>
+                  <div className="text-center">
+                     <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest mb-1 leading-none">RESOURCES</p>
+                     <p className="text-2xl font-black italic leading-none">FULL</p>
+                  </div>
                </div>
             </div>
          </div>
 
-         {/* Main Container */}
-         <div className="max-w-[1700px] mx-auto">
+         <div className="space-y-12">
             {Object.keys(groupedLearning).length === 0 ? (
-               <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="py-24 text-center space-y-6 bg-white/50 backdrop-blur-sm rounded-[48px] border-2 border-dashed border-indigo-100/50"
-               >
-                  <div className="w-24 h-24 bg-indigo-50/50 text-indigo-200 rounded-[32px] flex items-center justify-center mx-auto shadow-inner">
-                     <BookOpen className="w-12 h-12" />
+               <div className="py-32 text-center space-y-6">
+                  <div className="w-20 h-20 bg-white border border-slate-100 text-slate-200 rounded-[30px] flex items-center justify-center mx-auto shadow-sm">
+                     <BookOpen className="w-10 h-10" />
                   </div>
-                  <div className="space-y-2">
-                     <h3 className="text-2xl font-black text-[#002147] uppercase tracking-tight italic">
-                        No Class Found
-                     </h3>
-                     <p className="text-slate-400 font-bold text-[10px] uppercase tracking-[0.25em] max-w-sm mx-auto leading-relaxed">
-                        Check your subscriptions for active classes.
-                     </p>
-                  </div>
-               </motion.div>
+                  <h3 className="text-xl font-black text-[#002147] uppercase italic tracking-tighter">No Active Subscriptions</h3>
+               </div>
             ) : Object.keys(groupedLearning).map((groupName, gIdx) => (
-               <div key={gIdx} className="mb-20 animate-in fade-in slide-in-from-bottom-8 duration-1000" style={{ animationDelay: `${gIdx * 0.15}s` }}>
-                  {/* Group Header */}
-                  <div className="flex items-center gap-8 mb-12">
-                     <div className="flex items-center gap-4 px-8 py-4 bg-[#002147] text-white rounded-[24px] transform shadow-2xl shadow-indigo-900/10 border-b-4 border-indigo-600/30">
-                        <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md">
-                           <BookOpen className="w-5 h-5 text-orange-400" />
-                        </div>
-                        <div>
-                           <p className="text-[8px] font-black text-indigo-300 uppercase tracking-widest leading-none mb-1 text-center sm:text-left">Class Access</p>
-                           <h2 className="text-xl md:text-2xl font-black italic tracking-tighter uppercase leading-none">{groupName}</h2>
-                        </div>
+               <div key={gIdx} className="space-y-6 animate-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${gIdx * 0.1}s` }}>
+                  
+                  <div className="flex items-center gap-6">
+                     <div className="px-6 py-2 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center gap-4">
+                        <Layers className="w-4 h-4 text-[#f16126]" />
+                        <h2 className="text-sm md:text-base font-black italic uppercase text-[#002147] tracking-tight whitespace-nowrap">
+                           {groupName} <span className="text-slate-300 ml-2 not-italic">•</span> <span className="text-[#f16126] ml-2">{groupedLearning[groupName].length} Subjects</span>
+                        </h2>
                      </div>
-                     <div className="flex-1 h-[1px] bg-gradient-to-r from-indigo-100 to-transparent" />
+                     <div className="flex-1 h-[2px] bg-gradient-to-r from-slate-100 to-transparent" />
                   </div>
 
-                  {/* Subject Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                      {groupedLearning[groupName].map((sub, sIdx) => {
                         const daysRemaining = Math.max(0, Math.ceil((new Date(sub.expiryDate) - new Date()) / (1000 * 60 * 60 * 24)));
-                        const isExpiringSoon = daysRemaining <= 7 && daysRemaining > 0;
                         const isExpired = daysRemaining <= 0;
 
                         return (
                            <motion.div
                               key={sIdx}
-                              whileHover={{ y: -12, scale: 1.02 }}
-                              className={`group bg-white p-10 rounded-[56px] border-2 transition-all duration-500 relative overflow-hidden flex flex-col justify-between h-full ${isExpired ? 'border-rose-100 opacity-80 backdrop-blur-sm' :
-                                 isExpiringSoon ? 'border-orange-500 shadow-3xl shadow-orange-900/10 ring-8 ring-orange-50' :
-                                    'border-slate-50 hover:border-indigo-500/20 hover:shadow-[0_20px_50px_rgba(0,33,71,0.08)] shadow-indigo-900/5'
-                                 }`}
+                              whileHover={{ y: -8 }}
+                              className={`group bg-white p-8 rounded-[52px] border-2 transition-all duration-500 flex flex-col justify-between h-full hover:shadow-2xl hover:shadow-indigo-900/10 ${
+                                 isExpired ? 'border-rose-50 opacity-90' : 'border-slate-50 hover:border-indigo-100'
+                              }`}
                            >
-                              {/* Decorative Elements */}
-                              <div className="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-indigo-50 to-transparent rounded-full opacity-20 blur-2xl transition-all duration-700 group-hover:scale-150" />
-                              <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-transparent via-[#002147] to-transparent opacity-0 group-hover:opacity-10 transition-opacity" />
-
-                              <div className="relative z-10">
-                                 <div className="flex items-start justify-between mb-10">
-                                    <div className={`w-20 h-20 rounded-[32px] flex items-center justify-center p-5 transition-all duration-700 group-hover:rotate-12 shadow-2xl relative ${isExpired ? 'bg-rose-50 text-rose-400' :
-                                       isExpiringSoon ? 'bg-orange-50 text-orange-500 shadow-orange-900/10' :
-                                          'bg-[#002147] text-white shadow-[#002147]/20 group-hover:bg-orange-500'
-                                       }`}>
-                                       <div className="absolute inset-0 bg-white/10 rounded-inherit backdrop-blur-sm ring-1 ring-white/20" />
-                                       {isExpired ? <Clock className="w-10 h-10 relative z-10" /> : <FileText className="w-10 h-10 relative z-10" />}
+                              <div className="space-y-6 relative z-10">
+                                 <div className="flex items-start justify-between">
+                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:rotate-6 ${
+                                       isExpired ? 'bg-rose-50 text-rose-400' : 'bg-[#002147] text-white shadow-xl group-hover:bg-[#f16126]'
+                                    }`}>
+                                       <FileText className="w-7 h-7" />
                                     </div>
                                     <div className="text-right">
-                                       <div className={`inline-flex px-4 py-1.5 rounded-full mb-2 ${isExpired ? 'bg-rose-50 text-rose-500' : isExpiringSoon ? 'bg-orange-50 text-orange-600' : 'bg-emerald-50 text-emerald-600'
-                                          }`}>
-                                          <span className="text-[9px] font-black uppercase tracking-[0.2em]">{isExpired ? 'Ended' : isExpiringSoon ? 'Renew' : 'Active'}</span>
+                                       <div className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest mb-1 ${
+                                          isExpired ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'
+                                       }`}>
+                                          {isExpired ? 'EXPIRED' : 'ACTIVE'}
                                        </div>
-                                       <p className="text-base font-black text-[#002147] uppercase tracking-tighter tabular-nums italic">
-                                          {isExpired ? 'Expired' : `${daysRemaining} Days`}
+                                       <p className={`text-[10px] font-black uppercase italic tracking-tighter tabular-nums ${isExpired ? 'text-rose-500' : 'text-[#002147]'}`}>
+                                          {isExpired ? 'Renew Now' : `${daysRemaining} Days Left`}
                                        </p>
                                     </div>
                                  </div>
 
-                                 <div className="space-y-3 mb-10">
-                                    <h3 className="text-2xl md:text-3xl font-black uppercase italic tracking-tighter leading-[0.9] transition-colors text-[#002147] group-hover:text-indigo-600">
+                                 <div className="space-y-1">
+                                    <h3 className="text-xl md:text-2xl font-black uppercase italic tracking-tighter text-[#002147] group-hover:text-indigo-600 leading-tight">
                                        {sub.name}
                                     </h3>
-                                    <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-400">
-                                       Full Syllabus Access
-                                    </p>
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-300 italic">Curated Academy Content</p>
                                  </div>
 
-                                 <div className="grid grid-cols-2 gap-6 pb-10 border-b-2 border-slate-50 mb-10">
-                                    <div className="space-y-1.5">
-                                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">Resources</p>
-                                       <div className="flex items-center gap-2.5 text-slate-700">
-                                          <Zap className={`w-4 h-4 ${isExpired ? 'text-slate-300' : 'text-orange-500'}`} />
-                                          <span className="text-[11px] font-black uppercase italic leading-none">Full Access</span>
-                                       </div>
+                                 <div className="flex items-center gap-4 py-4 border-y border-slate-50">
+                                    <div className="flex items-center gap-2">
+                                       <Zap className={`w-3.5 h-3.5 ${isExpired ? 'text-slate-200' : 'text-orange-400'}`} />
+                                       <span className="text-[8px] font-black uppercase text-slate-400 tracking-widest">Resources</span>
                                     </div>
-                                    <div className="space-y-1.5">
-                                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">Sessions</p>
-                                       <div className="flex items-center gap-2.5 text-slate-700">
-                                          <Radio className={`w-4 h-4 ${isExpired ? 'text-slate-300' : 'text-rose-500 animate-pulse'}`} />
-                                          <span className="text-[11px] font-black uppercase italic leading-none">Live Help</span>
-                                       </div>
+                                    <div className="flex items-center gap-2">
+                                       <Radio className={`w-3.5 h-3.5 ${isExpired ? 'text-slate-200' : 'text-rose-400'}`} />
+                                       <span className="text-[8px] font-black uppercase text-slate-400 tracking-widest">Live Help</span>
                                     </div>
                                  </div>
                               </div>
 
-                              <div className="relative z-10">
-                                 {!isExpired ? (
+                              <div className="mt-8 space-y-3 relative z-10">
+                                 <Link
+                                    to={isExpired ? '/student/courses' : `/student/notes?search=${sub.name}`}
+                                    className={`w-full py-5 rounded-[22px] font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all active:scale-95 shadow-lg ${
+                                       isExpired 
+                                       ? 'bg-white text-rose-600 border border-rose-100 hover:bg-rose-50' 
+                                       : 'bg-[#002147] text-white hover:bg-indigo-600 shadow-indigo-900/10'
+                                    }`}
+                                 >
+                                    STUDY NOTES <FileText className="w-4 h-4" />
+                                 </Link>
+                                 
+                                 {!isExpired && (
                                     <Link
-                                       to={`/student/classes/${sub.name}`}
-                                       className={`w-full py-6 rounded-[28px] font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-4 transition-all active:scale-95 group/btn shadow-2xl relative overflow-hidden ${isExpiringSoon ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-900/30' : 'bg-[#002147] text-white shadow-[#002147]/20 hover:bg-orange-500'
-                                          }`}
+                                       to={`/student/live-schedule?search=${sub.name}`}
+                                       className="w-full py-5 bg-[#f16126] text-white rounded-[22px] font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all active:scale-95 shadow-lg shadow-[#f16126]/20 hover:bg-[#002147]"
                                     >
-                                       OPEN STUDY NOTES <ChevronRight className="w-5 h-5 group-hover/btn:translate-x-1.5 transition-transform" />
-                                    </Link>
-                                 ) : (
-                                    <Link
-                                       to="/student/courses"
-                                       className="w-full py-6 bg-white text-rose-600 border-2 border-rose-100 rounded-[28px] font-black text-xs uppercase tracking-[0.3em] hover:bg-rose-50 transition-all flex items-center justify-center gap-4 shadow-xl shadow-rose-900/5 group/renew active:scale-95"
-                                    >
-                                       RENEW ACCESS <Sparkles className="w-5 h-5 group-hover/renew:scale-125 transition-transform" />
+                                       JOIN LIVE CLASS <Video className="w-4 h-4" />
                                     </Link>
                                  )}
                               </div>

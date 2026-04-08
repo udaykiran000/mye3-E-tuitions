@@ -33,6 +33,7 @@ const StudentDashboard = () => {
   // Checkout States
   const [showCheckout, setShowCheckout] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [matchingCourse, setMatchingCourse] = useState(null);
   const [courses, setCourses] = useState([]);
   const [buyLoading, setBuyLoading] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState('oneMonth');
@@ -56,7 +57,20 @@ const StudentDashboard = () => {
     try {
       const board = userInfo?.board || '';
       const { data } = await axios.get(`/student/catalog${board ? `?board=${board}` : ''}`);
-      setCourses(data || []);
+      const catalog = data || [];
+      setCourses(catalog);
+
+      // Find matching course for this student
+      const userClass = userInfo?.className?.replace(/\D/g, '') || '';
+      const userBoard = userInfo?.board?.toUpperCase().trim() || '';
+      
+      const match = catalog.find(c => {
+        const courseClass = String(c.classLevel || c.className || '').replace(/\D/g, '') || '';
+        const studentBoard = userBoard.replace(' BOARD', '');
+        const courseBoard = c.board?.toUpperCase().trim().replace(' BOARD', '') || '';
+        return userClass === courseClass && (courseBoard === studentBoard || !courseBoard);
+      });
+      setMatchingCourse(match);
     } catch (error) {
       console.error('Error fetching catalog');
     }
@@ -111,18 +125,9 @@ const StudentDashboard = () => {
   };
 
   const openCheckout = () => {
-    const userClass = userInfo?.className?.replace(/\D/g, '') || '';
-    const userBoard = userInfo?.board?.toUpperCase().trim() || '';
-
-    const match = courses.find(c => {
-      const courseClass = String(c.classLevel || c.className || '').replace(/\D/g, '') || '';
-      const studentBoard = userBoard.replace(' BOARD', '');
-      const courseBoard = c.board?.toUpperCase().trim().replace(' BOARD', '') || '';
-      return userClass === courseClass && (courseBoard === studentBoard || !courseBoard);
-    });
-
-    if (match) {
-      setSelectedCourse(match);
+    if (matchingCourse) {
+      setSelectedCourse(matchingCourse);
+      setSelectedDuration('oneMonth'); // Default to monthly
       setShowCheckout(true);
     } else {
       toast.error('Class pricing not available');
@@ -147,7 +152,7 @@ const StudentDashboard = () => {
     <div className="space-y-8 animate-in fade-in duration-700 pb-20 p-4 md:p-6 lg:p-10 bg-[#f8fbff]/50 min-h-screen">
       <Toaster position="top-right" />
 
-      {/* 0. SUBSCRIPTION EXPIRY WARNING (CLEANER) */}
+      {/* 0. SUBSCRIPTION EXPIRY WARNING */}
       {(() => {
         const expiringSoon = learning.filter(sub => {
           const days = Math.ceil((new Date(sub.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
@@ -176,7 +181,7 @@ const StudentDashboard = () => {
         );
       })()}
 
-      {/* 1. STATE CARDS (STATS) */}
+      {/* 1. STATE CARDS */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         {[
           { icon: Star, label: 'Learning Pts', val: '12,450', color: 'bg-indigo-50 text-[#002147]', border: 'group-hover:border-indigo-200' },
@@ -208,18 +213,20 @@ const StudentDashboard = () => {
               <div className="flex flex-col lg:flex-row items-center gap-12 relative z-10">
                  <div className="flex-1 space-y-8 text-center lg:text-left">
                     <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-white/10 text-[#f16126] rounded-full border border-white/5 text-[10px] font-black uppercase tracking-widest backdrop-blur-md">
-                       Restricted Access Mode
+                       Restricted Mode
                     </div>
                     <h2 className="text-4xl md:text-7xl font-black uppercase italic tracking-tighter leading-none">Unlock your <br/><span className="text-[#f16126]">Academic Future</span></h2>
-                    <p className="text-indigo-200/60 font-bold text-xs md:text-sm uppercase tracking-[0.3em] italic max-w-xl leading-relaxed">Join your specialized class bubble today to access live curated sessions, strategic notes, and weekly exams.</p>
+                    <p className="text-indigo-200/60 font-bold text-xs md:text-sm uppercase tracking-[0.3em] italic max-w-xl leading-relaxed">Join your specialized class bubble today to access live sessions and strategy notes.</p>
                  </div>
                  
                  <div className="w-full lg:w-[340px] bg-white rounded-[44px] p-8 text-slate-900 shadow-2xl transform lg:rotate-2 hover:rotate-0 transition-transform duration-700">
                     <div className="flex justify-between items-start mb-8">
                        <img src={logoImg} className="h-10 object-contain" alt="logo" />
                        <div className="text-right">
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Entry Fee</p>
-                          <p className="text-2xl font-black text-[#002147] italic leading-none">₹200</p>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5 italic">Entry At</p>
+                          <p className="text-2xl font-black text-[#002147] italic tracking-tighter leading-none tabular-nums">
+                             ₹{(matchingCourse?.pricing?.oneMonth || matchingCourse?.price || 200).toLocaleString()}
+                          </p>
                        </div>
                     </div>
                     <div className="space-y-5 mb-10">
@@ -227,8 +234,8 @@ const StudentDashboard = () => {
                        <div className="space-y-3">
                           {['Live Daily Classes', 'Full Subject Notes', 'Recorded Recaps', 'Weekly Mock Tests'].map((item, i) => (
                              <div key={i} className="flex items-center gap-4 group/item">
-                                <div className="w-5 h-5 bg-emerald-50 rounded-full flex items-center justify-center group-hover/item:bg-emerald-500 transition-colors">
-                                   <CheckCircle2 className="w-3 h-3 text-emerald-500 group-hover/item:text-white transition-colors" />
+                                <div className="w-5 h-5 bg-emerald-50 rounded-full flex items-center justify-center">
+                                   <CheckCircle2 className="w-3 h-3 text-emerald-500" />
                                 </div>
                                 <span className="text-[11px] font-black uppercase italic text-slate-500 tracking-wide">{item}</span>
                              </div>
@@ -265,7 +272,6 @@ const StudentDashboard = () => {
         </div>
       ) : (
         <div className="space-y-10">
-          {/* ENROLLED HERO (POLISHED) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -278,7 +284,7 @@ const StudentDashboard = () => {
                   <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" /> Access Active
                 </div>
                 <h2 className="text-4xl md:text-7xl font-black uppercase italic tracking-tighter leading-none">MY <span className="text-[#f16126]">DASHBOARD</span></h2>
-                <p className="text-indigo-200/60 font-bold text-xs md:text-sm uppercase tracking-[0.3em] italic max-w-lg">Welcome back. Access your daily live lessons and digital repository below.</p>
+                <p className="text-indigo-200/60 font-bold text-xs md:text-sm uppercase tracking-[0.3em] italic max-w-lg">Access your daily live lessons and repository below.</p>
               </div>
               <Link to="/student/live-schedule" className="w-full md:w-auto px-14 py-7 bg-[#f16126] text-white rounded-[32px] font-black text-xs uppercase tracking-[0.3em] shadow-2xl hover:bg-white hover:text-[#002147] transition-all flex items-center justify-center gap-4 active:scale-95 group/live">
                 Start Live Session <Play className="w-5 h-5 fill-current ml-2 group-hover:scale-110 transition-transform" />
@@ -286,7 +292,7 @@ const StudentDashboard = () => {
             </div>
           </motion.div>
 
-          {/* ACTIVE PLAN (CLEANER) */}
+          {/* ACTIVE SUBSCRIPTION CARD */}
           <div className="bg-white p-10 rounded-[52px] border-2 border-slate-50 flex flex-col md:flex-row items-center justify-between relative overflow-hidden shadow-xl gap-10 hover:border-indigo-100 transition-all">
             <div className="text-center md:text-left flex-1 relative z-10">
               <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
@@ -305,6 +311,7 @@ const StudentDashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            {/* SCHEDULE TODAY */}
             <div className="space-y-6">
               <div className="flex items-center justify-between px-6">
                 <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-[#002147] flex items-center gap-3">
@@ -331,6 +338,7 @@ const StudentDashboard = () => {
               </div>
             </div>
 
+            {/* RECAPS */}
             <div className="space-y-6">
               <div className="flex items-center justify-between px-6">
                 <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-[#002147] flex items-center gap-3">
@@ -366,7 +374,7 @@ const StudentDashboard = () => {
         session={recapModal.session}
       />
 
-      {/* CHECKOUT MODAL (NEAT) */}
+      {/* CHECKOUT MODAL */}
       <AnimatePresence>
         {showCheckout && selectedCourse && (
           <div className="fixed inset-0 z-[2100] flex items-center justify-center p-4 backdrop-blur-3xl bg-[#002147]/70" onClick={() => setShowCheckout(false)}>

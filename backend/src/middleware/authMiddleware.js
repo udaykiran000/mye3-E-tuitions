@@ -12,10 +12,7 @@ const protect = async (req, res, next) => {
         return res.status(401).json({ message: 'User no longer exists. Please login again.' });
       }
       
-      // Single device login enforcement
-      if (req.user.currentDeviceToken && req.user.currentDeviceToken !== decoded.deviceToken) {
-        return res.status(401).json({ message: 'Security: Logged in from another device. Please login again.' });
-      }
+      // Single device login enforcement removed to allow multi-device persistence
       
       next();
     } catch (error) {

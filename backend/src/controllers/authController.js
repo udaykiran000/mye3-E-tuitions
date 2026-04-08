@@ -5,7 +5,7 @@ const crypto = require('crypto');
 
 const generateToken = (userId, deviceToken) => {
   return jwt.sign({ userId, deviceToken }, process.env.JWT_SECRET, {
-    expiresIn: '30d',
+    expiresIn: '24h',
   });
 };
 

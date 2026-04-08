@@ -36,54 +36,46 @@ const TeacherSidebar = ({ onClose }) => {
   ];
 
   return (
-    <aside className="w-full lg:w-72 bg-slate-900 h-screen text-white flex flex-col shadow-2xl">
-      <div className="p-6 md:p-8 border-b border-slate-800 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-3 group px-2">
+    <aside className="w-full lg:w-72 bg-[#002147] h-screen text-white flex flex-col shadow-2xl overflow-hidden border-r border-white/5">
+      {/* Brand Header */}
+      <div className="pt-12 pb-8 flex flex-col items-center justify-center gap-6">
+        <Link to="/" className="flex flex-col items-center gap-5 group">
           <img 
             src={logoImg} 
             alt="Logo" 
-            className="h-10 md:h-12 w-auto object-contain transition-transform group-hover:scale-105" 
+            className="h-28 w-auto object-contain transition-transform group-hover:scale-105" 
           />
-          <div className="flex flex-col gap-0 text-left">
-            <span className="text-xl font-black tracking-tighter leading-none whitespace-nowrap">Faculty Portal</span>
-            <span className="text-[10px] font-black text-teal-400 uppercase tracking-widest mt-0.5 italic opacity-80">Mye3 Education</span>
+          <div className="flex flex-col items-center">
+            <span className="text-[10px] font-black text-white/90 uppercase tracking-[0.4em] border-b-2 border-orange-500/50 pb-2 italic">Mye3 Education</span>
           </div>
         </Link>
         {onClose && (
-          <button onClick={onClose} className="lg:hidden p-2 text-slate-400 hover:text-white transition-colors">
+          <button onClick={onClose} className="lg:hidden absolute top-8 right-8 p-2 text-white/40 hover:text-white transition-colors">
             <X className="w-6 h-6" />
           </button>
         )}
       </div>
 
-      <nav className="flex-1 p-4 md:p-6 space-y-1.5 mt-4 overflow-y-auto">
+      {/* Navigation - No internal scrollbar */}
+      <nav className="px-6 py-4 space-y-2 flex-grow overflow-hidden">
         {menuItems.map((item, idx) => {
           const Content = (
             <>
               <item.icon className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              <span>{item.label}</span>
+              <span className="tracking-wide">{item.label}</span>
             </>
           );
           
-          return item.exact ? (
-            <Link
-              key={idx}
-              to={item.path}
-              onClick={() => onClose && onClose()}
-              className="flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all group text-sm text-slate-400 hover:text-white hover:bg-slate-800/50"
-            >
-              {Content}
-            </Link>
-          ) : (
+          return (
             <NavLink
               key={idx}
               to={item.path}
               onClick={() => onClose && onClose()}
               className={({ isActive }) => `
-                flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all group text-sm
+                flex items-center gap-4 px-6 py-4 rounded-2xl font-black transition-all group text-xs uppercase tracking-widest
                 ${isActive 
-                  ? 'bg-teal-600 text-white shadow-lg shadow-teal-900/40' 
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/50'}
+                  ? 'bg-[#f16126] text-white shadow-xl shadow-orange-950/40' 
+                  : 'text-white/50 hover:text-white hover:bg-white/5'}
               `}
             >
               {Content}
@@ -92,20 +84,21 @@ const TeacherSidebar = ({ onClose }) => {
         })}
       </nav>
 
-      <div className="p-6 border-t border-slate-800">
-         <div className="px-5 py-3 bg-slate-800/50 rounded-2xl border border-slate-700/50 mb-6 hidden md:block">
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Faculty Status</p>
-            <div className="flex items-center justify-center gap-2 mt-1">
-               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-               <span className="text-xs font-black text-emerald-500 uppercase">Online</span>
+      {/* Bottom Actions */}
+      <div className="p-8 space-y-6">
+         <div className="px-6 py-4 bg-white/5 rounded-[24px] border border-white/5 hidden md:block">
+            <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] text-center mb-2">Faculty Status</p>
+            <div className="flex items-center justify-center gap-2">
+               <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+               <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Online</span>
             </div>
          </div>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-4 px-5 py-4 rounded-xl font-bold text-rose-400 hover:text-white hover:bg-rose-600/20 transition-all group text-sm"
+          className="w-full flex items-center gap-4 px-6 py-5 rounded-[24px] font-black text-xs uppercase tracking-[0.3em] text-white/40 hover:text-orange-400 hover:bg-orange-500/10 transition-all group"
         >
-          <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
-          <span>Exit Portal</span>
+          <LogOut className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          <span>Logout</span>
         </button>
       </div>
     </aside>

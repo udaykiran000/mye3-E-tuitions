@@ -73,7 +73,7 @@ const TeacherDashboard = () => {
   });
 
   return (
-    <div className="space-y-10 md:space-y-14 animate-in fade-in duration-700 p-4 md:p-8 lg:p-12 pb-24 bg-slate-50/30 min-h-screen">
+    <div className="space-y-8 animate-in fade-in duration-700 p-4 md:p-6 lg:p-8 pb-24 bg-slate-50/30 min-h-screen">
       
       {/* Dynamic Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
@@ -104,23 +104,23 @@ const TeacherDashboard = () => {
       </div>
       
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {statCards.map((stat, idx) => (
           <motion.div 
-            whileHover={{ y: -8 }}
+            whileHover={{ y: -5 }}
             key={idx} 
-            className="group bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm flex flex-col gap-6 relative overflow-hidden transition-all hover:shadow-2xl hover:shadow-slate-200"
+            className="group bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-4 relative overflow-hidden transition-all hover:shadow-xl hover:shadow-slate-200 border-t-4 border-t-[#002147]"
           >
-             <div className={`w-16 h-16 rounded-2xl ${stat.bg} ${stat.color} flex items-center justify-center transition-transform group-hover:rotate-12 shrink-0 shadow-lg shadow-current/5`}>
-                <stat.icon className="w-8 h-8" />
+             <div className={`w-12 h-12 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center transition-transform group-hover:rotate-6 shrink-0 shadow-md shadow-current/5`}>
+                <stat.icon className="w-6 h-6" />
              </div>
              <div className="space-y-1">
-                <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] leading-none mb-2">{stat.label}</p>
+                <p className="text-[9px] font-black uppercase text-slate-400 tracking-[0.15em] leading-none mb-1.5">{stat.label}</p>
                 <div className="flex items-baseline gap-2">
-                   <p className="text-3xl md:text-4xl font-black text-slate-900 leading-none tracking-tighter italic">{stat.value}</p>
-                   {stat.path && <ArrowUpRight className="w-5 h-5 text-[#f16126] opacity-0 group-hover:opacity-100 transition-all -translate-y-1" />}
+                   <p className="text-2xl md:text-3xl font-black text-slate-900 leading-none tracking-tighter italic">{stat.value}</p>
+                   {stat.path && <ArrowUpRight className="w-4 h-4 text-[#f16126] opacity-0 group-hover:opacity-100 transition-all -translate-y-0.5" />}
                 </div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase italic mt-2">{stat.sub}</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase italic mt-1.5 opacity-60">{stat.sub}</p>
              </div>
              {stat.path && <Link to={stat.path} className="absolute inset-0 z-10" />}
           </motion.div>
@@ -174,28 +174,28 @@ const TeacherDashboard = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.05 }}
                     key={i} 
-                    className={`group bg-white p-8 rounded-[40px] border-2 transition-all flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10 ${
-                      isLive ? 'border-[#f16126] shadow-2xl shadow-orange-900/10 ring-8 ring-orange-50' : 
-                      isEnded ? 'border-slate-50 opacity-70 grayscale-[0.5]' : 'border-slate-50 hover:border-teal-100 hover:shadow-xl shadow-slate-200/50'
+                    className={`group bg-white p-5 md:p-6 rounded-2xl border transition-all flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 md:gap-8 ${
+                      isLive ? 'border-[#f16126] shadow-xl shadow-orange-900/10 ring-4 ring-orange-50' : 
+                      isEnded ? 'border-slate-100 opacity-60' : 'border-slate-100 hover:border-orange-200 hover:shadow-lg shadow-slate-100'
                     }`}
                   >
-                     <div className="flex flex-col md:flex-row md:items-center gap-8 flex-1">
-                        {/* Time Badge */}
-                        <div className={`w-full md:w-32 h-32 rounded-[32px] flex flex-col items-center justify-center p-4 shadow-2xl transition-all duration-500 group-hover:scale-105 ${
+                     <div className="flex flex-col md:flex-row md:items-center gap-6 flex-1">
+                        {/* Time Badge - Compact */}
+                        <div className={`w-full md:w-24 h-24 rounded-2xl flex flex-col items-center justify-center p-3 shadow-lg transition-all duration-500 group-hover:scale-105 ${
                            isLive ? 'bg-[#f16126] text-white shadow-orange-900/20' : 
                            isEnded ? 'bg-slate-100 text-slate-400' : 'bg-[#002147] text-white shadow-navy-900/20'
                         }`}>
-                           <p className="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">{startTime.toLocaleDateString('en-GB', { month: 'short' })}</p>
-                           <p className="text-3xl font-black leading-none mb-1 tracking-tighter">{startTime.toLocaleDateString('en-GB', { day: '2-digit' })}</p>
-                           <div className="w-8 h-[2px] bg-white/20 mb-1" />
-                           <p className="text-[10px] font-black">{startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                           <p className="text-[8px] font-black uppercase tracking-widest opacity-80 mb-0.5">{startTime.toLocaleDateString('en-GB', { month: 'short' })}</p>
+                           <p className="text-2xl font-black leading-none mb-0.5 tracking-tighter">{startTime.toLocaleDateString('en-GB', { day: '2-digit' })}</p>
+                           <div className="w-6 h-[1.5px] bg-white/20 my-1" />
+                           <p className="text-[9px] font-black">{startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                         </div>
 
                         <div className="space-y-3">
                            <div className="flex items-center gap-3">
                               <span className={`px-4 py-1.5 text-[9px] font-black rounded-lg uppercase tracking-[0.2em] shadow-sm ${
                                 isLive ? 'bg-white text-[#f16126] animate-pulse' :
-                                isEnded ? 'bg-slate-200 text-slate-500' : 'bg-teal-50 text-teal-600'
+                                isEnded ? 'bg-slate-200 text-slate-500' : 'bg-orange-50 text-orange-600'
                               }`}>
                                 {isLive ? 'Broadcast Active' : isEnded ? 'Archive Ready' : 'Upcoming Session'}
                               </span>
@@ -204,7 +204,7 @@ const TeacherDashboard = () => {
                                  <span className="text-[10px] font-black uppercase tracking-widest italic">Wait: {Math.max(0, Math.ceil((startTime - new Date()) / (1000 * 60)))} mins</span>
                               </div>
                            </div>
-                           <h3 className="font-black text-slate-900 text-2xl md:text-3xl tracking-tighter leading-none uppercase italic group-hover:text-[#002147] transition-colors">{s.title}</h3>
+                           <h3 className="font-black text-slate-900 text-xl md:text-2xl tracking-tighter leading-none uppercase italic group-hover:text-[#002147] transition-colors">{s.title}</h3>
                            <div className="flex items-center gap-4">
                               <div className="flex items-center gap-2 px-3 py-1 bg-slate-50 rounded-lg text-[9px] font-black text-slate-500 uppercase tracking-widest">
                                  <GraduationCap className="w-3.5 h-3.5" /> {s.classLevel}
@@ -220,24 +220,24 @@ const TeacherDashboard = () => {
                         {s.status === 'upcoming' && (
                           <button 
                             onClick={() => handleUpdateStatus(s._id, 'live')}
-                            className="w-full lg:w-auto px-10 py-5 bg-[#002147] text-white rounded-[24px] text-xs font-black uppercase tracking-[0.2em] transform active:scale-95 transition-all shadow-2xl shadow-navy-100 flex items-center justify-center gap-3 group/btn hover:bg-[#f16126]"
+                            className="w-full lg:w-auto px-8 py-4 bg-[#002147] text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transform active:scale-95 transition-all shadow-lg shadow-navy-100 flex items-center justify-center gap-2 group/btn hover:bg-[#f16126]"
                           >
-                            GO LIVE NOW <Play className="w-4 h-4 fill-current group-hover/btn:scale-110 transition-transform" />
+                            GO LIVE NOW <Play className="w-3.5 h-3.5 fill-current group-hover/btn:scale-110 transition-transform" />
                           </button>
                         )}
                         {s.status === 'live' && (
                           <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
-                             <a 
+                           <a 
                                href={s.link} target="_blank" rel="noopener noreferrer"
-                               className="w-full lg:w-auto px-8 py-5 bg-white text-[#f16126] border-2 border-orange-100 rounded-[24px] text-xs font-black uppercase tracking-widest hover:bg-orange-50 transition-all flex items-center justify-center gap-2"
+                               className="w-full lg:w-auto px-6 py-4 bg-white text-[#f16126] border-2 border-orange-100 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-50 transition-all flex items-center justify-center gap-2"
                              >
                                Monitor Broadcast
                              </a>
                              <button 
                                onClick={() => handleUpdateStatus(s._id, 'ended')}
-                               className="w-full lg:w-auto px-10 py-5 bg-rose-600 text-white rounded-[24px] text-xs font-black uppercase tracking-[0.2em] hover:bg-rose-700 transition-all shadow-2xl shadow-rose-900/20 flex items-center justify-center gap-3 group/end"
+                               className="w-full lg:w-auto px-8 py-4 bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-rose-700 transition-all shadow-lg shadow-rose-900/20 flex items-center justify-center gap-2 group/end"
                              >
-                               End Session <CheckCircle2 className="w-4 h-4 group-hover/end:scale-110 transition-transform" />
+                               End Session <CheckCircle2 className="w-3.5 h-3.5 group-hover/end:scale-110 transition-transform" />
                              </button>
                           </div>
                         )}

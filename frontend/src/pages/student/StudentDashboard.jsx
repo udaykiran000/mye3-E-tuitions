@@ -32,6 +32,7 @@ const StudentDashboard = () => {
   // Checkout States
   const [showCheckout, setShowCheckout] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [matchingCourse, setMatchingCourse] = useState(null);
   const [courses, setCourses] = useState([]);
   const [buyLoading, setBuyLoading] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState('oneMonth');
@@ -55,7 +56,20 @@ const StudentDashboard = () => {
     try {
       const board = userInfo?.board || '';
       const { data } = await axios.get(`/student/catalog${board ? `?board=${board}` : ''}`);
-      setCourses(data || []);
+      const catalog = data || [];
+      setCourses(catalog);
+
+      // Find matching course for this student
+      const userClass = userInfo?.className?.replace(/\D/g, '') || '';
+      const userBoard = userInfo?.board?.toUpperCase().trim() || '';
+      
+      const match = catalog.find(c => {
+        const courseClass = String(c.classLevel || c.className || '').replace(/\D/g, '') || '';
+        const studentBoard = userBoard.replace(' BOARD', '');
+        const courseBoard = c.board?.toUpperCase().trim().replace(' BOARD', '') || '';
+        return userClass === courseClass && (courseBoard === studentBoard || !courseBoard);
+      });
+      setMatchingCourse(match);
     } catch (error) {
       console.error('Error fetching catalog');
     }
@@ -110,18 +124,9 @@ const StudentDashboard = () => {
   };
 
   const openCheckout = () => {
-    const userClass = userInfo?.className?.replace(/\D/g, '') || '';
-    const userBoard = userInfo?.board?.toUpperCase().trim() || '';
-
-    const match = courses.find(c => {
-      const courseClass = String(c.classLevel || c.className || '').replace(/\D/g, '') || '';
-      const studentBoard = userBoard.replace(' BOARD', '');
-      const courseBoard = c.board?.toUpperCase().trim().replace(' BOARD', '') || '';
-      return userClass === courseClass && (courseBoard === studentBoard || !courseBoard);
-    });
-
-    if (match) {
-      setSelectedCourse(match);
+    if (matchingCourse) {
+      setSelectedCourse(matchingCourse);
+      setSelectedDuration('oneMonth'); // Default to monthly
       setShowCheckout(true);
     } else {
       toast.error('Class pricing not available');
@@ -195,8 +200,10 @@ const StudentDashboard = () => {
                 <img src={logoImg} alt="logo" className="w-full h-full object-contain" />
               </div>
               <div className="text-right pt-2">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic mb-0.5">Total Fee</p>
-                <p className="text-2xl font-black text-[#002147] italic tracking-tighter leading-none tabular-nums">₹200</p>
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic mb-0.5">Monthly Fee</p>
+                <p className="text-2xl font-black text-[#002147] italic tracking-tighter leading-none tabular-nums">
+                  ₹{(matchingCourse?.pricing?.oneMonth || matchingCourse?.price || 0).toLocaleString()}
+                </p>
               </div>
             </div>
             <div className="mb-4 flex-1">
@@ -205,12 +212,21 @@ const StudentDashboard = () => {
               </div>
               <h3 className="text-[24px] md:text-[26px] font-black text-[#002147] tracking-tighter uppercase italic leading-none mb-1">{userInfo?.className}</h3>
               <div className="mt-6 space-y-3">
-                {['Mathematics', 'Science (PS/NS)', 'Social Studies', 'English'].map((sub, idx) => (
-                  <div key={idx} className="flex items-center gap-3 text-slate-600">
-                    <div className="w-1.5 h-1.5 bg-[#f16126] rounded-full" />
-                    <span className="text-[11px] font-black italic uppercase tracking-wider text-slate-500">{sub}</span>
-                  </div>
-                ))}
+                {matchingCourse?.subjects && matchingCourse.subjects.length > 0 ? (
+                   matchingCourse.subjects.slice(0, 4).map((sub, idx) => (
+                    <div key={idx} className="flex items-center gap-3 text-slate-600">
+                      <div className="w-1.5 h-1.5 bg-[#f16126] rounded-full" />
+                      <span className="text-[11px] font-black italic uppercase tracking-wider text-slate-500">{sub.name}</span>
+                    </div>
+                  ))
+                ) : (
+                  ['Mathematics', 'Science (PS/NS)', 'Social Studies', 'English'].map((sub, idx) => (
+                    <div key={idx} className="flex items-center gap-3 text-slate-600">
+                      <div className="w-1.5 h-1.5 bg-[#f16126] rounded-full" />
+                      <span className="text-[11px] font-black italic uppercase tracking-wider text-slate-500">{sub}</span>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
             <div className="pt-6 border-t border-slate-50">

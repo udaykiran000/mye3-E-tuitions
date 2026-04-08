@@ -21,7 +21,9 @@ exports.getCatalog = async (req, res, next) => {
       ...classes.map(c => ({
         id: c._id,
         className: c.className,
-        classLevel: c.className.replace(/\D/g, ''), // Extract "10" from "Class 10"
+        classLevel: c.className.toLowerCase().includes('inter first') ? '11' : 
+                    c.className.toLowerCase().includes('inter second') ? '12' : 
+                    c.className.replace(/\D/g, ''),
         name: `${c.className || 'Unknown Class'} (All Subjects)`,
         type: 'bundle',
         pricing: c.pricing,

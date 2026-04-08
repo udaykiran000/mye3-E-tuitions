@@ -33,7 +33,7 @@ import course4 from '../assets/course-item-4.webp';
 import discCourse1 from '../assets/disc-content-1.webp';
 import discCourse2 from '../assets/disc-content-2.webp';
 import discCourse3 from '../assets/disc-content-3.webp';
-import discCourse4 from '../assets/disc-content-4.webp';
+import discCourse4 from '../assets/icse card.png';
 import teacherJoinImg from '../assets/ChatGPT Image Mar 30, 2026, 04_09_31 AM.png';
 import successImg from '../assets/register img.png';
 
@@ -84,44 +84,49 @@ const SLIDES = [
 ];
 
 const POPULAR_COURSES = [
-  { title: 'TS\nBoard', href: '/courses#TS Board', color: '#fbe08e', border: '#fbbf24', shadow: '#f59e0b', img: course1 },
-  { title: 'AP\nBoard', href: '/courses#AP Board', color: '#fca876', border: '#fb923c', shadow: '#f97316', img: course2 },
-  { title: 'CBSE\nBoard', href: '/courses#CBSE Board', color: '#b0f1cc', border: '#4ade80', shadow: '#22c55e', img: course3 },
-  { title: 'ICSE\nBoard', href: '/courses#ICSE Board', color: '#bae0fe', border: '#93c5fd', shadow: '#3b82f6', img: course4 },
+  { title: 'TS\nBOARD', href: '/courses/board/ts-board', color: '#fbe08e', border: '#fbbf24', shadow: '#f59e0b', img: course1 },
+  { title: 'AP\nBOARD', href: '/courses/board/ap-board', color: '#fca876', border: '#fb923c', shadow: '#f97316', img: course2 },
+  { title: 'CBSE\nBOARD', href: '/courses/board/cbse-board', color: '#b0f1cc', border: '#4ade80', shadow: '#22c55e', img: course3 },
+  { title: 'ICSE\nBOARD', href: '/courses/board/icse-board', color: '#bae0fe', border: '#93c5fd', shadow: '#3b82f6', img: course4 },
 ];
 
 const DISCOVER_COURSES = [
   {
     topTitle: 'Basic to advance',
-    title: 'Language',
-    desc: 'Learn a foreign language by online native teacher and increase your employability.',
+    title: 'AP BOARD',
+    desc: 'Learn from expert native teachers to master your AP board curriculum.',
     bgColor: '#fdf3c7',     
     btnColor: '#fab500',    
     img: discCourse1,
+    href: '/courses/board/ap-board',
   },
   {
     topTitle: 'Mains to Advance',
-    title: 'ICSE',
-    desc: 'Learn From best teachers from home at anytime at affordable prices.',
+    title: 'TS BOARD',
+    desc: 'Comprehensive learning for TS board students from home at affordable prices.',
     bgColor: '#ffebd9',     
     btnColor: '#f97316',    
     img: discCourse2,
+    href: '/courses/board/ts-board',
   },
   {
     topTitle: 'Basic to advance',
     title: 'CBSE',
-    desc: 'Find the best tutor for coding and programming classes at affordable prices.',
+    desc: 'Find the best tutors for comprehensive CBSE curriculum at affordable prices.',
     bgColor: '#d4fae4',     
     btnColor: '#22c55e',    
     img: discCourse3,
+    href: '/courses/board/cbse-board',
   },
   {
     topTitle: 'Basic to advance',
-    title: 'Curricular\nActivities',
-    desc: 'Get online Interactive extra curricular classes with best trainer.',
+    title: 'ICSE',
+    desc: 'Get online Interactive classes for ICSE specific subjects with the best trainers.',
     bgColor: '#e8eeff',     
     btnColor: '#3b82f6',    
     img: discCourse4,
+    href: '/courses/board/icse-board',
+    fitInside: true,
   }
 ];
 
@@ -494,19 +499,27 @@ const Home = () => {
                   <p className="font-bold text-[10px] md:text-[13px] tracking-wide" style={{ color: course.btnColor }}>{course.topTitle}</p>
                   <h3 className="text-[17px] md:text-[28px] font-black text-slate-800 leading-[1.1] truncate md:whitespace-pre-line">{course.title}</h3>
                   <p className="text-slate-600 text-[10px] md:text-[13px] leading-snug line-clamp-2 md:line-clamp-none opacity-90">{course.desc}</p>
-                  <button 
-                    className="px-3 py-1.5 md:px-5 md:py-2 rounded-md text-white font-black text-[9px] md:text-[13px] shadow transition-transform hover:-translate-y-0.5 mt-1" 
+                  <Link 
+                    to={course.href || "/courses"}
+                    className="inline-block w-fit px-4 py-1.5 md:px-7 md:py-2.5 rounded-xl text-white font-black text-[10px] md:text-[14px] shadow-lg shadow-orange-200 transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95 mt-2 uppercase tracking-wider" 
                     style={{ background: course.btnColor }}
                   >
                     Explore Now
-                  </button>
+                  </Link>
                 </div>
                 
                 {/* Right side image & decor */}
                 <div className="relative z-10 w-[40%] sm:w-[45%] flex justify-end items-center h-full">
                   {/* White background circle with thick colored border */}
-                  <div className="relative w-[75px] h-[75px] md:w-[125px] md:h-[125px] bg-white rounded-full flex justify-center items-end border-[3px] md:border-[5px]" style={{ borderColor: course.btnColor }}>
-                    <img src={course.img} alt={course.title} className="max-h-[140%] w-auto object-contain object-bottom -mb-[1px] relative z-20 pointer-events-none drop-shadow-sm" />
+                  <div 
+                    className={`relative w-[80px] h-[80px] md:w-[135px] md:h-[135px] bg-white rounded-full flex justify-center border-[4px] md:border-[6px] shadow-inner ${course.fitInside ? 'items-center p-3' : 'items-end'}`} 
+                    style={{ borderColor: course.btnColor }}
+                  >
+                    <img 
+                      src={course.img} 
+                      alt={course.title} 
+                      className={`${course.fitInside ? 'max-h-[90%] w-auto' : 'max-h-[135%] -mb-[1px]'} object-contain relative z-20 pointer-events-none drop-shadow-md`} 
+                    />
                   </div>
                 </div>
               </div>

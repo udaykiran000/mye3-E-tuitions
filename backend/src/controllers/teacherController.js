@@ -86,7 +86,8 @@ exports.getMyAssignments = async (req, res, next) => {
         name: label,
         type: item.assignmentType,
         classLevel: item.classLevel,
-        subjectName: item.subjectName
+        subjectName: item.subjectName,
+        board: item.board || 'TS Board'
       };
     });
 
@@ -284,10 +285,14 @@ exports.getMaterials = async (req, res, next) => {
     const assignments = teacher.assignedSubjects || [];
     
     const queryConditions = assignments.map(a => {
-      if (a.assignmentType === 'bundle') {
-        return { classLevel: a.classLevel };
+      const cond = { classLevel: a.classLevel };
+      if (a.assignmentType !== 'bundle') {
+        cond.subjectName = a.subjectName;
       }
-      return { classLevel: a.classLevel, subjectName: a.subjectName };
+      if (a.board) {
+        cond.board = a.board;
+      }
+      return cond;
     });
 
     const query = {

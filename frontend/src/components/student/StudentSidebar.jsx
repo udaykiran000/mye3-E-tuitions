@@ -77,12 +77,7 @@ const StudentSidebar = ({ onClose }) => {
       </nav>
 
       <div className="p-6">
-         <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-5 rounded-2xl text-white relative overflow-hidden group mb-6 hidden md:block">
-            <Sparkles className="absolute top-4 right-4 w-5 h-5 text-indigo-200/50 animate-pulse" />
-            <p className="text-[10px] font-black uppercase tracking-widest text-indigo-100 mb-1">Learning Streak</p>
-            <h3 className="text-xl font-black leading-tight">5 Days</h3>
-            <p className="text-[9px] mt-2 font-bold text-indigo-100/40 uppercase tracking-wider">Keep crushing it!</p>
-         </div>
+
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-4 px-5 py-4 rounded-xl font-bold text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all group text-sm border border-transparent hover:border-rose-100"

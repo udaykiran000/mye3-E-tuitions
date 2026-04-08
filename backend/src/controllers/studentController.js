@@ -12,9 +12,22 @@ const ClassBundle = require('../models/ClassBundle');
 // @access  Student
 exports.getCatalog = async (req, res, next) => {
   try {
+    // Determine the board to filter by
+    // 1. Check query param (e.g. /student/catalog?board=AP Board)
+    // 2. Check logged in user's profile
+    let boardFilter = req.query.board;
+    if (!boardFilter && req.user) {
+      boardFilter = req.user.board;
+    }
+
+    const query = { isActive: true };
+    if (boardFilter) {
+      query.board = boardFilter;
+    }
+
     const [classes, subjects] = await Promise.all([
-      ClassBundle.find({ isActive: true }).sort({ className: 1 }),
-      Subject.find({ isActive: true }).sort({ classLevel: 1 })
+      ClassBundle.find(query).sort({ className: 1 }),
+      Subject.find(query).sort({ classLevel: 1 })
     ]);
 
     const catalog = [
@@ -32,7 +45,7 @@ exports.getCatalog = async (req, res, next) => {
       })),
       ...subjects.map(s => ({
         id: s._id,
-        className: `Class ${s.classLevel}`, // Standardize to "Class X"
+        className: `Class ${s.classLevel}`, 
         name: s.name || 'Unknown Subject',
         type: 'subject',
         pricing: s.pricing,

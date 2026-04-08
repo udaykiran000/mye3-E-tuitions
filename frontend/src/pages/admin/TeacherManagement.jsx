@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Plus, Search, Edit2, Trash2, User, Mail, Shield, Save, X, Loader2, BookOpen, GraduationCap, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, User, Mail, Shield, Save, X, Loader2, BookOpen, GraduationCap, CheckCircle, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 
 const TeacherManagement = () => {
@@ -23,6 +23,8 @@ const TeacherManagement = () => {
   const [classes, setClasses] = useState([]); 
   const [selectedAssignments, setSelectedAssignments] = useState([]);
   const [assignmentSearch, setAssignmentSearch] = useState('');
+  const [activeBoard, setActiveBoard] = useState(null);
+  const [activeClasses, setActiveClasses] = useState([]);
 
   const fetchTeachers = async () => {
     try {
@@ -41,8 +43,8 @@ const TeacherManagement = () => {
       const { data: subjects1112 } = await axios.get('/subjects');
       
       const allClasses = [
-        ...bundles.map(b => ({ ...b, type: 'bundle', displayName: b.className, level: b.className })),
-        ...subjects1112.map(s => ({ ...s, type: 'subject', displayName: s.name, level: `Class ${s.classLevel}` }))
+        ...bundles.map(b => ({ ...b, type: 'bundle', displayName: b.className, level: b.className, board: b.board })),
+        ...subjects1112.map(s => ({ ...s, type: 'subject', displayName: s.name, level: `Class ${s.classLevel}`, board: s.board }))
       ];
       setClasses(allClasses);
     } catch (error) {
@@ -117,49 +119,52 @@ const TeacherManagement = () => {
   };
 
   const toggleAssignment = (item) => {
-    const isSelected = selectedAssignments.some(a => a.classLevel === item.classLevel && a.subjectName === item.subjectName);
+    const isSelected = selectedAssignments.some(a => a.classLevel === item.classLevel && a.subjectName === item.subjectName && a.board === item.board);
     if (isSelected) {
-      setSelectedAssignments(prev => prev.filter(a => !(a.classLevel === item.classLevel && a.subjectName === item.subjectName)));
+      setSelectedAssignments(prev => prev.filter(a => !(a.classLevel === item.classLevel && a.subjectName === item.subjectName && a.board === item.board)));
     } else {
       setSelectedAssignments(prev => [...prev, item]);
     }
   };
 
-  const toggleFullClass = (level, items) => {
-    const allSelected = items.every(item => selectedAssignments.some(a => a.classLevel === item.classLevel && a.subjectName === item.subjectName));
-    if (allSelected) {
-      // Remove all
-      setSelectedAssignments(prev => prev.filter(a => a.classLevel !== level));
-    } else {
-      // Add missing
-      const newItems = items.filter(item => !selectedAssignments.some(a => a.classLevel === item.classLevel && a.subjectName === item.subjectName));
-      setSelectedAssignments(prev => [...prev, ...newItems]);
-    }
-  };
-
-  // Group classes for the UI
-  const groupedClasses = classes.reduce((acc, curr) => {
+  // Nested grouping: { board: { classLevel: [assignments] } }
+  const groupedByBoard = classes.reduce((acc, curr) => {
     const level = curr.level;
-    if (!acc[level]) acc[level] = [];
-    
+    const board = curr.board || 'TS Board';
+    if (!acc[board]) acc[board] = {};
+    if (!acc[board][level]) acc[board][level] = [];
+
     if (curr.type === 'bundle') {
-      curr.subjects.forEach(sub => acc[level].push({
-        assignmentType: 'bundle',
-        classLevel: level,
-        subjectName: sub.name,
-        subjectId: sub._id
-      }));
+      if (curr.subjects && curr.subjects.length > 0) {
+        curr.subjects.forEach(sub => {
+          if (sub.name) {
+            acc[board][level].push({
+              assignmentType: 'bundle',
+              classLevel: level,
+              subjectName: sub.name,
+              subjectId: sub._id,
+              board
+            });
+          }
+        });
+      }
     } else {
-      acc[level].push({
-        assignmentType: 'subject',
-        classLevel: level,
-        subjectName: curr.displayName,
-        subjectId: curr._id
-      });
+      if (curr.displayName) {
+        acc[board][level].push({
+          assignmentType: 'subject',
+          classLevel: level,
+          subjectName: curr.displayName,
+          subjectId: curr._id,
+          board
+        });
+      }
     }
     return acc;
   }, {});
 
+  // Flatten helper for selection
+  const getAllItemsForBoard = (board) => Object.values(groupedByBoard[board] || {}).flat();
+  
   const filteredTeachers = teachers.filter(t => 
     t.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
     t.email.toLowerCase().includes(searchQuery.toLowerCase())
@@ -248,47 +253,59 @@ const TeacherManagement = () => {
                        </div>
                     </td>
                     <td className="px-5 py-4">
-                       <div className="space-y-3 min-w-[300px]">
+                       <div className="space-y-2 min-w-[300px]">
                           {teacher.assignedSubjects?.length > 0 ? (
-                            Object.entries(
-                               teacher.assignedSubjects.reduce((acc, sub) => {
-                                  if (!acc[sub.classLevel]) acc[sub.classLevel] = [];
-                                  acc[sub.classLevel].push(sub);
-                                  return acc;
-                               }, {})
-                            ).map(([level, subs], i) => (
-                              <div key={i} className="flex flex-col sm:flex-row sm:items-start gap-1.5 sm:gap-3">
-                                 <div className="text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded uppercase self-start whitespace-nowrap mt-0.5 border border-slate-200">
-                                    {level}
-                                 </div>
-                                 <div className="flex flex-wrap gap-1.5 text-sm text-slate-600">
-                                    {subs.map((sub, j) => (
-                                      <span 
-                                        key={j} 
-                                        className={`px-2.5 py-0.5 text-xs rounded border flex items-center gap-1.5 group/tag transition-colors hover:border-slate-300 ${
-                                          sub.assignmentType === 'bundle' 
-                                          ? 'bg-purple-50 text-purple-700 border-purple-200 font-medium' 
-                                          : 'bg-white text-slate-600 border-slate-200 shadow-sm font-medium'
-                                        }`}
-                                      >
-                                         {sub.subjectName}
-                                         <button 
-                                           onClick={() => handleRemoveAssignment(teacher._id, sub._id)}
-                                           className="text-slate-400 hover:text-red-500 transition-colors ml-0.5"
-                                           title="Remove subject"
-                                         >
-                                            <X className="w-3.5 h-3.5" />
-                                         </button>
-                                      </span>
-                                    ))}
-                                 </div>
-                              </div>
-                            ))
+                             Object.entries(
+                                teacher.assignedSubjects.reduce((acc, sub) => {
+                                   const lvl = sub.classLevel;
+                                   if (!acc[lvl]) acc[lvl] = [];
+                                   acc[lvl].push(sub);
+                                   return acc;
+                                }, {})
+                             ).map(([lvl, subs], i) => (
+                               <div key={i} className="space-y-1.5">
+                                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wide">{lvl}</div>
+                                  <div className="flex flex-wrap gap-1.5">
+                                     {subs.map((sub, j) => (
+                                       <span
+                                         key={j}
+                                         className={`pl-2 pr-1 py-0.5 text-xs rounded border flex items-center gap-1 ${
+                                           sub.assignmentType === 'bundle'
+                                           ? 'bg-purple-50 text-purple-700 border-purple-200 font-medium'
+                                           : 'bg-white text-slate-600 border-slate-200 shadow-sm font-medium'
+                                         }`}
+                                       >
+                                          {sub.subjectName}
+                                          {sub.board && (
+                                            <span className="ml-1 px-1 py-px text-[10px] bg-indigo-100 text-indigo-600 rounded font-semibold">{sub.board}</span>
+                                          )}
+                                          <button
+                                            onClick={() => handleRemoveAssignment(teacher._id, sub._id)}
+                                            className="text-slate-400 hover:text-red-500 transition-colors"
+                                            title="Remove subject"
+                                          >
+                                             <X className="w-3 h-3" />
+                                          </button>
+                                       </span>
+                                     ))}
+                                  </div>
+                               </div>
+                             ))
                           ) : (
                             <span className="text-sm text-slate-400 italic">No assignments configured</span>
                           )}
-                          <button 
-                            onClick={() => { setSelectedTeacher(teacher); setSelectedAssignments([]); setShowAssignModal(true); }}
+                          <button
+                            onClick={() => { 
+                               setSelectedTeacher(teacher); 
+                               setSelectedAssignments([]); 
+                               setShowAssignModal(true); 
+                               const boardKeys = Object.keys(groupedByBoard);
+                               if (boardKeys.length > 0) {
+                                 setActiveBoard(boardKeys[0]);
+                                 const clsKeys = Object.keys(groupedByBoard[boardKeys[0]]);
+                                 if (clsKeys.length > 0) setActiveClasses([clsKeys[0]]);
+                               }
+                            }}
                             className="mt-1 px-3 py-1.5 text-xs font-medium bg-white text-indigo-600 border border-slate-200 rounded-md hover:bg-slate-50 hover:border-indigo-200 transition-colors flex items-center gap-1.5 w-fit shadow-sm"
                           >
                              <Plus className="w-3.5 h-3.5" /> Assign Subjects
@@ -400,89 +417,302 @@ const TeacherManagement = () => {
         </div>
       )}
 
-      {/* FLEXIBLE ASSIGNMENT MODAL (NEW) */}
+      {/* FLEXIBLE ASSIGNMENT MODAL (FIXED FOR ALL CLASSES) */}
       {showAssignModal && selectedTeacher && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
-           <div className="bg-white rounded-xl w-full max-w-lg overflow-hidden shadow-xl animate-in zoom-in-95 duration-200 flex flex-col max-h-[85vh]">
-               <div className="p-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-slate-50/50">
-                 <div>
-                    <h2 className="text-base font-bold text-slate-800">Manage Assignments</h2>
-                    <p className="text-xs font-medium text-slate-500 mt-0.5 flex items-center gap-1">
-                       <Shield className="w-3.5 h-3.5 text-indigo-500" /> {selectedTeacher.name}
-                    </p>
-                 </div>
-                 <button onClick={() => setShowAssignModal(false)} className="text-slate-400 hover:text-slate-800"><X className="w-5 h-5" /></button>
-              </div>
-
-              {/* Selection Header */}
-              <div className="p-3 bg-white border-b border-slate-100 shrink-0">
-                 <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input 
-                      type="text" 
-                      placeholder="Search grade or subject..." 
-                      value={assignmentSearch}
-                      onChange={(e) => setAssignmentSearch(e.target.value)}
-                      className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 focus:border-indigo-500 rounded-md outline-none font-medium text-sm text-slate-800 transition-colors shadow-sm"
-                    />
-                 </div>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar text-sm">
-                 {Object.entries(groupedClasses)
-                   .filter(([level, items]) => 
-                      level.toLowerCase().includes(assignmentSearch.toLowerCase()) || 
-                      items.some(i => i.subjectName.toLowerCase().includes(assignmentSearch.toLowerCase()))
-                   )
-                   .map(([level, items]) => {
-                    const allSelected = items.every(item => selectedAssignments.some(a => a.classLevel === item.classLevel && a.subjectName === item.subjectName));
-                    return (
-                      <div key={level} className="space-y-3">
-                         <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
-                            <h3 className="text-sm font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">{level}</h3>
-                            <button 
-                              type="button"
-                              onClick={() => toggleFullClass(level, items)}
-                              className={`text-xs font-medium px-2.5 py-1 rounded transition-colors border ${allSelected ? 'bg-indigo-50 text-indigo-600 border-indigo-200 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 shadow-sm'}`}
-                            >
-                               {allSelected ? 'Deselect All' : 'Select All'}
-                            </button>
-                         </div>
-                         <div className="grid grid-cols-2 gap-2">
-                            {items.map((item, idx) => {
-                               const isSelected = selectedAssignments.some(a => a.classLevel === item.classLevel && a.subjectName === item.subjectName);
-                               return (
-                                 <button
-                                   key={idx}
-                                   type="button"
-                                   onClick={() => toggleAssignment(item)}
-                                   className={`flex items-center justify-between p-2.5 rounded-md border transition-colors shadow-sm ${isSelected ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'}`}
-                                 >
-                                    <span className="text-xs font-medium truncate pr-2">{item.subjectName}</span>
-                                    <div className={`shrink-0 w-4 h-4 rounded-sm border flex items-center justify-center transition-colors ${isSelected ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'}`}>
-                                       {isSelected && <CheckCircle className="w-3.5 h-3.5" />}
-                                    </div>
-                                 </button>
-                               );
-                            })}
-                         </div>
-                      </div>
-                    );
-                 })}
-              </div>
-
-              <div className="p-4 bg-slate-50/50 border-t border-slate-100 shrink-0">
-                 <div className="flex items-center justify-between">
-                    <div>
-                       <p className="text-xs text-slate-500 font-medium">Selected</p>
-                       <p className="text-sm font-bold text-slate-800">{selectedAssignments.length} Subjects</p>
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-md z-[110] flex items-center justify-center p-4">
+           <div className="bg-white rounded-2xl w-full max-w-5xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-300 flex flex-col h-[85vh]">
+               {/* Modal Header */}
+               <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
+                 <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-indigo-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
+                       <Shield className="w-6 h-6" />
                     </div>
+                    <div>
+                       <h2 className="text-xl font-bold text-slate-800">Assign Subjects</h2>
+                       <p className="text-sm font-medium text-slate-500">Configuring curriculum for <span className="text-indigo-600 font-semibold">{selectedTeacher.name}</span></p>
+                    </div>
+                 </div>
+                 <button 
+                   onClick={() => setShowAssignModal(false)} 
+                   className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all"
+                 >
+                    <X className="w-6 h-6" />
+                 </button>
+              </div>
+
+              {/* Three Column Layout Container */}
+              <div className="flex-1 flex overflow-hidden bg-slate-50/50 text-sm">
+                 
+                 {/* Column 1: Boards */}
+                 <div className="w-1/4 border-r border-slate-200 flex flex-col bg-white">
+                    <div className="p-4 border-b border-slate-100 bg-slate-50/30">
+                       <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Step 1: Board</h3>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                       {Object.keys(groupedByBoard).length === 0 ? (
+                          <div className="p-4 text-center text-slate-400 mt-10">
+                             <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                             <p className="text-[10px] font-bold uppercase tracking-wider">No Boards Found</p>
+                          </div>
+                       ) : Object.keys(groupedByBoard).map(board => {
+                          const items = getAllItemsForBoard(board);
+                          const selectedInBoard = items.filter(i => selectedAssignments.some(a => a.classLevel === i.classLevel && a.subjectName === i.subjectName && a.board === i.board)).length;
+                          const isActive = activeBoard === board;
+
+                          return (
+                             <button
+                                key={board}
+                                onClick={() => {
+                                   setActiveBoard(board);
+                                   const availableGrades = Object.keys(groupedByBoard[board] || {});
+                                   if (availableGrades.length > 0) setActiveClasses([availableGrades[0]]);
+                                }}
+                                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 ${
+                                   isActive 
+                                   ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100' 
+                                   : 'text-slate-600 hover:bg-slate-50'
+                                }`}
+                             >
+                                <div className="flex items-center gap-3 text-left">
+                                   <BookOpen className={`w-4 h-4 shrink-0 ${isActive ? 'text-indigo-100' : 'text-slate-400'}`} />
+                                   <span className="font-bold leading-tight">{board}</span>
+                                </div>
+                                {selectedInBoard > 0 && (
+                                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${isActive ? 'bg-white text-indigo-600' : 'bg-indigo-100 text-indigo-600'}`}>
+                                      {selectedInBoard}
+                                   </span>
+                                )}
+                             </button>
+                          );
+                       })}
+                    </div>
+                 </div>
+
+                 {/* Column 2: Classes */}
+                 <div className="w-1/4 border-r border-slate-200 flex flex-col bg-white/50">
+                    <div className="p-4 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
+                       <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Step 2: Grade</h3>
+                       {activeBoard && (
+                          <button
+                             onClick={() => {
+                                const allBoardItems = getAllItemsForBoard(activeBoard);
+                                const allSelected = allBoardItems.every(i => selectedAssignments.some(a => a.classLevel === i.classLevel && a.subjectName === i.subjectName && a.board === i.board));
+                                if (allSelected) {
+                                   setSelectedAssignments(prev => prev.filter(a => a.board !== activeBoard));
+                                } else {
+                                   const newItems = allBoardItems.filter(item => !selectedAssignments.some(a => a.classLevel === item.classLevel && a.subjectName === item.subjectName && a.board === item.board));
+                                   setSelectedAssignments(prev => [...prev, ...newItems]);
+                                }
+                             }}
+                             className="text-[10px] font-bold text-indigo-600 hover:underline"
+                          >
+                             Set All
+                          </button>
+                       )}
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                       {activeBoard && Object.keys(groupedByBoard[activeBoard] || {}).length > 0 ? (
+                          Object.keys(groupedByBoard[activeBoard]).sort((a,b) => {
+                             const numA = parseInt(a.replace(/\D/g,'')) || 0;
+                             const numB = parseInt(b.replace(/\D/g,'')) || 0;
+                             return numA - numB;
+                          }).map(level => {
+                             const items = groupedByBoard[activeBoard][level];
+                             const selectedInClass = items.filter(i => selectedAssignments.some(a => a.classLevel === i.classLevel && a.subjectName === i.subjectName && a.board === i.board)).length;
+                             const isActive = activeClasses.includes(level);
+                             const isEmpty = items.length === 0;
+
+                             return (
+                                <button
+                                   key={level}
+                                   onClick={() => {
+                                      setActiveClasses(prev => 
+                                         prev.includes(level) 
+                                         ? (prev.length > 1 ? prev.filter(l => l !== level) : prev) 
+                                         : [...prev, level]
+                                      );
+                                   }}
+                                   className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 ${
+                                      isActive 
+                                      ? 'bg-slate-800 text-white shadow-md' 
+                                      : 'text-slate-600 hover:bg-white'
+                                   }`}
+                                >
+                                   <div className="flex items-center gap-3 text-left">
+                                      <div className={`w-4 h-4 shrink-0 rounded border flex items-center justify-center transition-colors ${isActive ? 'bg-indigo-500 border-indigo-500' : 'border-slate-300 bg-white'}`}>
+                                         {isActive && <CheckCircle className="w-3 h-3 text-white" />}
+                                      </div>
+                                      <span className={`font-bold leading-tight ${isEmpty ? 'opacity-50' : ''}`}>{level}</span>
+                                   </div>
+                                   {selectedInClass > 0 && (
+                                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${isActive ? 'bg-indigo-500 text-white' : 'bg-indigo-100 text-indigo-600'}`}>
+                                         {selectedInClass}
+                                      </span>
+                                   )}
+                                </button>
+                             );
+                          })
+                       ) : (
+                          <div className="p-4 text-center text-slate-400 mt-10">
+                             <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                             <p className="text-[10px] font-bold uppercase tracking-wider">Select a Board</p>
+                          </div>
+                       )}
+                    </div>
+                 </div>
+
+                 {/* Column 3: Subjects */}
+                 <div className="flex-1 flex flex-col bg-white">
+                    <div className="p-4 border-b border-slate-100 bg-slate-50/30">
+                       <div className="flex items-center gap-3 px-2">
+                          <Search className="w-4 h-4 text-slate-400" />
+                          <input 
+                             type="text" 
+                             placeholder="Search in selected grades..."
+                             value={assignmentSearch}
+                             onChange={(e) => setAssignmentSearch(e.target.value)}
+                             className="bg-transparent border-none outline-none text-sm font-medium w-full text-slate-700"
+                          />
+                       </div>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+                       {!activeBoard || activeClasses.length === 0 ? (
+                          <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-3 opacity-60">
+                             <BookOpen className="w-12 h-12" />
+                             <p className="font-medium text-center">Check grades in the middle column <br/> to view and assign subjects</p>
+                          </div>
+                       ) : (
+                          <div className="space-y-10">
+                             {activeClasses.map(level => {
+                                const items = groupedByBoard[activeBoard][level] || [];
+                                const filteredItems = items.filter(sub => sub.subjectName.toLowerCase().includes(assignmentSearch.toLowerCase()));
+                                
+                                if (filteredItems.length === 0) {
+                                   if (assignmentSearch) return null; // Hide the section if it doesn't match search
+                                   return (
+                                      <div key={level} className="space-y-4 py-8 border-b border-dashed border-slate-200 last:border-0 text-center">
+                                          <h4 className="text-xs font-black text-slate-800 uppercase tracking-tighter flex items-center gap-2 justify-center">
+                                             <GraduationCap className="w-4 h-4 text-indigo-600" />
+                                             {level}
+                                          </h4>
+                                          <div className="flex flex-col items-center gap-2 opacity-40">
+                                            <AlertCircle className="w-6 h-6 text-slate-400" />
+                                            <p className="text-xs text-slate-500 font-medium tracking-tight">No subjects added to this grade yet.<br/>Please add them in Subject Management.</p>
+                                          </div>
+                                      </div>
+                                   );
+                                }
+
+                                return (
+                                   <div key={level} className="space-y-4">
+                                      <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                                         <h4 className="text-xs font-black text-slate-800 uppercase tracking-tighter flex items-center gap-2">
+                                            <GraduationCap className="w-4 h-4 text-indigo-600" />
+                                            {level}
+                                         </h4>
+                                         <button
+                                            type="button"
+                                            onClick={() => {
+                                               const allSelected = items.every(i => selectedAssignments.some(a => a.classLevel === i.classLevel && a.subjectName === i.subjectName && a.board === i.board));
+                                               if (allSelected) {
+                                                  setSelectedAssignments(prev => prev.filter(a => !(a.classLevel === level && a.board === activeBoard)));
+                                               } else {
+                                                  const newItems = items.filter(item => !selectedAssignments.some(a => a.classLevel === item.classLevel && a.subjectName === item.subjectName && a.board === item.board));
+                                                  setSelectedAssignments(prev => [...prev, ...newItems]);
+                                               }
+                                            }}
+                                            className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full hover:bg-indigo-100 transition-colors"
+                                         >
+                                            Check All {level}
+                                         </button>
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-3">
+                                         {filteredItems.map((item, idx) => {
+                                            const isSelected = selectedAssignments.some(a => a.classLevel === item.classLevel && a.subjectName === item.subjectName && a.board === item.board);
+                                            return (
+                                               <button
+                                                  key={idx}
+                                                  type="button"
+                                                  onClick={() => toggleAssignment(item)}
+                                                  className={`group flex items-center justify-between p-4 rounded-2xl border-2 transition-all duration-200 ${
+                                                     isSelected 
+                                                     ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700 shadow-sm' 
+                                                     : 'border-slate-100 hover:border-slate-200 text-slate-600'
+                                                  }`}
+                                               >
+                                                  <div className="flex items-center gap-3 min-w-0">
+                                                     <div className={`w-8 h-8 shrink-0 rounded-lg flex items-center justify-center transition-colors ${isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'}`}>
+                                                        <BookOpen className="w-4 h-4" />
+                                                     </div>
+                                                     <span className="text-xs font-bold truncate leading-none mt-0.5">{item.subjectName}</span>
+                                                  </div>
+                                                  <div className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                                                     isSelected 
+                                                     ? 'bg-indigo-600 border-indigo-600 text-white rotate-0 scale-100' 
+                                                     : 'border-slate-200 rotate-90 scale-90'
+                                                  }`}>
+                                                     {isSelected && <CheckCircle className="w-4 h-4" />}
+                                                  </div>
+                                               </button>
+                                            );
+                                         })}
+                                      </div>
+                                   </div>
+                                );
+                             })}
+
+                             {/* Global No items for search */}
+                             {assignmentSearch && activeClasses.every(level => {
+                                const items = groupedByBoard[activeBoard][level] || [];
+                                return items.filter(sub => sub.subjectName.toLowerCase().includes(assignmentSearch.toLowerCase())).length === 0;
+                             }) && (
+                                <div className="py-12 text-center text-slate-400 space-y-3">
+                                   <Search className="w-12 h-12 mx-auto opacity-10" />
+                                   <p className="font-medium">No subjects matching "{assignmentSearch}"</p>
+                                </div>
+                             )}
+                          </div>
+                       )}
+                    </div>
+                 </div>
+              </div>
+
+              {/* Selection Footer */}
+              <div className="p-6 bg-white border-t border-slate-100 shrink-0 flex items-center justify-between">
+                 <div className="flex items-center gap-6">
+                    <div className="flex flex-col">
+                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Selection</span>
+                       <span className="text-xl font-black text-slate-800">{selectedAssignments.length} <span className="text-slate-400 font-medium">Subjects</span></span>
+                    </div>
+                    <div className="h-10 w-px bg-slate-100" />
+                    <div className="flex -space-x-2 overflow-hidden">
+                       {selectedAssignments.slice(0, 5).map((a, i) => (
+                          <div key={i} className="w-8 h-8 rounded-full bg-indigo-50 border-2 border-white flex items-center justify-center text-[10px] font-bold text-indigo-600 shrink-0" title={`${a.subjectName} (${a.board})`}>
+                             {a.subjectName.charAt(0)}
+                          </div>
+                       ))}
+                       {selectedAssignments.length > 5 && (
+                          <div className="w-8 h-8 rounded-full bg-slate-800 border-2 border-white flex items-center justify-center text-[10px] font-bold text-white shrink-0">
+                             +{selectedAssignments.length - 5}
+                          </div>
+                       )}
+                    </div>
+                 </div>
+                 
+                 <div className="flex items-center gap-3">
                     <button 
-                      onClick={handleAssignSubmit}
-                      disabled={selectedAssignments.length === 0}
-                      className="px-4 py-1.5 bg-indigo-600 text-white rounded-md font-medium text-xs shadow-sm hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:shadow-none"
+                       onClick={() => setShowAssignModal(false)}
+                       className="px-6 py-3 font-bold text-slate-500 hover:text-slate-700 transition-colors"
                     >
-                       Save Assignments
+                       Cancel
+                    </button>
+                    <button 
+                       onClick={handleAssignSubmit}
+                       disabled={selectedAssignments.length === 0}
+                       className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-xl shadow-indigo-100 hover:bg-indigo-700 transform active:scale-95 transition-all disabled:opacity-50 disabled:shadow-none"
+                    >
+                       Confirm Assignments
                     </button>
                  </div>
               </div>

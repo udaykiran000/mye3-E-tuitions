@@ -94,7 +94,7 @@ exports.getSubjects = async (req, res, next) => {
 // @access  Admin
 exports.addSubject = async (req, res, next) => {
   try {
-    const { name, classLevel, pricing, syllabus } = req.body;
+    const { name, classLevel, pricing, board } = req.body;
     const subject = await Subject.create({
       name,
       classLevel: Number(classLevel),
@@ -160,11 +160,12 @@ exports.getTeachersForSubject = async (req, res, next) => {
 
     // Build match filter for subject-specific teachers
     const matchFilter = { role: 'teacher' };
-    if (classLevel || subjectName) {
+    if (classLevel || subjectName || req.query.board) {
       matchFilter.assignedSubjects = {
         $elemMatch: {
           ...(classLevel ? { classLevel } : {}),
-          ...(subjectName ? { subjectName } : {})
+          ...(subjectName ? { subjectName } : {}),
+          ...(req.query.board ? { board: req.query.board } : {})
         }
       };
     }
@@ -202,9 +203,12 @@ exports.assignSubjectToTeacher = async (req, res, next) => {
     const assignmentsToAdd = Array.isArray(assignments) ? assignments : [req.body];
 
     assignmentsToAdd.forEach(a => {
-      // Avoid exact duplicates
+      // Avoid exact duplicates (now including board)
       const exists = teacher.assignedSubjects.some(
-        existing => existing.classLevel === a.classLevel && existing.subjectName === a.subjectName
+        existing => 
+          existing.classLevel === a.classLevel && 
+          existing.subjectName === a.subjectName &&
+          existing.board === a.board
       );
 
       if (!exists) {
@@ -212,7 +216,8 @@ exports.assignSubjectToTeacher = async (req, res, next) => {
           assignmentType: a.assignmentType,
           classLevel: a.classLevel,
           subjectName: a.subjectName,
-          subjectId: a.subjectId || null
+          subjectId: a.subjectId || null,
+          board: a.board || null
         });
       }
     });
@@ -579,11 +584,13 @@ exports.toggleMaterialVisibility = async (req, res, next) => {
 // @access  Admin
 exports.updateClassPricing = async (req, res, next) => {
   try {
-    const { pricing, subjects, syllabus } = req.body;
+    const { pricing, subjects, board, syllabus } = req.body;
     const updateData = {};
     if (pricing !== undefined) updateData.pricing = pricing;
     if (board !== undefined) updateData.board = board;
     if (subjects !== undefined) updateData.subjects = subjects;
+    
+    updateData.updatedAt = Date.now();
 
     const bundle = await ClassBundle.findByIdAndUpdate(
       req.params.id,

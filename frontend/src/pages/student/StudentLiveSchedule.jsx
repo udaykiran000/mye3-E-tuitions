@@ -231,39 +231,7 @@ const StudentLiveSchedule = () => {
         </div>
       </div>
 
-      {/* SYLLABUS HUB AD */}
-      <div className="max-w-[1600px] mx-auto">
-         <div className="bg-slate-900 rounded-[50px] p-10 md:p-20 text-white flex flex-col lg:flex-row items-center justify-between gap-12 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-full h-full bg-indigo-600/5 pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-3xl -ml-64 -mb-64" />
-            
-            <div className="space-y-8 flex-1 relative z-10 text-center lg:text-left">
-               <h4 className="text-3xl md:text-4xl font-black uppercase tracking-widest leading-none">
-                  Academic <span className="text-indigo-400">Vault</span> Access
-               </h4>
-               <p className="text-slate-400 font-bold text-sm md:text-xl max-w-xl">
-                  Missed something in the live session? Every broadcast is recorded and categorized within your curriculum library for 24/7 access.
-               </p>
-               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-4">
-                  <div className="flex items-center gap-4 px-6 py-4 bg-white/5 rounded-2xl border border-white/10 group hover:border-white/20 transition-all">
-                     <BookOpen className="w-6 h-6 text-indigo-400" />
-                     <p className="text-[11px] font-black uppercase tracking-widest">Board Mapping</p>
-                  </div>
-                  <div className="flex items-center gap-4 px-6 py-4 bg-white/5 rounded-2xl border border-white/10 group hover:border-white/20 transition-all">
-                     <FileText className="w-6 h-6 text-amber-400" />
-                     <p className="text-[11px] font-black uppercase tracking-widest">Expert PDF Notes</p>
-                  </div>
-               </div>
-            </div>
 
-            <Link 
-              to="/student/classes"
-              className="px-14 py-8 bg-indigo-600 text-white rounded-[32px] font-black text-sm uppercase tracking-[0.3em] shadow-2xl hover:bg-white hover:text-indigo-900 active:scale-95 transition-all text-center relative z-10 whitespace-nowrap"
-            >
-               Go to My Classes
-            </Link>
-         </div>
-      </div>
     </div>
   );
 };

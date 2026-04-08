@@ -18,7 +18,17 @@ import { MdEmail } from 'react-icons/md';
 // Dropdown data
 const NAV_ITEMS = [
   { label: 'Home', to: '/' },
-  { label: 'Tuitions', to: '/courses' },
+  { 
+    label: 'Tuitions', 
+    to: '#', 
+    dropdown: [
+      { label: 'AP BOARD', to: '/courses/board/ap-board' },
+      { label: 'TS BOARD', to: '/courses/board/ts-board' },
+      { label: 'CBSE BOARD', to: '/courses/board/cbse-board' },
+      { label: 'ICSE BOARD', to: '/courses/board/icse-board' },
+      { label: 'All', to: '/courses' },
+    ]
+  },
   { label: 'Teachers', to: '/teachers' },
   { label: 'About Us', to: '/about' },
   { label: 'FAQs', to: '/faqs' },

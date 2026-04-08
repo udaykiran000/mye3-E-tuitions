@@ -11,7 +11,6 @@ import StudentDashboard from './pages/student/StudentDashboard';
 import StudentStore from './pages/student/StudentStore';
 import AdminDashboard from './pages/AdminDashboard';
 import About from './pages/About';
-import Blog from './pages/Blog';
 import FAQs from './pages/FAQs';
 import ContactUs from './pages/ContactUs';
 import Teachers from './pages/Teachers';
@@ -85,6 +84,7 @@ function AppContent() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/courses" element={<Store />} />
+              <Route path="/courses/board/:boardName" element={<Store />} />
               
               {/* Student Routes */}
               <Route path="/student/*" element={
@@ -145,7 +145,6 @@ function AppContent() {
               } />
 
               <Route path="/about" element={<About />} />
-              <Route path="/blog" element={<Blog />} />
               <Route path="/faqs" element={<FAQs />} />
               <Route path="/contact-us" element={<ContactUs />} />
               <Route path="/teachers" element={<Teachers />} />

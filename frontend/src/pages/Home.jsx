@@ -216,12 +216,12 @@ const Home = () => {
               <span
                 className="inline-flex items-center gap-2 px-6 py-2 rounded-full font-bold text-[14px] text-white bg-[#fab500]"
               >
-                Popular Tuitions
+                Offered Tuitions
               </span>
             </div>
 
             {/* Course cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {POPULAR_COURSES.map((course, i) => (
                 <Link
                   key={i}
@@ -305,7 +305,7 @@ const Home = () => {
         <div className="relative max-w-[1100px] mx-auto px-4 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center" style={{ zIndex: 2 }}>
 
           {/* ── Left: Image Column ── */}
-          <div className="relative ml-0 md:ml-10">
+          <div className="relative ml-0 md:ml-10 hidden lg:block">
 
             {/* Teal dots — perfectly masked, behind image (Desktop) */}
             <div className="absolute pointer-events-none -z-10 hidden md:block" style={{
@@ -450,16 +450,19 @@ const Home = () => {
         <div className="max-w-[1100px] mx-auto px-4 md:px-12 lg:px-16 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 lg:gap-10">
             {[
-              { value: '15496+', label: 'HAPPY PARENTS/STUDENTS', color: '#f5a623' },
-              { value: '1.3M',   label: 'CLASS COMPLETED',        color: '#f97316' },
+              { value: '5496+', label: 'HAPPY PARENTS/STUDENTS', color: '#f97316' },
+              { value: '500+',  label: 'CLASSES COMPLETED',       color: '#002147' },
               { value: '100%',   label: 'SATISFACTION RATE',      color: '#10b981' },
-              { value: '9875',   label: 'CERTIFIED TUTORS',       color: '#3b82f6' },
+              { value: '200+',   label: 'CERTIFIED TUTORS',       color: '#3b82f6' },
             ].map((stat, i) => (
-              <div key={i} className="flex flex-col items-center justify-center py-6 md:py-7 gap-1.5 border border-slate-100/50 text-center bg-white rounded-3xl shadow-[0_12px_40px_rgba(0,0,0,0.06)] px-2">
-                <span className="text-4xl md:text-[34px] font-black leading-none" style={{ color: stat.color }}>
+              <div key={i} 
+                className="flex flex-col items-center justify-center py-2 md:py-7 gap-0.5 border-2 text-center bg-white rounded-xl md:rounded-3xl shadow-[0_12px_40px_rgba(0,0,0,0.06)] px-0.5 transition-transform hover:scale-105"
+                style={{ borderColor: i % 2 === 0 ? '#f97316' : '#002147' }}
+              >
+                <span className="text-lg md:text-[34px] font-black leading-none" style={{ color: stat.color }}>
                   {stat.value}
                 </span>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                <span className="text-[7px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5 scale-[0.85] md:scale-100">
                   {stat.label}
                 </span>
               </div>
@@ -559,24 +562,27 @@ const Home = () => {
 
           <div className="relative">
             <div className="w-full aspect-square md:aspect-auto md:h-full bg-gradient-to-br from-slate-50 to-blue-50 rounded-[32px] md:rounded-[48px] overflow-hidden shadow-xl flex items-center justify-center p-4">
-              <div className="grid grid-cols-2 gap-3 md:gap-4 md:p-8 w-full">
+              <div className="grid grid-cols-2 gap-2 md:gap-4 md:p-8 w-full">
                 {[
-                  { num: '10,400+', label: 'Sessions Conducted' },
-                  { num: '1.3M+', label: 'Learning Minutes' },
-                  { num: '100%', label: 'Student Satisfaction' },
-                  { num: '8,875+', label: 'Students Enrolled' },
+                  { num: '5496+', label: 'Parents/Students' },
+                  { num: '500+', label: 'Classes Completed' },
+                  { num: '100%', label: 'Satisfaction Rate' },
+                  { num: '200+', label: 'Certified Tutors' },
                 ].map((stat, i) => (
-                  <div key={i} className="bg-white rounded-xl md:rounded-2xl px-3 py-3 md:px-6 md:py-4 shadow-md border border-slate-100 flex flex-col items-center justify-center text-center">
-                    <p className="text-xl md:text-3xl font-black text-slate-900 leading-tight">{stat.num}</p>
-                    <p className="text-[8px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">{stat.label}</p>
+                  <div key={i} 
+                    className="bg-white md:bg-white rounded-lg md:rounded-2xl px-1 py-1.5 md:px-6 md:py-4 shadow-md border-2 flex flex-col items-center justify-center text-center group transition-all hover:scale-105 active:scale-95"
+                    style={{ borderColor: (i === 0 || i === 3) ? '#f97316' : '#002147' }}
+                  >
+                    <p className="text-base md:text-3xl font-black text-[#002147] md:text-slate-900 leading-tight group-hover:text-orange-500 transition-colors">{stat.num}</p>
+                    <p className="text-[6.5px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 md:mt-1">{stat.label}</p>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="absolute -bottom-8 -right-8 text-white p-8 rounded-[32px] shadow-2xl space-y-1"
+            <div className="absolute -bottom-4 -right-4 md:-bottom-8 md:-right-8 text-white p-4 md:p-8 rounded-2xl md:rounded-[32px] shadow-2xl space-y-0.5 md:space-y-1"
               style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }}>
-              <p className="text-3xl font-black leading-none">Global</p>
-              <p className="text-xs font-bold uppercase tracking-widest opacity-80">Reach & Impact</p>
+              <p className="text-xl md:text-3xl font-black leading-none">Global</p>
+              <p className="text-[8px] md:text-xs font-bold uppercase tracking-widest opacity-80">Reach & Impact</p>
             </div>
           </div>
         </div>
@@ -595,53 +601,53 @@ const Home = () => {
           <div className="flex flex-col lg:flex-row items-stretch gap-4 lg:gap-16 mb-6 lg:mb-16">
             
             {/* Left: Registration Form (Reflecting Image 3) */}
-            <div className="lg:w-[50%] flex flex-col justify-center">
-              <div className="bg-[#091a33] rounded-[20px] p-4 md:p-10 border border-white/5 shadow-2xl relative overflow-hidden">
+            <div className="lg:w-[50%] flex flex-col justify-center px-1 md:px-0">
+              <div className="bg-[#091a33] rounded-[20px] p-3 md:p-10 border border-white/5 shadow-2xl relative overflow-hidden">
                 {/* Theme Highlights */}
                 <div className="absolute top-0 left-0 w-2 h-full bg-orange-500"></div>
                 
-                <div className="space-y-1 mb-4 md:mb-8">
-                  <span className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.3em]">Join Our Faculty</span>
-                  <h2 className="text-lg md:text-[32px] font-black text-white leading-tight">
+                <div className="space-y-0.5 md:space-y-1 mb-3 md:mb-8">
+                  <span className="text-[9px] md:text-[10px] font-bold text-orange-500 uppercase tracking-[0.3em]">Join Our Faculty</span>
+                  <h2 className="text-base md:text-[32px] font-black text-white leading-tight">
                     Become an Online <span className="text-orange-500">Tutor</span>
                   </h2>
                 </div>
 
                 <form className="space-y-3 md:space-y-4" onSubmit={(e) => e.preventDefault()}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Name</label>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Name</label>
                       <input 
                         type="text" 
                         placeholder="Enter Full Name"
-                        className="w-full px-3 py-2 md:py-2.5 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-orange-500 focus:bg-white/10 transition-all text-white placeholder-slate-500 text-sm" 
+                        className="w-full px-3 py-1.5 md:py-2.5 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-orange-500 focus:bg-white/10 transition-all text-white placeholder-slate-500 text-[12px] md:text-sm" 
                       />
                     </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Email</label>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Email</label>
                       <input 
                         type="email" 
                         placeholder="teacher@example.com"
-                        className="w-full px-3 py-2 md:py-2.5 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-orange-500 focus:bg-white/10 transition-all text-white placeholder-slate-500 text-sm" 
+                        className="w-full px-3 py-1.5 md:py-2.5 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-orange-500 focus:bg-white/10 transition-all text-white placeholder-slate-500 text-[12px] md:text-sm" 
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Mobile No</label>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Mobile No</label>
                       <input 
                         type="tel" 
                         placeholder="+91 XXXXX XXXXX"
-                        className="w-full px-3 py-2 md:py-2.5 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-orange-500 focus:bg-white/10 transition-all text-white placeholder-slate-500 text-sm" 
+                        className="w-full px-3 py-1.5 md:py-2.5 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-orange-500 focus:bg-white/10 transition-all text-white placeholder-slate-500 text-[12px] md:text-sm" 
                       />
                     </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Subject Expertise</label>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Subject Expertise</label>
                       <input 
                         type="text" 
                         placeholder="Maths, Physics etc."
-                        className="w-full px-3 py-2 md:py-2.5 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-orange-500 focus:bg-white/10 transition-all text-white placeholder-slate-500 text-sm" 
+                        className="w-full px-3 py-1.5 md:py-2.5 bg-white/5 border border-white/10 rounded-lg outline-none focus:border-orange-500 focus:bg-white/10 transition-all text-white placeholder-slate-500 text-[12px] md:text-sm" 
                       />
                     </div>
                   </div>

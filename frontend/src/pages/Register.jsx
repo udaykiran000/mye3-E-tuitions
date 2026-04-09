@@ -249,6 +249,49 @@ const Register = () => {
           margin-bottom: 18px;
           color: white;
         }
+
+        /* ── Mobile View ── */
+        @media (max-width: 768px) {
+          html, body, #root {
+            overflow: auto !important;
+            height: auto;
+          }
+          .reg-container {
+            flex-direction: column;
+            height: auto;
+            min-height: 100vh;
+            overflow: visible;
+          }
+          .reg-left-side {
+            display: none;
+          }
+          .reg-right-side {
+            width: 100%;
+            height: auto;
+            min-height: 100vh;
+            padding-right: 0;
+            justify-content: center;
+          }
+          .reg-right-side-card {
+            height: auto;
+            min-height: 100vh;
+            border-radius: 0;
+            padding: 40px 20px;
+            box-shadow: none;
+          }
+          .reg-form-inner {
+            max-width: 100%;
+          }
+          .reg-logo {
+            height: 100px;
+            margin-bottom: 30px;
+          }
+          .reg-submit-btn {
+            padding: 14px;
+            font-size: 14px;
+            margin-top: 10px;
+          }
+        }
       `}</style>
       <div className="reg-container">
         <div className="reg-left-side">

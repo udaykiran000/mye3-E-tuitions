@@ -3,13 +3,14 @@ import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { setCredentials } from '../store/slices/authSlice';
-import { FcGoogle } from 'react-icons/fc';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import logoImg from '../assets/output-onlinepngtools.png';
 import loginImg from '../assets/ChatGPT Image Mar 30, 2026, 01_51_09 AM.png';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
 
   const dispatch = useDispatch();
@@ -51,12 +52,8 @@ const Login = () => {
               </Link>
             </header>
 
-            {/* Social Login Buttons & Create Account */}
+            {/* Create Account Button Only */}
             <div className="grid grid-cols-1 gap-2">
-              <button className="flex items-center justify-center gap-2 w-full py-2.5 px-6 border border-slate-200 rounded-full font-bold text-slate-600 hover:bg-slate-50 transition-all text-sm">
-                <FcGoogle className="text-xl" />
-                Sign in with Google
-              </button>
               <Link 
                 to="/register" 
                 className="flex items-center justify-center w-full py-2.5 px-6 bg-slate-100 rounded-full font-bold text-slate-600 hover:bg-slate-200 transition-all text-sm"
@@ -95,14 +92,23 @@ const Login = () => {
                 <div className="flex justify-between items-center ml-1">
                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Password</label>
                 </div>
-                <input 
-                  type="password" 
-                  className="w-full px-5 py-3 rounded-xl border border-slate-100 focus:border-indigo-600 focus:bg-white bg-slate-50 outline-none transition-all font-bold text-slate-700 placeholder:text-slate-300 text-sm"
-                  placeholder="Enter your Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
+                <div className="relative">
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    className="w-full px-5 py-3 rounded-xl border border-slate-100 focus:border-indigo-600 focus:bg-white bg-slate-50 outline-none transition-all font-bold text-slate-700 placeholder:text-slate-300 text-sm"
+                    placeholder="Enter your Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors"
+                  >
+                    {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                  </button>
+                </div>
                 <div className="flex justify-end pr-1">
                   <Link to="#" className="text-[10px] font-black text-indigo-600 hover:underline uppercase tracking-widest">Forget Password?</Link>
                 </div>

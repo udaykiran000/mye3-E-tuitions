@@ -147,10 +147,12 @@ const StudentLayout = ({ children }) => {
                  </div>
                  <Link 
                    to="/student/profile" 
-                   className="flex items-center gap-2 px-5 py-3 bg-[#002147] text-white rounded-2xl font-black uppercase tracking-widest hover:bg-[#f16126] transition-all text-[10px] shadow-xl shadow-black/5 border-b-4 border-black/20 active:scale-95"
+                   className="flex items-center gap-3 text-[#002147] hover:text-[#f16126] transition-all group active:scale-95"
                  >
-                    <HiOutlineUserCircle className="text-lg" />
-                    <span className="hidden sm:inline">Profile</span>
+                    <HiOutlineUserCircle className="text-3xl md:text-4xl transition-transform group-hover:scale-110" />
+                    <div className="flex flex-col">
+                      <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest leading-none">Profile</span>
+                    </div>
                  </Link>
               </div>
 

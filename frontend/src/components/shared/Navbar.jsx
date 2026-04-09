@@ -18,6 +18,7 @@ import {
 } from 'react-icons/hi';
 import { FaWhatsapp, FaHandshake } from 'react-icons/fa';
 import { MdEmail } from 'react-icons/md';
+import { motion } from 'framer-motion';
 
 // Dropdown data
 const NAV_ITEMS = [
@@ -312,6 +313,14 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState(null);
+  const [isMobileDrag, setIsMobileDrag] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobileDrag(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -527,16 +536,25 @@ const Navbar = () => {
         )}
       </nav>
 
-      {/* Floating WhatsApp Button */}
-      <a
+      {/* Floating WhatsApp Button - Draggable on Mobile */}
+      <motion.a
         href="https://wa.me/919912671666"
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-8 right-8 z-[1000] w-14 h-14 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform cursor-pointer"
+        drag={isMobileDrag}
+        dragConstraints={{ 
+          left: -window.innerWidth + 80, 
+          right: 0, 
+          top: -window.innerHeight + 80, 
+          bottom: 0 
+        }}
+        dragElastic={0.1}
+        dragMomentum={false}
+        className="fixed bottom-8 right-8 z-[1000] w-14 h-14 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform cursor-pointer touch-none"
         style={{ background: '#25D366' }}
       >
         <FaWhatsapp className="text-3xl" />
-      </a>
+      </motion.a>
 
       {/* Floating Connect With Us Button */}
       <ConnectButton />

@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import StudentSidebar from './StudentSidebar';
-import { HiBell, HiMenuAlt2 } from 'react-icons/hi';
+import { HiMenuAlt2, HiOutlineUserCircle } from 'react-icons/hi';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import { logout } from '../../store/slices/authSlice';
-import { UserCircle, GraduationCap, LogOut } from 'lucide-react';
-import { HiOutlineUserCircle } from 'react-icons/hi';
+import { Search, GraduationCap, LogOut } from 'lucide-react';
 
 const StudentLayout = ({ children }) => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -111,66 +110,63 @@ const StudentLayout = ({ children }) => {
           </div>
         )}
 
-        <header className="h-16 md:h-20 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-4 md:px-6 sticky top-0 z-40">
-           <div className="flex items-center gap-4">
+        <header className="h-14 md:h-16 bg-white border-b border-slate-100 flex items-center justify-between px-4 md:px-8 sticky top-0 z-40 shadow-sm">
+           <div className="flex items-center gap-6">
               <button 
                 onClick={() => setIsSidebarOpen(true)}
-                className="lg:hidden p-2 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
+                className="lg:hidden p-2 text-[#002147] hover:bg-slate-50 rounded-lg transition-colors"
               >
                 <HiMenuAlt2 className="text-2xl" />
               </button>
-              <div className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-indigo-100 hidden sm:flex">
-                 <GraduationCap className="w-4 h-4" /> Enrolled Student
+              
+              {/* SEARCH BAR - White Style */}
+              <div className="hidden md:flex items-center flex-1 max-w-2xl bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200">
+                <Search className="ml-5 w-5 h-5 text-slate-400 shrink-0" />
+                <input 
+                  type="text" 
+                  placeholder="Search..."
+                  className="flex-1 px-4 py-4 bg-transparent text-sm font-bold text-[#002147] placeholder-slate-400 focus:outline-none tracking-wide"
+                />
+                <button className="bg-[#f16126] text-white px-8 py-4 font-black text-[11px] uppercase tracking-widest hover:bg-[#e05520] transition-colors shrink-0">
+                  SEARCH
+                </button>
               </div>
            </div>
 
-           <div className="flex items-center gap-3 md:gap-6">
-              <Link 
-                to="/student/live-schedule"
-                className={`w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center transition-all relative border group
-                  ${hasLive ? 'bg-rose-50 border-rose-100 text-rose-600 shadow-lg shadow-rose-900/10' : alertCount > 0 ? 'bg-indigo-50 border-indigo-100 text-indigo-600' : 'bg-slate-50 border-slate-100 text-slate-400'}
-                `}
-                title={hasLive ? 'Class is LIVE!' : 'View Schedule'}
-              >
-                 <HiBell className="text-xl group-hover:scale-110 transition-transform" />
-                 {(alertCount > 0 || hasLive) && (
-                   <>
-                     <span className={`absolute top-2.5 right-2.5 w-2.5 h-2.5 rounded-full border-2 border-white ${hasLive ? 'bg-rose-500' : 'bg-indigo-500'}`}></span>
-                     {hasLive && <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-rose-500 rounded-full animate-ping opacity-75"></span>}
-                   </>
-                 )}
-              </Link>
-
-              <div className="h-8 w-px bg-slate-100 hidden sm:block"></div>
-
-              <div className="flex items-center gap-2 md:gap-4">
-                 <Link 
-                   to="/student/profile" 
-                   className="flex items-center gap-2 md:gap-4 hover:bg-slate-50 p-2 rounded-2xl transition-all group"
-                   title="View Profile"
-                 >
-                    <div className="text-right hidden sm:block">
-                       <p className="text-sm font-black text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors uppercase italic">{userInfo?.name || 'Student'}</p>
-                       <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest leading-none mt-1">
-                          {`${userInfo?.board || ''} ${userInfo?.className || ''}`.trim() || userInfo?.role || 'Portal'}
+           <div className="flex items-center gap-4 md:gap-8">
+              {/* HEADER PROFILE AREA */}
+              <div className="flex items-center gap-3 md:gap-5">
+                 <div className="text-right flex flex-col justify-center">
+                    <p className="text-[13px] md:text-sm font-black text-[#002147] leading-tight uppercase tracking-tight">{userInfo?.name || 'Student'}</p>
+                    <div className="flex items-center justify-end gap-1.5 mt-0.5">
+                       <GraduationCap className="w-3 h-3 text-[#f16126]" />
+                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">
+                          {`${userInfo?.board || ''} ${userInfo?.className || ''}`.trim() || 'Portal'}
                        </p>
                     </div>
-                    <div className="w-10 h-10 md:w-12 md:h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-lg shadow-lg shadow-indigo-100 cursor-pointer group-hover:scale-105 transition-transform">
-                       {userInfo?.name?.charAt(0) || <HiOutlineUserCircle className="text-2xl" />}
-                    </div>
-                 </Link>
-                 <button
-                   onClick={handleLogout}
-                   className="flex items-center gap-2 px-3 py-2 text-rose-600 font-bold hover:bg-rose-50 rounded-lg transition-all border border-rose-100 text-xs md:text-sm"
+                 </div>
+                 <Link 
+                   to="/student/profile" 
+                   className="flex items-center gap-2 px-5 py-3 bg-[#002147] text-white rounded-2xl font-black uppercase tracking-widest hover:bg-[#f16126] transition-all text-[10px] shadow-xl shadow-black/5 border-b-4 border-black/20 active:scale-95"
                  >
-                    <LogOut className="w-4 h-4" />
-                    <span className="hidden md:inline">Logout</span>
-                 </button>
+                    <HiOutlineUserCircle className="text-lg" />
+                    <span className="hidden sm:inline">Profile</span>
+                 </Link>
               </div>
+
+              <div className="h-10 w-px bg-slate-100 hidden sm:block"></div>
+
+              <button
+                onClick={handleLogout}
+                className="hidden md:flex items-center gap-2 px-5 py-3 text-rose-600 font-black uppercase tracking-widest hover:bg-rose-50 rounded-xl transition-all border border-transparent hover:border-rose-100 text-[10px]"
+              >
+                 <LogOut className="w-4 h-4" />
+                 <span>Logout</span>
+              </button>
            </div>
         </header>
 
-        <main className="p-2 md:p-4 flex-1">
+        <main className="flex-1 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>

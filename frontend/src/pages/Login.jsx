@@ -39,20 +39,20 @@ const Login = () => {
     <div className="min-h-screen bg-white md:bg-sky-50 flex items-center justify-center p-0 md:p-4 overflow-hidden">
       <div className="max-w-4xl w-full h-full md:h-auto bg-white rounded-none md:rounded-[2rem] shadow-none md:shadow-2xl overflow-hidden flex flex-col lg:flex-row md:max-h-[90vh]">
         {/* Left Side: Form */}
-        <div className="w-full lg:w-[45%] p-8 md:p-8 lg:p-10 flex flex-col justify-between min-h-screen md:min-h-0">
-          <div className="space-y-4">
+        <div className="w-full lg:w-[45%] p-6 md:p-8 flex flex-col justify-between min-h-screen md:min-h-0 gap-2">
+          <div className="space-y-3">
             <header className="flex justify-center w-full pb-4">
               <Link to="/" className="inline-block hover:scale-105 transition-transform duration-300">
                 <img 
                   src={logoImg} 
                   alt="e-Tuitions Logo" 
-                  className="h-24 md:h-32 object-contain"
+                  className="h-20 md:h-24 object-contain"
                 />
               </Link>
             </header>
 
             {/* Social Login Buttons & Create Account */}
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-1 gap-2">
               <button className="flex items-center justify-center gap-2 w-full py-2.5 px-6 border border-slate-200 rounded-full font-bold text-slate-600 hover:bg-slate-50 transition-all text-sm">
                 <FcGoogle className="text-xl" />
                 Sign in with Google
@@ -108,17 +108,11 @@ const Login = () => {
                 </div>
               </div>
               
-              <button type="submit" className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-sm uppercase tracking-widest shadow-xl shadow-indigo-200 hover:bg-indigo-700 active:scale-[0.98] transition-all mt-1">
+              <button type="submit" className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-sm uppercase tracking-widest shadow-xl shadow-indigo-200 hover:bg-indigo-700 active:scale-[0.98] transition-all">
                 Login
               </button>
             </form>
           </div>
-
-          <footer className="mt-6 text-center lg:text-left">
-            <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest whitespace-nowrap">
-              ©2024 Elegance All Rights Reserved.
-            </p>
-          </footer>
         </div>
 
         {/* Right Side: Illustration */}

@@ -122,14 +122,14 @@ const StoreCarousel = () => {
   }, [images.length]);
 
   return (
-    <div className="relative w-full h-[200px] md:h-[240px] rounded-3xl bg-transparent flex items-center justify-center overflow-visible">
+    <div className="relative w-full h-[140px] md:h-[240px] rounded-3xl bg-transparent flex items-center justify-center overflow-visible">
       {decorativeIcons.map((item, idx) => (
         <motion.div
           key={idx}
           initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1, y: [0, -12, 0] }}
+          animate={{ opacity: 1, scale: 0.8, y: [0, -10, 0] }}
           transition={{ duration: 4, repeat: Infinity, delay: item.delay }}
-          className={`absolute ${item.pos} z-20 hidden md:flex w-10 h-10 rounded-full ${item.bg} items-center justify-center shadow-sm border border-white`}
+          className={`absolute ${item.pos} z-20 flex w-7 h-7 md:w-10 md:h-10 rounded-full ${item.bg} items-center justify-center shadow-sm border border-white md:scale-100`}
         >
           <item.Icon className={`w-5 h-5 ${item.color}`} />
         </motion.div>
@@ -172,6 +172,10 @@ const StudentStore = () => {
   const [expandedId, setExpandedId] = useState(null);
   const [selectedDuration, setSelectedDuration] = useState('oneMonth');
   const [activeInterYear, setActiveInterYear] = useState(11); // Default to First Year (Class 11)
+  
+  // Mobile Specific Filter State
+  const [selectedMobileClass, setSelectedMobileClass] = useState('6');
+  const [selectedMobileBoard, setSelectedMobileBoard] = useState('TS Board');
 
   // Helper to format board name from URL (e.g., 'ts-board' -> 'TS Board')
   const getFormattedBoard = (slug) => {
@@ -380,7 +384,7 @@ const StudentStore = () => {
       <div className="min-h-screen bg-[#fcfcfd] flex items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-4 border-slate-200 border-t-orange-500 rounded-full animate-spin"></div>
-          <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] animate-pulse">Loading Courses...</span>
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] animate- pulse">Loading Courses...</span>
         </div>
       </div>
     );
@@ -393,19 +397,19 @@ const StudentStore = () => {
 
 
       {/* Top Search Strip */}
-      <div className="bg-[#002147] py-5 px-4 w-full shadow-lg z-20">
-        <div className="max-w-[750px] mx-auto flex h-[52px] relative">
+      <div className="bg-[#002147] py-4 md:py-5 px-3 md:px-4 w-full shadow-lg z-20">
+        <div className="max-w-[750px] mx-auto flex h-[48px] md:h-[52px] relative">
           <div className="flex-1 relative flex items-center bg-white rounded-l-2xl overflow-hidden">
-            <FiSearch className="text-slate-400 w-5 h-5 ml-6 flex-shrink-0" />
+            <FiSearch className="text-slate-400 w-4 h-4 md:w-5 md:h-5 ml-4 md:ml-6 flex-shrink-0" />
             <input
               type="text"
-              placeholder="Search by class or subject..."
+              placeholder="Search class or subject..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full py-2 px-5 text-[15px] font-bold text-[#002147] outline-none h-full bg-transparent placeholder-slate-400"
+              className="w-full py-2 px-3 md:px-5 text-xs md:text-[15px] font-bold text-[#002147] outline-none h-full bg-transparent placeholder-slate-400"
             />
           </div>
-          <button className="bg-orange-500 text-white px-10 h-full text-[13px] font-black uppercase tracking-widest rounded-r-2xl hover:bg-orange-600 transition-all">
+          <button className="bg-orange-500 text-white px-5 md:px-10 h-full text-[11px] md:text-[13px] font-black uppercase tracking-widest rounded-r-2xl hover:bg-orange-600 transition-all">
             Search
           </button>
         </div>
@@ -415,20 +419,26 @@ const StudentStore = () => {
         <div className="bg-white rounded-3xl border border-orange-100 overflow-hidden shadow-sm flex flex-col md:flex-row h-auto min-h-[200px]">
           <div className="w-full md:w-[65%] p-8 flex flex-col justify-center border-r-0 md:border-r-2 border-orange-500 relative overflow-hidden bg-white">
             <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-4 px-4 py-1 bg-orange-50 rounded-full w-fit border border-orange-100 shadow-sm">
+              <div className="hidden md:flex items-center gap-2 mb-4 px-4 py-1 bg-orange-50 rounded-full w-fit border border-orange-100 shadow-sm">
                 <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />
                 <span className="text-[9px] font-black text-orange-600 uppercase tracking-widest">Select Your Class</span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-black text-[#002147] mb-4 italic tracking-tighter leading-none uppercase">
-                {activeBoardFilter ? `${activeBoardFilter} ` : 'MYE3-E-TUITION '}
-                <span className="text-orange-500 not-italic">{activeBoardFilter ? 'TUITIONS' : 'ACADEMY'}</span>
+              <h1 className="text-2xl md:text-4xl font-black text-[#002147] mb-3 md:mb-4 italic md:not-italic tracking-tighter leading-none uppercase">
+                <span className="md:hidden">MYE3 <span className="text-orange-500 not-italic">ACADEMY</span></span>
+                <span className="hidden md:inline">
+                  {activeBoardFilter ? `${activeBoardFilter} ` : 'MYE3-E-TUITION '}
+                  <span className="text-orange-500 not-italic">{activeBoardFilter ? 'TUITIONS' : 'ACADEMY'}</span>
+                </span>
               </h1>
-              <p className="text-slate-500 font-bold italic text-sm max-w-xl mb-6 leading-relaxed">
-                {activeBoardFilter 
-                  ? `Specially curated courses for ${activeBoardFilter} students to achieve academic excellence.`
-                  : "Explore our comprehensive online courses and start learning with expert tutors."}
+              <p className="text-slate-500 font-bold italic text-xs md:text-sm max-w-xl mb-6 leading-relaxed">
+                <span className="md:hidden">Explore our comprehensive online courses and start learning with expert tutors.</span>
+                <span className="hidden md:inline">
+                  {activeBoardFilter 
+                    ? `Specially curated courses for ${activeBoardFilter} students to achieve academic excellence.`
+                    : "Explore our comprehensive online courses and start learning with expert tutors."}
+                </span>
               </p>
-              <div className="flex flex-wrap gap-3">
+              <div className="hidden md:flex flex-wrap gap-3">
                 <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-100"><FiCheckCircle /> All Subjects</div>
                 <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-[10px] font-black uppercase tracking-widest border border-blue-100"><FiCheckCircle /> Live Classes</div>
               </div>
@@ -438,7 +448,86 @@ const StudentStore = () => {
         </div>
       </div>
 
-      <div className="max-w-[1280px] mx-auto px-4 md:px-8 pb-32 space-y-12">
+      <div className="max-w-[1280px] mx-auto px-4 md:px-8 pb-32 space-y-8">
+        {/* Mobile Filter Navigation */}
+        <div className="md:hidden space-y-6 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+          {/* Board Selector */}
+          <div className="space-y-3">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Select Board</p>
+            <div className="flex flex-wrap gap-2">
+              {['TS Board', 'AP Board', 'CBSE Board', 'ICSE Board'].map(b => (
+                <button
+                  key={b}
+                  onClick={() => setSelectedMobileBoard(b)}
+                  className={`px-4 py-2 rounded-xl text-[10px] font-bold transition-all border ${
+                    selectedMobileBoard === b 
+                    ? 'bg-[#002147] text-white border-[#002147] shadow-md scale-105' 
+                    : 'bg-white text-slate-600 border-slate-100 hover:border-orange-500/50'
+                  }`}
+                >
+                  {b.replace(' Board', '')}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* School Tuitions */}
+          <div className="space-y-3">
+             <div className="flex items-center gap-3">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#002147]">School Tuitions</span>
+                <div className="flex-1 h-[1px] bg-slate-100" />
+             </div>
+             <div className="flex flex-wrap gap-2">
+                {['6', '7', '8', '9', '10'].map(cls => (
+                  <button
+                    key={cls}
+                    onClick={() => setSelectedMobileClass(cls)}
+                    className={`w-10 h-10 rounded-full text-xs font-black transition-all border flex items-center justify-center ${
+                      selectedMobileClass === cls 
+                      ? 'bg-orange-500 text-white border-orange-500 shadow-lg scale-110' 
+                      : 'bg-slate-50 text-slate-500 border-slate-100 hover:border-orange-500/20'
+                    }`}
+                  >
+                    {cls}
+                  </button>
+                ))}
+             </div>
+          </div>
+
+          {/* Intermediate */}
+          <div className="space-y-3">
+             <div className="flex items-center gap-3">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#002147]">Intermediate</span>
+                <div className="flex-1 h-[1px] bg-slate-100" />
+             </div>
+             <div className="flex gap-3">
+                <button
+                  onClick={() => setSelectedMobileClass('11')}
+                  className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                    selectedMobileClass === '11' 
+                    ? 'bg-orange-500 text-white border-orange-500 shadow-lg' 
+                    : 'bg-[#002147] text-white border-[#002147]'
+                  }`}
+                >
+                  First Year
+                </button>
+                <button
+                  onClick={() => setSelectedMobileClass('12')}
+                  className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                    selectedMobileClass === '12' 
+                    ? 'bg-orange-500 text-white border-orange-500 shadow-lg' 
+                    : 'bg-[#002147] text-white border-[#002147]'
+                  }`}
+                >
+                  Second Year
+                </button>
+             </div>
+          </div>
+        </div>
+
+        {/* Existing Listings (Conditional for Desktop/Mobile) */}
+        <div className="hidden md:block space-y-12">
+
         {juniorCourses.length > 0 && (
           <section ref={juniorRef} className="scroll-mt-32 space-y-8">
             <div className="flex items-center gap-6">
@@ -492,6 +581,41 @@ const StudentStore = () => {
         )}
       </div>
 
+        {/* Mobile Filtered Listing */}
+        <div className="md:hidden space-y-8">
+           <div className="flex items-center gap-4">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100 px-3 py-1 rounded-lg">
+                Showing {selectedMobileBoard} - Class {selectedMobileClass}
+              </span>
+              <div className="flex-1 h-[1px] bg-slate-100" />
+           </div>
+           
+           {finalFiltered.filter(c => {
+             const cClass = String(c.classLevel || c.className || '').replace(/\D/g, '');
+             const cBoard = (c.board || 'TS Board').toUpperCase().trim();
+             const fBoard = selectedMobileBoard.toUpperCase().trim();
+             return (cClass === selectedMobileClass || (selectedMobileClass === '11' && c.classLevel === '11') || (selectedMobileClass === '12' && c.classLevel === '12')) && 
+                    (cBoard === fBoard || cBoard === fBoard.replace(' BOARD', ''));
+           }).length > 0 ? (
+             <div className="grid grid-cols-1 gap-6">
+                {finalFiltered.filter(c => {
+                  const cClass = String(c.classLevel || c.className || '').replace(/\D/g, '');
+                  const cBoard = (c.board || 'TS Board').toUpperCase().trim();
+                  const fBoard = selectedMobileBoard.toUpperCase().trim();
+                  return cClass === selectedMobileClass && (cBoard === fBoard || cBoard === fBoard.replace(' BOARD', ''));
+                }).map(c => (
+                  <CourseCard key={c.id} c={c} setSelectedCourse={setSelectedCourse} setSelectedDuration={setSelectedDuration} setShowCheckout={setShowCheckout} userInfo={userInfo} />
+                ))}
+             </div>
+           ) : (
+             <div className="bg-slate-50 p-12 rounded-3xl border border-dashed border-slate-200 text-center">
+                <FiBook className="w-8 h-8 text-slate-300 mx-auto mb-4" />
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No courses found for this selection</p>
+             </div>
+           )}
+        </div>
+      </div>
+
       <AnimatePresence>
         {showCheckout && selectedCourse && (
           <div 
@@ -507,34 +631,34 @@ const StudentStore = () => {
               className="relative w-full h-full md:h-auto md:max-h-[90vh] md:max-w-5xl bg-white rounded-none md:rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)] cursor-default flex flex-col md:flex-row"
             >
               {/* Left Side: Summary & Logo */}
-              <div className="w-full md:w-[45%] bg-[#002147] p-8 md:p-12 text-white relative flex flex-col items-center justify-center border-b-[8px] md:border-b-0 md:border-r-[8px] border-orange-500 overflow-y-auto">
+              <div className="w-full md:w-[45%] bg-[#002147] p-4 md:p-12 text-white relative flex flex-col items-center justify-center border-b-[6px] md:border-b-0 md:border-r-[8px] border-orange-500 overflow-y-auto">
                  {/* Close button for Mobile only */}
                  <button 
                    onClick={() => setShowCheckout(false)} 
-                   className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 md:hidden flex items-center justify-center hover:bg-white/20 transition-colors z-30 cursor-pointer"
+                   className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/10 md:hidden flex items-center justify-center hover:bg-white/20 transition-colors z-30 cursor-pointer"
                    aria-label="Close"
                  >
-                   <FiX className="w-5 h-5 text-white" />
+                   <FiX className="w-4 h-4 text-white" />
                  </button>
 
-                 <img src={logoImg} alt="Mye3 Logo" className="h-20 md:h-32 object-contain mb-8 filter drop-shadow-xl" />
+                 <img src={logoImg} alt="Mye3 Logo" className="h-20 md:h-32 object-contain mb-4 md:mb-8 filter drop-shadow-xl" />
                  
-                 <p className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.4em] mb-4 text-orange-500">Summary</p>
-                 <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-center relative w-full mb-8 leading-[1.1]">
+                 <p className="text-[8px] md:text-[11px] font-black uppercase tracking-[0.4em] mb-1.5 md:mb-4 text-orange-500">Summary</p>
+                 <h3 className="text-base md:text-3xl font-black uppercase tracking-tight text-center relative w-full mb-3 md:mb-8 leading-[1.1]">
                     <span className="relative z-10">{selectedCourse.name}</span>
                  </h3>
                  
                  <div className="w-full flex justify-center">
-                    <div className="flex flex-wrap gap-2 justify-center max-w-[80%]">
+                    <div className="flex flex-wrap gap-1.5 justify-center max-w-[90%]">
                       {selectedCourse.subjects && selectedCourse.subjects.length > 0 ? selectedCourse.subjects.map((sub, i) => (
-                        <span key={i} className="px-4 py-1.5 bg-white/10 rounded-full text-[10px] md:text-[11px] font-bold tracking-widest text-emerald-400 border border-emerald-500/30 shadow-inner">{sub.name}</span>
-                      )) : <span className="px-4 py-1.5 bg-white/10 rounded-full text-[10px] md:text-[11px] font-bold tracking-widest text-emerald-400 border border-emerald-500/30 shadow-inner">All Foundational Subjects</span>}
+                        <span key={i} className="px-3 py-1 bg-white/10 rounded-full text-[9px] md:text-[11px] font-bold tracking-widest text-emerald-400 border border-emerald-500/30 shadow-inner">{sub.name}</span>
+                      )) : <span className="px-3 py-1 bg-white/10 rounded-full text-[9px] md:text-[11px] font-bold tracking-widest text-emerald-400 border border-emerald-500/30 shadow-inner">All Foundation</span>}
                     </div>
                  </div>
               </div>
 
               {/* Right Side: Payment Form */}
-              <div className="w-full md:w-[55%] p-6 md:p-12 space-y-6 md:space-y-8 overflow-y-auto bg-slate-50 md:bg-white relative flex flex-col justify-center">
+              <div className="w-full md:w-[55%] p-4 md:p-12 space-y-3 md:space-y-8 overflow-y-auto bg-slate-50 md:bg-white relative flex flex-col justify-center">
                  {/* Close button for Desktop only */}
                  <button 
                    onClick={() => setShowCheckout(false)} 
@@ -544,63 +668,63 @@ const StudentStore = () => {
                    <FiX className="w-6 h-6 text-slate-400" />
                  </button>
 
-                 <div className="space-y-4">
-                   <p className="text-[11px] md:text-xs font-black uppercase tracking-[0.3em] text-[#002147] mb-2">Select Duration</p>
-                  {['oneMonth', 'threeMonths', 'sixMonths', 'twelveMonths'].map(dur => {
-                    const labelMap = {
-                      oneMonth: 'Monthly Access',
-                      threeMonths: 'Quarterly (3 Months)',
-                      sixMonths: 'Half-Yearly (6 Months)',
-                      twelveMonths: 'Annual (12 Months)'
-                    };
-                    let price = selectedCourse.pricing?.[dur] || 0;
-                    if (price === 0) {
-                      const basePrice = selectedCourse.pricing?.oneMonth || selectedCourse.price || 500;
-                      if (dur === 'oneMonth') price = basePrice;
-                      if (dur === 'threeMonths') price = Math.round((basePrice * 3) * 0.95);
-                      if (dur === 'sixMonths') price = Math.round((basePrice * 6) * 0.90);
-                      if (dur === 'twelveMonths') price = Math.round((basePrice * 12) * 0.85);
-                    }
-                    if (price === 0) return null; // Fallback if no price available
+                 <div className="space-y-2 md:space-y-4">
+                    <p className="text-[9px] md:text-xs font-black uppercase tracking-[0.3em] text-[#002147] mb-1 md:mb-2">Select Duration</p>
+                   {['oneMonth', 'threeMonths', 'sixMonths', 'twelveMonths'].map(dur => {
+                     const labelMap = {
+                       oneMonth: 'Monthly Access',
+                       threeMonths: 'Quarterly (3 Months)',
+                       sixMonths: 'Half-Yearly (6 Months)',
+                       twelveMonths: 'Annual (12 Months)'
+                     };
+                     let price = selectedCourse.pricing?.[dur] || 0;
+                     if (price === 0) {
+                       const basePrice = selectedCourse.pricing?.oneMonth || selectedCourse.price || 500;
+                       if (dur === 'oneMonth') price = basePrice;
+                       if (dur === 'threeMonths') price = Math.round((basePrice * 3) * 0.95);
+                       if (dur === 'sixMonths') price = Math.round((basePrice * 6) * 0.90);
+                       if (dur === 'twelveMonths') price = Math.round((basePrice * 12) * 0.85);
+                     }
+                     if (price === 0) return null; // Fallback if no price available
 
-                    const isSelected = selectedDuration === dur;
+                     const isSelected = selectedDuration === dur;
 
-                    return (
-                      <button
-                        key={dur}
-                        onClick={() => setSelectedDuration(dur)}
-                        className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all group ${isSelected
-                          ? 'border-[#002147] bg-[#f8fbff] shadow-md ring-1 ring-[#002147]/5'
-                          : 'border-slate-100 bg-white hover:border-slate-200'
-                          }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-[#f16126] bg-[#f16126]' : 'border-slate-200 bg-white'
-                            }`}>
-                            {isSelected && <div className="w-2 h-2 bg-white rounded-full" />}
-                          </div>
-                          <div className="text-left">
-                            <p className={`text-xs font-black uppercase tracking-tight italic ${isSelected ? 'text-[#002147]' : 'text-slate-500'}`}>
-                              {labelMap[dur]}
-                            </p>
-                            {dur === 'twelveMonths' && <span className="text-[9px] md:text-[10px] font-black text-emerald-500 tracking-widest uppercase bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100 ml-2">Best Value</span>}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className={`text-xl md:text-2xl font-black italic tracking-tighter ${isSelected ? 'text-[#f16126]' : 'text-[#002147]'}`}>
-                            ₹{price.toLocaleString()}
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-                <button disabled={buyLoading} onClick={handlePayment} className="w-full bg-gradient-to-r from-[#002147] to-[#00152e] text-white py-4 md:py-5 rounded-2xl font-black text-sm md:text-[15px] uppercase tracking-[0.2em] flex items-center justify-center gap-4 hover:shadow-[0_10px_30px_rgba(0,33,71,0.4)] transition-all shadow-xl active:scale-95 disabled:opacity-50 mt-4 md:mt-8">
-                  {buyLoading ? 'Processing...' : <>Confirm & Pay <FiCreditCard className="w-5 h-5 md:w-6 md:h-6" /></>}
-                </button>
-              </div>
-            </motion.div>
-          </div>
+                     return (
+                       <button
+                         key={dur}
+                         onClick={() => setSelectedDuration(dur)}
+                         className={`w-full flex items-center justify-between p-2.5 md:p-4 rounded-xl md:rounded-2xl border-2 transition-all group ${isSelected
+                           ? 'border-[#002147] bg-[#f8fbff] shadow-md ring-1 ring-[#002147]/5'
+                           : 'border-slate-100 bg-white hover:border-slate-200'
+                           }`}
+                       >
+                         <div className="flex items-center gap-3">
+                           <div className={`w-4 h-4 md:w-5 md:h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-[#f16126] bg-[#f16126]' : 'border-slate-200 bg-white'
+                             }`}>
+                             {isSelected && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                           </div>
+                           <div className="text-left">
+                             <p className={`text-[10px] md:text-xs font-black uppercase tracking-tight italic ${isSelected ? 'text-[#002147]' : 'text-slate-500'}`}>
+                               {labelMap[dur]}
+                             </p>
+                             {dur === 'twelveMonths' && <span className="text-[8px] md:text-[10px] font-black text-emerald-500 tracking-widest uppercase bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100 ml-2">Best Value</span>}
+                           </div>
+                         </div>
+                         <div className="text-right">
+                           <p className={`text-lg md:text-2xl font-black italic tracking-tighter ${isSelected ? 'text-[#f16126]' : 'text-[#002147]'}`}>
+                             ₹{price.toLocaleString()}
+                           </p>
+                         </div>
+                       </button>
+                     );
+                   })}
+                 </div>
+                 <button disabled={buyLoading} onClick={handlePayment} className="w-full bg-gradient-to-r from-[#002147] to-[#00152e] text-white py-3 md:py-5 rounded-xl md:rounded-2xl font-black text-[11px] md:text-[15px] uppercase tracking-[0.2em] flex items-center justify-center gap-4 hover:shadow-[0_10px_30px_rgba(0,33,71,0.4)] transition-all shadow-xl active:scale-95 disabled:opacity-50 mt-2 md:mt-8">
+                   {buyLoading ? 'Processing...' : <>Confirm & Pay <FiCreditCard className="w-4 h-4 md:w-6 md:h-6" /></>}
+                 </button>
+               </div>
+             </motion.div>
+           </div>
         )}
       </AnimatePresence>
     </div>

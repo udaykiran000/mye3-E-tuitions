@@ -10,7 +10,11 @@ import {
   HiChevronDown,
   HiOutlinePhone,
   HiOutlineMail,
-  HiX
+  HiX,
+  HiOutlineHome,
+  HiOutlineAcademicCap,
+  HiOutlineUserGroup,
+  HiOutlineChat
 } from 'react-icons/hi';
 import { FaWhatsapp, FaHandshake } from 'react-icons/fa';
 import { MdEmail } from 'react-icons/md';
@@ -275,6 +279,33 @@ const ConnectButton = () => {
   );
 };
 
+// ── Mobile Bottom Navigation Bar ──
+const MobileBottomNav = () => {
+  const items = [
+    { label: 'Home', to: '/', icon: HiOutlineHome },
+    { label: 'Tuitions', to: '/courses', icon: HiOutlineAcademicCap },
+    { label: 'Teachers', to: '/teachers', icon: HiOutlineUserGroup },
+    { label: 'Contact', to: '/contact-us', icon: HiOutlineChat },
+  ];
+
+  return (
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 z-[1000] px-2 py-2 shadow-[0_-4px_16px_rgba(0,0,0,0.05)]">
+      <div className="flex items-center justify-around">
+        {items.map((item, i) => (
+          <Link
+            key={i}
+            to={item.to}
+            className="flex flex-col items-center gap-1 min-w-[64px] transition-all active:scale-90 group"
+          >
+            <item.icon className="text-[22px] text-slate-400 group-hover:text-orange-500" />
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter group-hover:text-orange-500 transition-colors">{item.label}</span>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const Navbar = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -343,7 +374,7 @@ const Navbar = () => {
             <img
               src={logoImg}
               alt="e-Tuitions Logo"
-              className="h-16 md:h-20 w-auto object-contain scale-110 md:scale-[1.2] origin-left group-hover:scale-[1.15] md:group-hover:scale-[1.25] transition-transform"
+              className="h-[74px] md:h-20 w-auto object-contain scale-110 md:scale-[1.2] origin-left group-hover:scale-[1.15] md:group-hover:scale-[1.25] transition-transform"
             />
           </Link>
 
@@ -376,6 +407,16 @@ const Navbar = () => {
                 style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)', boxShadow: '0 4px 14px rgba(249,115,22,0.4)' }}
               >
                 Enrol Now
+              </Link>
+            )}
+
+            {/* Mobile-only Join Now button */}
+            {!userInfo && (
+              <Link
+                to="/register"
+                className="md:hidden flex items-center px-4 py-1.5 text-white text-[12px] font-black uppercase tracking-wider rounded-lg shadow-md active:scale-95 transition-all bg-gradient-to-br from-orange-500 to-orange-600 hover:from-[#002147] hover:to-[#001a35] hover:shadow-lg"
+              >
+                Join Now
               </Link>
             )}
 
@@ -499,6 +540,9 @@ const Navbar = () => {
 
       {/* Floating Connect With Us Button */}
       <ConnectButton />
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
 
       <style>{`
         @keyframes fadeIn {

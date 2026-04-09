@@ -39,20 +39,17 @@ const AdminSidebar = ({ onClose }) => {
 
   return (
     <aside className="w-full lg:w-72 bg-slate-900 h-screen text-white flex flex-col shadow-2xl">
-      <div className="p-6 md:p-8 border-b border-slate-800 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-3 group px-2">
+      <div className="py-8 md:py-12 border-b border-slate-800 flex flex-col items-center justify-center relative">
+        <Link to="/" className="flex flex-col items-center group">
           <img 
             src={logoImg} 
             alt="Logo" 
-            className="h-10 md:h-12 w-auto object-contain transition-transform group-hover:scale-105" 
+            className="h-20 md:h-24 w-auto object-contain transition-transform group-hover:scale-110" 
           />
-          <div className="flex flex-col gap-0 text-left">
-            <span className="text-xl font-black tracking-tighter leading-none">Admin</span>
-            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mt-0.5">LMS Portal</span>
-          </div>
+          <p className="text-[11px] font-black text-indigo-400 uppercase tracking-[0.4em] -mt-1 leading-none">Admin</p>
         </Link>
         {onClose && (
-          <button onClick={onClose} className="lg:hidden p-2 text-slate-400 hover:text-white transition-colors">
+          <button onClick={onClose} className="lg:hidden absolute top-6 right-6 p-2 text-slate-400 hover:text-white transition-colors">
             <X className="w-6 h-6" />
           </button>
         )}

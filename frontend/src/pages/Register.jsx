@@ -66,144 +66,176 @@ const Register = () => {
         }
         * { box-sizing: border-box; }
 
-        /* ── Page shell: dual background ── */
-        .reg-page {
-          position: relative;
+        .reg-container {
           width: 100vw;
           height: 100vh;
-          background: #f0f2f5;        /* light gray overall */
+          background: #f0f2f5; 
           display: flex;
-          align-items: center;
-          justify-content: center;
-          overflow: hidden;
-          z-index: 1;
         }
 
-        /* ── Right background block ── */
-        .reg-bg-sync {
-          position: absolute;
-          inset: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: -1;
-        }
-        .reg-bg-sync-red {
-          position: relative;
-          width: 85%;
-          max-width: 1150px;
+        .reg-left-side {
+          width: 60%;
           height: 100vh;
-        }
-        .reg-bg-sync-red::after {
-          content: '';
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          left: 60%;
-          right: -100vw;
-          background: #002855;   /* Slightly more vibrant Navy Blue */
-        }
-
-        /* ── The Central Card ── */
-        .reg-main-card {
-          position: relative;
           display: flex;
-          width: 92%;
-          max-width: 1300px;
-          height: 82vh;
-          min-height: 680px;
-          border-radius: 12px;
-          box-shadow: 0 40px 80px rgba(0,0,0,0.3); /* Big drop shadow */
-          overflow: hidden; /* Rounds the inner corners */
-          z-index: 10;
+          align-items: center;    /* Leaves equal gap top and bottom (10vh each side for 80vh card) */
+          justify-content: flex-end; /* Attaches exactly to the right blue part */
+          padding-left: 10%;      /* Leaves 10% gap on the left */
         }
 
-        /* ── Image section (Left) ── */
-        .reg-card-left {
+        .reg-left-side-card {
+          width: 100%;
+          height: 80vh;
+          background: #ccc;
+          border-radius: 20px 0 0 20px; /* Left edges curved only */
+          overflow: hidden;
           position: relative;
-          width: 65%;
-          height: 100%;
-          background: #e96f12; /* Fallback orange color to match image just in case */
         }
 
-        .reg-left-img {
-          position: absolute;
-          inset: 0;
+        .reg-left-side-card img {
           width: 100%;
           height: 100%;
-          object-fit: cover; 
-          object-position: 10% center; /* Adjusting again for wider container */
+          object-fit: cover;
           display: block;
         }
 
-        /* No dark overlay needed since the new image has perfect baked-in lighting and white text */
-        .reg-left-overlay {
-          display: none;
+        .reg-right-side {
+          width: 40%;
+          height: 100vh;
+          background: #002855; /* Project theme blue */
+          display: flex;
+          align-items: center;    /* Leaves 10vh top, 10vh bottom */
+          justify-content: flex-start; /* Connects smoothly to the left card */
+          padding-right: 8%;      /* Leaves 8% gap on the right */
         }
 
-        .reg-form-logo {
-          display: block;
-          height: 140px; /* Increased logo size as requested */
-          margin: 0 auto 10px auto;
-          object-fit: contain;
-        }
-
-        /* ── Form section (Right) ── */
-        .reg-card-right {
-          position: relative;
-          width: 35%;
-          height: 100%;
-          background: #002855;
+        .reg-right-side-card {
+          width: 100%;
+          height: 80vh;
+          background: #002855; 
+          border-radius: 0 20px 20px 0; /* Right edges curved */
+          box-shadow: 12px 15px 35px rgba(0, 0, 0, 0.4); 
           display: flex;
           flex-direction: column;
-          overflow-y: auto; /* Enable scrolling for smaller screens */
+          align-items: center;
+          justify-content: center;
+          padding: 15px 30px;
+          overflow-y: auto;
         }
 
-        /* Custom scrollbar to keep it looking clean */
-        .reg-card-right::-webkit-scrollbar {
-          width: 6px;
-        }
-        .reg-card-right::-webkit-scrollbar-track {
-          background: #002855;
-        }
-        .reg-card-right::-webkit-scrollbar-thumb {
-          background: rgba(255,255,255,0.2);
-          border-radius: 3px;
-        }
+        .reg-right-side-card::-webkit-scrollbar { width: 6px; }
+        .reg-right-side-card::-webkit-scrollbar-track { background: transparent; }
+        .reg-right-side-card::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
 
-        /* Inner container - compacted */
         .reg-form-inner {
           width: 100%;
-          min-height: 100%;
+          max-width: 320px;
           display: flex;
           flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: 30px 40px; 
         }
 
-        /* ── Form content ── */
-        .reg-form-box {
+        .reg-logo {
+          display: block;
+          height: 90px; 
+          margin: 0 auto 10px auto;
+          object-fit: contain;
+          transition: transform 0.2s;
+        }
+        .reg-logo:hover {
+          transform: scale(1.05);
+        }
+
+        .reg-input-group {
+          margin-bottom: 12px;
           width: 100%;
-          max-width: 300px;
-          color: #fff;
         }
-        .reg-form-box h2 {
-          font-size: 28px; /* Smaller title */
-          font-weight: 400;
-          line-height: 1.1;
-          margin: 0 0 5px 0;
-          text-align: center;
+
+        .reg-input-group input, .reg-input-group select {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+          color: white;
+          font-size: 13px;
+          padding: 4px 0;
+          outline: none;
         }
-        .reg-subtitle {
-          font-size: 11px;
-          color: rgba(255,255,255,0.82);
-          line-height: 1.5;
-          margin: 0 0 20px 0;
+
+        .reg-input-group input::placeholder {
+          color: white;
+          opacity: 0.9;
+        }
+        
+        .reg-input-group select {
+           appearance: none; 
+           color: white;
+        }
+        
+        .reg-input-group select option {
+           background: #002855;
+           color: white;
+        }
+
+        /* Checkbox */
+        .reg-checkbox-group {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 15px;
+        }
+
+        .reg-checkbox-group input {
+          width: 15px;
+          height: 15px;
+          cursor: pointer;
+        }
+
+        .reg-checkbox-group label {
+          color: white;
+          font-size: 12px;
+          cursor: pointer;
+        }
+        
+        .reg-checkbox-group label span {
+          text-decoration: underline;
+          font-weight: bold;
+        }
+
+        /* Button */
+        .reg-submit-btn {
+          width: 100%;
+          background-color: #e84c3d;
+          color: white;
+          border: none;
+          padding: 10px;
+          border-radius: 5px;
+          font-weight: bold;
+          font-size: 13px;
+          cursor: pointer;
+          letter-spacing: 1px;
+          margin-bottom: 15px;
+          transition: background 0.2s, transform 0.1s;
+        }
+        .reg-submit-btn:hover { background: #d03d2e; }
+        .reg-submit-btn:active { transform: scale(0.98); }
+
+        /* Login link */
+        .reg-login-link-container {
           text-align: center;
         }
 
-        /* error */
+        .reg-login-link-container p {
+          color: rgba(255, 255, 255, 0.8);
+          font-size: 12px;
+          margin: 0 0 5px 0;
+        }
+
+        .reg-login-link-container a {
+          color: white;
+          font-weight: bold;
+          text-decoration: underline;
+          font-size: 14px;
+        }
+
         .reg-error {
           background: rgba(255,255,255,0.18);
           border: 1px solid rgba(255,255,255,0.3);
@@ -215,330 +247,74 @@ const Register = () => {
           text-transform: uppercase;
           letter-spacing: 1.5px;
           margin-bottom: 18px;
-        }
-
-        /* input rows */
-        .reg-field {
-          border-bottom: 1px solid rgba(255,255,255,0.40);
-          margin-bottom: 15px; /* Tighter spacing */
-          display: flex;
-          align-items: center;
-        }
-        .reg-input {
-          flex: 1;
-          background: transparent !important;
-          border: none;
-          outline: none;
-          color: #fff !important;
-          font-size: 14px;
-          padding: 8px 0;
-          -webkit-text-fill-color: #fff !important;
-        }
-        .reg-input::placeholder { color: rgba(255,255,255,0.52); }
-        .reg-input:-webkit-autofill,
-        .reg-input:-webkit-autofill:hover,
-        .reg-input:-webkit-autofill:focus {
-          -webkit-box-shadow: 0 0 0 1000px #002855 inset !important;
-          -webkit-text-fill-color: #fff !important;
-          transition: background-color 9999s ease-in-out 0s;
-        }
-
-        .reg-select {
-          flex: 1;
-          background: transparent;
-          border: none;
-          outline: none;
-          color: #fff;
-          font-size: 14px;
-          padding: 8px 0;
-          cursor: pointer;
-          appearance: none;
-          -webkit-appearance: none;
-          color-scheme: dark;
-        }
-        .reg-select option { background: #002855; color: #fff; }
-
-        /* terms */
-        .reg-terms {
-          display: flex;
-          align-items: center;
-          gap: 9px;
-          margin-bottom: 18px;
-        }
-        .reg-terms input[type="checkbox"] {
-          width: 14px;
-          height: 14px;
-          accent-color: #e84c3d;
-          cursor: pointer;
-          flex-shrink: 0;
-        }
-        .reg-terms label {
-          font-size: 11px;
-          color: rgba(255,255,255,0.88);
-          cursor: pointer;
-          line-height: 1.5;
-        }
-        .reg-terms label span {
-          font-weight: 700;
-          text-decoration: underline;
-        }
-
-        /* register button */
-        .reg-btn {
-          width: 100%;
-          padding: 14px;
-          background: #e84c3d;
-          color: #fff;
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 2.5px;
-          text-transform: uppercase;
-          border: none;
-          border-radius: 3px;
-          cursor: pointer;
-          transition: background 0.2s, transform 0.1s;
-        }
-        .reg-btn:hover  { background: #e65100; } /* More orange hover */
-        .reg-btn:active { transform: scale(0.98); }
-
-        /* login link */
-        .reg-login-link {
-          text-align: center;
-          margin-top: 22px;
-        }
-        .reg-login-link p {
-          font-size: 11px;
-          color: rgba(255,255,255,0.78);
-          margin: 0 0 3px 0;
-        }
-        .reg-login-link a {
-          color: #fff;
-          font-weight: 700;
-          text-decoration: underline;
-        }
-
-        /* ── Mobile responsiveness ── */
-
-        @media (max-width: 900px) {
-          .reg-page {
-            height: 100vh;
-            min-height: 100vh;
-            padding: 15px;
-            align-items: center;
-          }
-          .reg-bg-sync {
-            display: none; /* Hide background split in mobile */
-          }
-          .reg-main-card {
-            width: 100%;
-            max-width: 500px;
-            height: auto;
-            min-height: auto;
-            border-radius: 16px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-          }
-          .reg-card-left {
-            display: none; /* Hide image entirely on mobile */
-          }
-          .reg-card-right {
-            width: 100%;
-            border-radius: 16px;
-            padding: 0;
-            justify-content: center;
-          }
-          .reg-form-inner {
-            padding: 40px 25px;
-          }
-          .reg-form-box {
-            max-width: 100%;
-          }
-          .reg-form-logo {
-            height: 95px;
-            margin: 0 auto 16px auto;
-          }
-          
-          /* ── Compact UI elements for 540px height screens ── */
-          .reg-form-box h2 {
-            font-size: 24px;   /* Smaller headline */
-            margin-bottom: 12px;
-            line-height: 1.15;
-            text-align: center; /* centering heading looks good here */
-          }
-          .reg-subtitle {
-            display: none; /* Hide getting started text entirely on mobile */
-          }
-          .reg-error {
-            padding: 6px 10px;
-            margin-bottom: 10px;
-          }
-          .reg-field {
-            margin-bottom: 12px; /* Tighter input spacing */
-          }
-          .reg-input, .reg-select {
-            font-size: 13px;
-            padding: 5px 0;
-          }
-          .reg-terms {
-            margin-bottom: 14px;
-            gap: 6px;
-          }
-          .reg-terms label {
-            font-size: 10px;
-          }
-          .reg-btn {
-            padding: 10px;       /* Smaller button */
-            font-size: 11px;
-          }
-          .reg-login-link {
-            margin-top: 12px;
-          }
-          .reg-login-link p {
-            margin: 0;
-            line-height: 1.4;
-          }
+          color: white;
         }
       `}</style>
-
-      {/* ════════════════════════════════════════════
-          PAGE SHELL  —  dual background with centered card
-      ════════════════════════════════════════════ */}
-      <div className="reg-page">
-        {/* The red background right block — EXACTLY synced with the card split */}
-        <div className="reg-bg-sync">
-          <div className="reg-bg-sync-red" />
-        </div>
-
-        {/* ── THE CENTRAL CARD ── */}
-        <div className="reg-main-card">
-          
-          {/* Left section: Dark Image */}
-          <div className="reg-card-left">
-            <img
-              src={registerBg}
-              alt="Student giving thumbs up"
-              className="reg-left-img"
-            />
-            <div className="reg-left-overlay" />
-            
+      <div className="reg-container">
+        <div className="reg-left-side">
+          <div className="reg-left-side-card">
+            <img src={registerBg} alt="Educational theme" />
           </div>
-
-          {/* Right section: Navy Blue Form */}
-          <div className="reg-card-right">
+        </div>
+        <div className="reg-right-side">
+          <div className="reg-right-side-card">
             <div className="reg-form-inner">
-              <div className="reg-form-box">
+              
+              <Link to="/">
+                <img src={logoImg} alt="e-Tuitions Logo" className="reg-logo" />
+              </Link>
+              
+              {error && <div className="reg-error">{error}</div>}
 
-                {/* Form Logo */}
-                <Link to="/" className="inline-block hover:scale-105 transition-transform" style={{ margin: '0 auto', display: 'block', textAlign: 'center' }}>
-                  <img src={logoImg} alt="e-Tuitions Logo" className="reg-form-logo" />
-                </Link>
-
-                {/* Header */}
-                <h2>Let's Get<br />You Started</h2>
-
-                {/* Error */}
-                {error && <div className="reg-error">{error}</div>}
-
-                {/* Form */}
-                <form onSubmit={submitHandler}>
-
-                  {/* Full Name */}
-                  <div className="reg-field">
-                    <input
-                      type="text"
-                      className="reg-input"
-                      placeholder="Full Name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  {/* Email */}
-                  <div className="reg-field">
-                    <input
-                      type="email"
-                      className="reg-input"
-                      placeholder="Email Address"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  {/* Password */}
-                  <div className="reg-field">
-                    <input
-                      type="password"
-                      className="reg-input"
-                      placeholder="Password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  {/* Board */}
-                  <div className="reg-field">
-                    <select
-                      className="reg-select"
-                      value={board}
-                      onChange={(e) => setBoard(e.target.value)}
-                      required
-                    >
-                      <option value="" disabled>Select Board</option>
-                      <option value="TS Board">TS Board</option>
-                      <option value="AP Board">AP Board</option>
-                      <option value="CBSE Board">CBSE Board</option>
-                      <option value="ICSE Board">ICSE Board</option>
-                    </select>
-                  </div>
-
-                  {/* Class Name */}
-                  <div className="reg-field">
-                    <select
-                      className="reg-select"
-                      value={className}
-                      onChange={(e) => setClassName(e.target.value)}
-                      required
-                    >
-                      <option value="" disabled>Select Class</option>
-                      {availableClasses.map((cls, idx) => (
-                        <option key={idx} value={cls}>{cls}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Terms */}
-                  <div className="reg-terms">
-                    <input
-                      type="checkbox"
-                      id="reg-terms-chk"
-                      checked={agreedToTerms}
-                      onChange={(e) => setAgreedToTerms(e.target.checked)}
-                      required
-                    />
-                    <label htmlFor="reg-terms-chk">
-                      I agree to <span>Terms &amp; Conditions</span>
-                    </label>
-                  </div>
-
-                  {/* Submit */}
-                  <button type="submit" className="reg-btn">
-                    Register
-                  </button>
-                </form>
-
-                {/* Login link */}
-                <div className="reg-login-link">
-                  <p>Already have an account?</p>
-                  <Link to="/login" className="reg-login-btn">Click here to Login</Link>
+              <form onSubmit={submitHandler} className="reg-form">
+                
+                <div className="reg-input-group">
+                  <input type="text" placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} required />
                 </div>
 
+                <div className="reg-input-group">
+                  <input type="email" placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                </div>
+
+                <div className="reg-input-group">
+                  <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                </div>
+
+                <div className="reg-input-group">
+                  <select value={board} onChange={(e) => setBoard(e.target.value)} required>
+                    <option value="" disabled>Select Board</option>
+                    <option value="TS Board">TS Board</option>
+                    <option value="AP Board">AP Board</option>
+                    <option value="CBSE Board">CBSE Board</option>
+                    <option value="ICSE Board">ICSE Board</option>
+                  </select>
+                </div>
+
+                <div className="reg-input-group">
+                  <select value={className} onChange={(e) => setClassName(e.target.value)} required>
+                    <option value="" disabled>Select Class</option>
+                    {availableClasses.map((cls, idx) => (
+                      <option key={idx} value={cls}>{cls}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="reg-checkbox-group">
+                  <input type="checkbox" id="terms" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} required />
+                  <label htmlFor="terms">I agree to <span>Terms &amp; Conditions</span></label>
+                </div>
+
+                <button type="submit" className="reg-submit-btn">REGISTER</button>
+              </form>
+
+              <div className="reg-login-link-container">
+                <p>Already have an account?</p>
+                <Link to="/login">Click here to Login</Link>
               </div>
+
             </div>
           </div>
         </div>
-
       </div>
     </>
   );

@@ -23,9 +23,10 @@ import courseItem2 from '../../assets/course-item-2.webp';
 import courseItem3 from '../../assets/course-item-3.webp';
 import courseItem4 from '../../assets/course-item-4.webp';
 import brandSymbol from '../../assets/logo copy.png';
+import logoImg from '../../assets/output-onlinepngtools.png';
 
 
-const CourseCard = ({ c, setSelectedCourse, setShowCheckout, userInfo }) => {
+const CourseCard = ({ c, setSelectedCourse, setSelectedDuration, setShowCheckout, userInfo }) => {
   const isBundle = c.type === 'bundle';
 
   // Normalize for comparison
@@ -39,74 +40,62 @@ const CourseCard = ({ c, setSelectedCourse, setShowCheckout, userInfo }) => {
 
   return (
     <motion.div
-      whileHover={{ y: -10, scale: 1.02 }}
-      className={`group bg-white p-10 rounded-[56px] border-2 transition-all duration-500 relative overflow-hidden flex flex-col justify-between h-full ${
-        !isEligible ? 'opacity-70 blur-[0.5px]' : 'hover:border-orange-500/20 hover:shadow-[0_20px_60px_rgba(241,97,38,0.1)] shadow-sm border-slate-50'
+      whileHover={{ y: -5, scale: 1.02 }}
+      className={`group bg-white p-6 rounded-3xl border transition-all duration-300 relative overflow-hidden flex flex-col justify-between h-full ${
+        !isEligible ? 'opacity-70 blur-[0.5px]' : 'hover:border-orange-500/30 hover:shadow-xl shadow-sm border-slate-100'
       }`}
     >
-      {/* Decorative Brand Elements */}
-      <div className={`absolute top-0 left-0 w-2 h-full ${isBundle ? 'bg-orange-500 shadow-[0_0_20px_rgba(241,97,38,0.3)]' : 'bg-[#002147]'} opacity-20`} />
+      {/* Decorative Top Bar instead of full side bar for wider cards */}
+      <div className={`absolute top-0 left-0 w-full h-1.5 ${isBundle ? 'bg-orange-500' : 'bg-[#002147]'} opacity-80`} />
       
-      {isBundle && (
-        <div className="absolute top-0 right-0 px-8 py-3 bg-orange-500 text-white font-black text-[10px] uppercase tracking-[0.3em] rounded-bl-[32px] shadow-lg z-10">
-          ALL SUBJECTS
-        </div>
-      )}
-
-      <div className="flex items-start justify-between mb-4">
-        <div className="w-12 h-12 bg-[#002147] rounded-xl flex items-center justify-center p-2.5 group-hover:scale-105 transition-all duration-300 shadow-sm relative">
-          <img src={brandSymbol} alt="logo" className="w-full h-full object-contain" />
+      {/* Header: Logo & Price compact */}
+      <div className="flex items-start justify-between mb-4 mt-2">
+        <div className="w-10 h-10 bg-[#002147] rounded-[10px] flex items-center justify-center p-0.5 shadow-sm group-hover:scale-105 transition-all">
+          <img src={brandSymbol} alt="logo" className="w-[85%] h-[85%] object-contain drop-shadow" />
         </div>
         <div className="text-right">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 italic">Full Access Fee</p>
-          <p className="text-3xl font-black text-[#002147] italic tracking-tighter leading-none tabular-nums">₹{(c.pricing?.oneMonth || c.price || 0).toLocaleString()}</p>
+          <p className="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-1.5">Tuition Fee</p>
+          <p className="text-2xl font-black text-[#002147] tracking-tight leading-none">₹{(c.pricing?.oneMonth || c.price || 0).toLocaleString()}</p>
         </div>
       </div>
 
-      <div className="mb-4 flex-1">
-        <p className="text-[9px] font-black text-orange-600 uppercase tracking-[0.3em] leading-none mb-1.5">
-          {Number(courseClass) === 11 ? 'Inter 1st Year' : Number(courseClass) === 12 ? 'Inter 2nd Year' : `Class ${courseClass}`} {courseBoard ? `(${courseBoard})` : ''}
-        </p>
-        <div className="flex items-center gap-2 mb-1.5">
+      <div className="mb-5 flex-1">
+        <div className="flex items-center gap-2.5 mb-2.5">
+          <p className="text-[12px] font-black text-orange-600 uppercase tracking-widest leading-none">
+            {Number(courseClass) === 11 ? 'Inter 1st Year' : Number(courseClass) === 12 ? 'Inter 2nd Year' : `Class ${courseClass}`}
+          </p>
           {courseBoard && (
-            <span className="px-2 py-0.5 bg-orange-100 text-orange-600 text-[8px] font-black rounded uppercase tracking-wider">
+            <span className="px-2.5 py-1 bg-[#00142e] text-orange-400 text-[9px] border border-[#002147] shadow-[0_2px_10px_rgba(0,33,71,0.2)] font-black rounded uppercase tracking-widest">
               {courseBoard}
             </span>
           )}
         </div>
-        <h3 className="text-[16px] font-black text-[#002147] leading-tight tracking-tight uppercase italic">{c.name}</h3>
-        {/* Features Preview */}
-        <div className="space-y-3">
-          {(c.subjects || []).slice(0, 4).map((sub, idx) => (
-            <div key={idx} className="flex items-center gap-3 text-slate-600 transition-all hover:translate-x-1 duration-300">
-              <div className="w-5 h-5 bg-emerald-50 rounded-lg flex items-center justify-center border border-emerald-100">
-                 <FiCheckCircle className="w-3 h-3 text-emerald-500 shrink-0" />
-              </div>
-              <span className="text-[11px] font-bold italic uppercase tracking-tight text-slate-500">{sub.name}</span>
-            </div>
-          ))}
-        </div>
+        <h3 className="text-base font-black text-[#002147] leading-snug tracking-tight mb-2 uppercase">{c.name}</h3>
+        
+        {/* Simplified Inline Subjects */}
+        <p className="text-[11px] font-semibold text-slate-500 leading-relaxed italic">
+          <span className="text-emerald-500 font-bold not-italic">Includes:</span> {c.subjects && c.subjects.length > 0 ? c.subjects.map(s => s.name).join(', ') : 'All foundational subjects'}
+        </p>
       </div>
 
-      <div className="relative z-10">
+      <div className="relative z-10 mt-auto">
         {isEligible ? (
             <button
               onClick={() => { 
                 setSelectedCourse(c); 
-                setSelectedDuration('oneMonth'); // Default to monthly
+                setSelectedDuration('oneMonth'); 
                 setShowCheckout(true); 
               }}
-              className="w-full bg-[#002147] text-white py-6 rounded-[28px] font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-orange-600 transition-all shadow-2xl active:scale-95 group/buy relative overflow-hidden"
+              className="w-full bg-[#002147] text-white py-3 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-orange-500 transition-colors shadow-md active:scale-95"
             >
-              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-              SELECT PLAN <FiArrowRight className="w-5 h-5 group-hover/buy:translate-x-2 transition-transform" />
+              VIEW CLASS <FiArrowRight className="w-4 h-4" />
             </button>
         ) : (
-          <div className="space-y-4">
-            <button disabled className="w-full bg-slate-50 text-slate-300 py-6 rounded-[28px] font-black text-xs uppercase tracking-[0.3em] cursor-not-allowed border-2 border-dashed border-slate-100 italic">
-              RESTRICTED ACCESS
+          <div className="space-y-2">
+            <button disabled className="w-full bg-slate-50 text-slate-400 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest cursor-not-allowed border border-dashed border-slate-200">
+              RESTRICTED
             </button>
-            <p className="text-[9px] text-center font-black text-rose-400 uppercase tracking-widest italic opacity-60">Only for {userClass || 'designated'} grade students</p>
+            <p className="text-[8px] text-center font-bold text-rose-400 uppercase tracking-widest">Only for {userClass || 'designated'} grade</p>
           </div>
         )}
       </div>
@@ -182,6 +171,7 @@ const StudentStore = () => {
   const [buyLoading, setBuyLoading] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
   const [selectedDuration, setSelectedDuration] = useState('oneMonth');
+  const [activeInterYear, setActiveInterYear] = useState(11); // Default to First Year (Class 11)
 
   // Helper to format board name from URL (e.g., 'ts-board' -> 'TS Board')
   const getFormattedBoard = (slug) => {
@@ -374,9 +364,9 @@ const StudentStore = () => {
             <div className="flex-1 h-[1px] bg-slate-50" />
           </div>
           {boardCourses.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {boardCourses.map(c => (
-                <CourseCard key={c.id} c={c} expandedId={expandedId} setExpandedId={setExpandedId} setSelectedCourse={setSelectedCourse} setShowCheckout={setShowCheckout} userInfo={userInfo} />
+                <CourseCard key={c.id} c={c} expandedId={expandedId} setExpandedId={setExpandedId} setSelectedCourse={setSelectedCourse} setSelectedDuration={setSelectedDuration} setShowCheckout={setShowCheckout} userInfo={userInfo} />
               ))}
             </div>
           )}
@@ -460,56 +450,102 @@ const StudentStore = () => {
           </section>
         )}
 
-        {interFirstYear.length > 0 && (
-          <section ref={seniorRef} className="scroll-mt-32 space-y-8">
-            <div className="flex items-center gap-6">
-              <div className="px-5 py-2 bg-orange-500 text-white rounded-2xl transform -skew-x-12"><h2 className="text-xl font-black italic tracking-tight uppercase leading-none skew-x-12">Inter First Year</h2></div>
-              <div className="flex-1 h-[2px] bg-slate-100" />
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">CLASS 11TH</span>
+        {(interFirstYear.length > 0 || interSecondYear.length > 0) && (
+          <div className="scroll-mt-32 space-y-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-1">
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setActiveInterYear(11)}
+                  className={`px-8 py-3 rounded-2xl font-black italic tracking-tight uppercase transition-all shadow-md transform -skew-x-12 ${
+                    activeInterYear === 11 ? 'bg-orange-500 text-white' : 'bg-[#002147] text-white hover:bg-orange-500'
+                  }`}
+                >
+                  <span className="inline-block skew-x-12">First Year</span>
+                </button>
+                <button 
+                  onClick={() => setActiveInterYear(12)}
+                  className={`px-8 py-3 rounded-2xl font-black italic tracking-tight uppercase transition-all shadow-md transform -skew-x-12 ${
+                    activeInterYear === 12 ? 'bg-orange-500 text-white' : 'bg-[#002147] text-white hover:bg-orange-500'
+                  }`}
+                >
+                  <span className="inline-block skew-x-12">Second Year</span>
+                </button>
+              </div>
+              <div className="hidden md:flex flex-1 h-[2px] bg-slate-100" />
+              <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] bg-slate-50 px-4 py-1.5 rounded-full border border-slate-100">
+                {activeInterYear === 11 ? 'CLASS 11TH' : 'CLASS 12TH'}
+              </span>
             </div>
-            {renderBoardGroups(interFirstYear)}
-          </section>
-        )}
 
-        {interSecondYear.length > 0 && (
-          <section className="scroll-mt-32 space-y-8">
-            <div className="flex items-center gap-6">
-              <div className="px-5 py-2 bg-indigo-600 text-white rounded-2xl transform -skew-x-12"><h2 className="text-xl font-black italic tracking-tight uppercase leading-none skew-x-12">Inter Second Year</h2></div>
-              <div className="flex-1 h-[2px] bg-slate-100" />
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">CLASS 12TH</span>
-            </div>
-            {renderBoardGroups(interSecondYear)}
-          </section>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeInterYear}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.35 }}
+              >
+                {activeInterYear === 11 ? renderBoardGroups(interFirstYear) : renderBoardGroups(interSecondYear)}
+              </motion.div>
+            </AnimatePresence>
+          </div>
         )}
       </div>
 
       <AnimatePresence>
         {showCheckout && selectedCourse && (
           <div 
+            key="checkout-overlay"
             onClick={() => setShowCheckout(false)}
-            className="fixed inset-0 z-[2100] flex items-center justify-center p-4 backdrop-blur-2xl bg-[#002147]/60 cursor-pointer"
+            className="fixed inset-0 z-[2100] flex items-center justify-center p-0 md:p-8 backdrop-blur-2xl bg-[#002147]/80 cursor-pointer"
           >
             <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }} 
+              initial={{ scale: 0.95, opacity: 0 }} 
               animate={{ scale: 1, opacity: 1 }} 
-              exit={{ scale: 0.9, opacity: 0 }} 
+              exit={{ scale: 0.95, opacity: 0 }} 
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-md bg-white rounded-[40px] overflow-hidden shadow-2xl cursor-default"
+              className="relative w-full h-full md:h-auto md:max-h-[90vh] md:max-w-5xl bg-white rounded-none md:rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)] cursor-default flex flex-col md:flex-row"
             >
-              <div className="bg-[#f16126] p-8 text-white relative">
+              {/* Left Side: Summary & Logo */}
+              <div className="w-full md:w-[45%] bg-[#002147] p-8 md:p-12 text-white relative flex flex-col items-center justify-center border-b-[8px] md:border-b-0 md:border-r-[8px] border-orange-500 overflow-y-auto">
+                 {/* Close button for Mobile only */}
                  <button 
                    onClick={() => setShowCheckout(false)} 
-                   className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors z-30 cursor-pointer"
+                   className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 md:hidden flex items-center justify-center hover:bg-white/20 transition-colors z-30 cursor-pointer"
                    aria-label="Close"
                  >
                    <FiX className="w-5 h-5 text-white" />
                  </button>
-                 <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-2 opacity-80">Finalize Enrollment</p>
-                 <h3 className="text-2xl font-black uppercase italic tracking-tight">{selectedCourse.name}</h3>
+
+                 <img src={logoImg} alt="Mye3 Logo" className="h-20 md:h-32 object-contain mb-8 filter drop-shadow-xl" />
+                 
+                 <p className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.4em] mb-4 text-orange-500">Summary</p>
+                 <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-center relative w-full mb-8 leading-[1.1]">
+                    <span className="relative z-10">{selectedCourse.name}</span>
+                 </h3>
+                 
+                 <div className="w-full flex justify-center">
+                    <div className="flex flex-wrap gap-2 justify-center max-w-[80%]">
+                      {selectedCourse.subjects && selectedCourse.subjects.length > 0 ? selectedCourse.subjects.map((sub, i) => (
+                        <span key={i} className="px-4 py-1.5 bg-white/10 rounded-full text-[10px] md:text-[11px] font-bold tracking-widest text-emerald-400 border border-emerald-500/30 shadow-inner">{sub.name}</span>
+                      )) : <span className="px-4 py-1.5 bg-white/10 rounded-full text-[10px] md:text-[11px] font-bold tracking-widest text-emerald-400 border border-emerald-500/30 shadow-inner">All Foundational Subjects</span>}
+                    </div>
+                 </div>
               </div>
-              <div className="p-8 space-y-5">
-                <div className="space-y-3">
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Select Duration</p>
+
+              {/* Right Side: Payment Form */}
+              <div className="w-full md:w-[55%] p-6 md:p-12 space-y-6 md:space-y-8 overflow-y-auto bg-slate-50 md:bg-white relative flex flex-col justify-center">
+                 {/* Close button for Desktop only */}
+                 <button 
+                   onClick={() => setShowCheckout(false)} 
+                   className="absolute top-8 right-8 w-12 h-12 rounded-full bg-slate-100 hidden md:flex items-center justify-center hover:bg-slate-200 transition-colors z-30 cursor-pointer shadow-sm"
+                   aria-label="Close"
+                 >
+                   <FiX className="w-6 h-6 text-slate-400" />
+                 </button>
+
+                 <div className="space-y-4">
+                   <p className="text-[11px] md:text-xs font-black uppercase tracking-[0.3em] text-[#002147] mb-2">Select Duration</p>
                   {['oneMonth', 'threeMonths', 'sixMonths', 'twelveMonths'].map(dur => {
                     const labelMap = {
                       oneMonth: 'Monthly Access',
@@ -517,8 +553,15 @@ const StudentStore = () => {
                       sixMonths: 'Half-Yearly (6 Months)',
                       twelveMonths: 'Annual (12 Months)'
                     };
-                    const price = selectedCourse.pricing?.[dur] || 0;
-                    if (price === 0 && dur !== 'oneMonth') return null; // Don't show inactive tiers
+                    let price = selectedCourse.pricing?.[dur] || 0;
+                    if (price === 0) {
+                      const basePrice = selectedCourse.pricing?.oneMonth || selectedCourse.price || 500;
+                      if (dur === 'oneMonth') price = basePrice;
+                      if (dur === 'threeMonths') price = Math.round((basePrice * 3) * 0.95);
+                      if (dur === 'sixMonths') price = Math.round((basePrice * 6) * 0.90);
+                      if (dur === 'twelveMonths') price = Math.round((basePrice * 12) * 0.85);
+                    }
+                    if (price === 0) return null; // Fallback if no price available
 
                     const isSelected = selectedDuration === dur;
 
@@ -540,11 +583,11 @@ const StudentStore = () => {
                             <p className={`text-xs font-black uppercase tracking-tight italic ${isSelected ? 'text-[#002147]' : 'text-slate-500'}`}>
                               {labelMap[dur]}
                             </p>
-                            {dur === 'twelveMonths' && <span className="text-[8px] font-black text-emerald-500 tracking-widest uppercase">Best Value</span>}
+                            {dur === 'twelveMonths' && <span className="text-[9px] md:text-[10px] font-black text-emerald-500 tracking-widest uppercase bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100 ml-2">Best Value</span>}
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className={`text-lg font-black italic tracking-tighter ${isSelected ? 'text-[#f16126]' : 'text-[#002147]'}`}>
+                          <p className={`text-xl md:text-2xl font-black italic tracking-tighter ${isSelected ? 'text-[#f16126]' : 'text-[#002147]'}`}>
                             ₹{price.toLocaleString()}
                           </p>
                         </div>
@@ -552,8 +595,8 @@ const StudentStore = () => {
                     );
                   })}
                 </div>
-                <button disabled={buyLoading} onClick={handlePayment} className="w-full bg-[#002147] text-white py-5 rounded-2xl font-black text-[13px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-orange-600 transition-all shadow-xl active:scale-95 disabled:opacity-50">
-                  {buyLoading ? 'Processing...' : <>Confirm & Pay <FiCreditCard className="w-5 h-5" /></>}
+                <button disabled={buyLoading} onClick={handlePayment} className="w-full bg-gradient-to-r from-[#002147] to-[#00152e] text-white py-4 md:py-5 rounded-2xl font-black text-sm md:text-[15px] uppercase tracking-[0.2em] flex items-center justify-center gap-4 hover:shadow-[0_10px_30px_rgba(0,33,71,0.4)] transition-all shadow-xl active:scale-95 disabled:opacity-50 mt-4 md:mt-8">
+                  {buyLoading ? 'Processing...' : <>Confirm & Pay <FiCreditCard className="w-5 h-5 md:w-6 md:h-6" /></>}
                 </button>
               </div>
             </motion.div>

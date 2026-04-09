@@ -33,7 +33,7 @@ import course4 from '../assets/course-item-4.webp';
 import discCourse1 from '../assets/disc-content-1.webp';
 import discCourse2 from '../assets/disc-content-2.webp';
 import discCourse3 from '../assets/disc-content-3.webp';
-import discCourse4 from '../assets/icse card.png';
+import discCourse4 from '../assets/ChatGPT Image Apr 8, 2026, 08_58_35 PM.png';
 import teacherJoinImg from '../assets/ChatGPT Image Mar 30, 2026, 04_09_31 AM.png';
 import successImg from '../assets/register img.png';
 
@@ -126,7 +126,6 @@ const DISCOVER_COURSES = [
     btnColor: '#3b82f6',    
     img: discCourse4,
     href: '/courses/board/icse-board',
-    fitInside: true,
   }
 ];
 
@@ -500,11 +499,11 @@ const Home = () => {
                   <h3 className="text-[17px] md:text-[28px] font-black text-slate-800 leading-[1.1] truncate md:whitespace-pre-line">{course.title}</h3>
                   <p className="text-slate-600 text-[10px] md:text-[13px] leading-snug line-clamp-2 md:line-clamp-none opacity-90">{course.desc}</p>
                   <Link 
-                    to={course.href || "/courses"}
+                    to={userInfo ? (course.href || "/courses") : "/register"}
                     className="inline-block w-fit px-4 py-1.5 md:px-7 md:py-2.5 rounded-xl text-white font-black text-[10px] md:text-[14px] shadow-lg shadow-orange-200 transition-all hover:-translate-y-1 hover:shadow-xl active:scale-95 mt-2 uppercase tracking-wider" 
                     style={{ background: course.btnColor }}
                   >
-                    Explore Now
+                    Enroll Now
                   </Link>
                 </div>
                 

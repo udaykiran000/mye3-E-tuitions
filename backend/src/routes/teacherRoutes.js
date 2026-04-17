@@ -11,7 +11,8 @@ const {
   uploadMaterial,
   deleteMaterial,
   getDashboardStats,
-  toggleMaterialVisibility
+  toggleMaterialVisibility,
+  getEarnings
 } = require('../controllers/teacherController');
 const { protect } = require('../middleware/authMiddleware');
 const { authorizeRoles } = require('../middleware/roleMiddleware');
@@ -32,5 +33,6 @@ router.post('/materials', upload.single('file'), uploadMaterial);
 router.delete('/materials/:id', deleteMaterial);
 router.patch('/materials/:id/visibility', toggleMaterialVisibility);
 router.get('/dashboard-stats', getDashboardStats);
+router.get('/earnings', getEarnings);
 
 module.exports = router;

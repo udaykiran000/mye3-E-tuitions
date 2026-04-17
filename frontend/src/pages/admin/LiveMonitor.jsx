@@ -31,7 +31,7 @@ const BOARD_THEMES = {
     'CBSE': { main: 'amber', primary: 'bg-amber-600', secondary: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-100', hover: 'hover:bg-amber-700', active: 'ring-amber-100' },
     'ICSE': { main: 'emerald', primary: 'bg-emerald-600', secondary: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-100', hover: 'hover:bg-emerald-700', active: 'ring-emerald-100' }
 };
-const PLATFORMS = ['Zoom', 'Google Meet', 'YouTube Live'];
+const PLATFORMS = ['Google Meet'];
 const DAYS_META = [
     { label: 'S', value: 0 }, { label: 'M', value: 1 }, { label: 'T', value: 2 },
     { label: 'W', value: 3 }, { label: 'T', value: 4 }, { label: 'F', value: 5 },
@@ -51,7 +51,8 @@ const fmtTime = d => {
         const date = new Date(d);
         if (isNaN(date.getTime())) return String(d);
         return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-    } catch { return String(d); }
+    } catch { return String(d);
+                                                                     }
 };
 const fmt24To12 = (t24) => {
     if (!t24) return '--:--';
@@ -68,9 +69,10 @@ const get24HFromDate = (d) => {
     } catch { return '10:00'; }
 };
 
-/** Returns 7 Date objects for Sun-Sat of the current week, all zeroed to midnight local */
-const getWeekDates = () => {
+/** Returns 7 Date objects for Sun-Sat of the week defined by weekOffset */
+const getWeekDates = (weekOffset = 0) => {
     const now = new Date();
+    now.setDate(now.getDate() + (weekOffset * 7));
     now.setHours(0, 0, 0, 0);
     const sunday = new Date(now);
     sunday.setDate(now.getDate() - now.getDay());
@@ -98,17 +100,34 @@ const EMPTY_CELL_FORM = {
     subjectName: '',
     teacherId: '',
     time: '10:00',
-    platform: 'Zoom',
+    endTime: '11:00',
+    platform: 'Google Meet',
     link: '',
     board: 'AP Board',
     selectedDays: [],   // day numbers 0-6
+    scheduleType: 'once', // 'once' | '1week' | '2weeks' | '1month' | 'everyday'
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
 const LiveMonitor = () => {
+    const handleStopRecurring = async (scheduleId) => {
+        if (!window.confirm('Are you sure you want to stop this daily recurring schedule? ALL future sessions in this series will be deleted.')) return;
+        try {
+            setCellSaving(true);
+            await axios.delete(`/admin/recurring-schedules/${scheduleId}`);
+            await fetchData();
+            setActiveCell(null);
+        } catch (err) {
+            setCellError(err.response?.data?.message || 'Error stopping recurring schedule');
+        } finally {
+            setCellSaving(false);
+        }
+    };
+
     // ── Data ──────────────────────────────────────────────────────────────────
     const [loading, setLoading] = useState(true);
     const [allSessions, setAllSessions] = useState([]);
+    const [recurringSchedules, setRecurringSchedules] = useState([]);
     const [allClasses, setAllClasses] = useState([]);
     const [allBundlesDB, setAllBundlesDB] = useState([]);
     const [allSubjectsDB, setAllSubjectsDB] = useState([]);
@@ -129,35 +148,102 @@ const LiveMonitor = () => {
     const [lastForm, setLastForm] = useState(null);  // remembered defaults
     const [deleteConfirmId, setDeleteConfirmId] = useState(null);  // session id awaiting delete confirm
 
-    const weekDates = useMemo(getWeekDates, []);
+    const [weekOffset, setWeekOffset] = useState(0);
+    const [monthOffset, setMonthOffset] = useState(0); // -1, 0, or +1 only
+    const weekDates = useMemo(() => getWeekDates(weekOffset), [weekOffset]);
     const today = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }, []);
+
+    // ── Month & Week Navigation Logic ────────────────────────────────────────
+    const navInfo = useMemo(() => {
+        const now = new Date();
+        const activeMonthIndex = now.getMonth() + monthOffset;
+        const activeYear = now.getFullYear() + Math.floor(activeMonthIndex / 12);
+        const normalizedMonth = ((activeMonthIndex % 12) + 12) % 12;
+        
+        const monthStart = new Date(activeYear, normalizedMonth, 1);
+        const monthEnd = new Date(activeYear, normalizedMonth + 1, 0);
+        
+        const curWeekStart = weekDates[0];
+        const curWeekEnd = weekDates[6];
+        
+        const prevWStart = new Date(curWeekStart); prevWStart.setDate(prevWStart.getDate() - 7);
+        const nextWStart = new Date(curWeekStart); nextWStart.setDate(nextWStart.getDate() + 7);
+        
+        return {
+            monthLabels: [-1, 0, 1].map(offset => {
+                const d = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+                return d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+            }),
+            activeMonth: normalizedMonth,
+            activeYear: activeYear,
+            weekLabel: `${curWeekStart.getDate()} ${curWeekStart.toLocaleDateString('en-IN',{month:'short'})} – ${curWeekEnd.getDate()} ${curWeekEnd.toLocaleDateString('en-IN',{month:'short'})}`,
+            canGoPrev: prevWStart >= monthStart || curWeekStart > monthStart,
+            canGoNext: nextWStart <= monthEnd
+        };
+    }, [monthOffset, weekDates]);
+
+    const handleMonthJump = (offset) => {
+        const now = new Date();
+        setMonthOffset(offset);
+        if (offset === 0) {
+            setWeekOffset(0);
+        } else {
+            const thisSun = new Date(now);
+            thisSun.setDate(now.getDate() - now.getDay());
+            thisSun.setHours(0,0,0,0);
+            const targetMonthStart = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+            const targetSun = new Date(targetMonthStart);
+            targetSun.setDate(targetMonthStart.getDate() - targetMonthStart.getDay());
+            setWeekOffset(Math.round((targetSun - thisSun) / (7 * 24 * 60 * 60 * 1000)));
+        }
+    };
+
 
     // ── Fetch all data ────────────────────────────────────────────────────────
     const fetchData = useCallback(async () => {
         try {
-            const [sessRes, classRes, subjRes, teachRes] = await Promise.all([
+            setLoading(true);
+            console.log('LiveMonitor: Fetching data...');
+            const [sessRes, classRes, subjRes, teachRes, recRes] = await Promise.allSettled([
                 axios.get('/admin/live-sessions'),
                 axios.get('/admin/classes'),
                 axios.get('/admin/subjects'),
                 axios.get('/admin/teachers-list'),
+                axios.get('/admin/recurring-schedules'),
             ]);
 
-            setAllSessions(sessRes.data || []);
-            setAllBundlesDB(classRes.data || []);
-            setAllSubjectsDB(subjRes.data || []);
-            setAllTeachers(teachRes.data || []);
+            const sessions = sessRes.status === 'fulfilled' ? sessRes.value.data : [];
+            const bundles = classRes.status === 'fulfilled' ? classRes.value.data : [];
+            const subjects = subjRes.status === 'fulfilled' ? subjRes.value.data : [];
+            const teachers = teachRes.status === 'fulfilled' ? teachRes.value.data : [];
+
+            if (classRes.status === 'rejected') console.error('LiveMonitor: Classes API failed:', classRes.reason);
+            if (subjRes.status === 'rejected') console.error('LiveMonitor: Subjects API failed:', subjRes.reason);
+
+            setAllSessions(sessions);
+            setAllBundlesDB(bundles);
+            setAllSubjectsDB(subjects);
+            setAllTeachers(teachers);
+            setRecurringSchedules(recRes.status === 'fulfilled' ? recRes.value.data : []);
 
             // Build sorted class list
-            const bundleNames = (classRes.data || []).map(b => b.className || `Class ${b.classLevel}`);
-            const subjectLevels = [...new Set((subjRes.data || []).map(s => `Class ${s.classLevel}`))];
+            const bundleNames = bundles.map(b => b.className || `Class ${b.classLevel}`);
+            const subjectLevels = subjects.map(s => `Class ${s.classLevel}`);
             const combined = [...new Set([...bundleNames, ...subjectLevels])];
+            
             combined.sort((a, b) => {
-                const n = s => parseInt((s.match(/\d+/) || [99])[0]);
+                const n = s => parseInt((String(s).match(/\d+/) || [0])[0]);
                 return n(a) - n(b);
             });
+            if (combined.length === 0) {
+                console.warn('LiveMonitor: No classes or subjects returned from backend.');
+            }
+            
+            console.log('LiveMonitor: Final matches:', { sessionsCount: sessions.length, classesCount: combined.length });
             setAllClasses(combined);
         } catch (err) {
-            console.error('fetchData failed:', err);
+            console.error('LiveMonitor: fetchData fatal error:', err);
+            alert('Data Fetch Failed! Check Backend Console.');
         } finally {
             setLoading(false);
         }
@@ -227,6 +313,7 @@ const LiveMonitor = () => {
                 subjectName: existingSession.subjectName,
                 teacherId: existingSession.teacherId?._id || existingSession.teacherId || '',
                 time: get24HFromDate(existingSession.startTime),
+                endTime: existingSession.endTime ? get24HFromDate(existingSession.endTime) : get24HFromDate(new Date(existingSession.startTime).getTime() + 60*60*1000),
                 platform: existingSession.platform,
                 link: existingSession.link,
                 board: existingSession.board || boardFilter,
@@ -240,6 +327,7 @@ const LiveMonitor = () => {
 
             // Smart Time Default: If last used time is already taken in this cell, find next hour
             let defaultTime = lastForm?.time || '10:00';
+            let defaultEndTime = lastForm?.endTime || '11:00';
             const [h, m] = defaultTime.split(':').map(Number);
 
             // Check if this specific subject+time exists on this day
@@ -255,6 +343,8 @@ const LiveMonitor = () => {
                 // If 10:00 is taken, try 11:00, 12:00 etc.
                 let nextHour = (h + 1) % 24;
                 defaultTime = `${nextHour.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                let nextEndHour = (nextHour + 1) % 24;
+                defaultEndTime = `${nextEndHour.toString().padStart(2, '0')}:${defaultEndTime.split(':')[1] || '00'}`;
             }
 
             setCellForm({
@@ -263,6 +353,7 @@ const LiveMonitor = () => {
                 subjectName: initSub?.subjectName || '',
                 teacherId: sameSubject ? (lastForm.teacherId || '') : '',
                 time: defaultTime,
+                endTime: defaultEndTime,
                 platform: lastForm?.platform || 'Zoom',
                 link: lastForm?.link || '',
                 board: boardFilter,
@@ -306,6 +397,7 @@ const LiveMonitor = () => {
         if (!sub) return setCellError('No subject found.');
 
         const [h, m] = cellForm.time.split(':').map(Number);
+        const [eh, em] = (cellForm.endTime || '11:00').split(':').map(Number);
         const board = cellForm.board || boardFilter;
         const payload = {
             platform: cellForm.platform,
@@ -355,14 +447,40 @@ const LiveMonitor = () => {
                 // UPDATE single session
                 const startTime = new Date(date);
                 startTime.setHours(h, m, 0, 0);
-                await axios.put(`/admin/live-sessions/${cellForm.sessionId}`, { ...payload, startTime: startTime.toISOString() });
-            } else {
-                // CREATE — one entry per selected day within THIS week
-                const days = cellForm.selectedDays.length > 0 ? cellForm.selectedDays : [date.getDay()];
-                const sessions = days.map(dayNum => {
-                    const dt = dateForDayInWeek(date, dayNum, h, m);
-                    return { ...payload, startTime: dt.toISOString() };
+                const endTime = new Date(date);
+                endTime.setHours(eh, em, 0, 0);
+                await axios.put(`/admin/live-sessions/${cellForm.sessionId}`, { ...payload, startTime: startTime.toISOString(), endTime: endTime.toISOString() });
+
+            } else if (cellForm.scheduleType === 'everyday') {
+                // INFINITE RECURRING — send template to backend cron system
+                const startTime = new Date(date);
+                startTime.setHours(h, m, 0, 0);
+                const endTime = new Date(date);
+                endTime.setHours(eh, em, 0, 0);
+                await axios.post('/admin/live-sessions', {
+                    isRecurring: true,
+                    recurringTemplate: { ...payload, startTime: startTime.toISOString(), endTime: endTime.toISOString() }
                 });
+
+            } else {
+                // CREATE — Bulk sessions for selected days or a date range
+                const days = cellForm.selectedDays.length > 0 ? cellForm.selectedDays : [date.getDay()];
+                const sessions = [];
+
+                // Determine how many weeks to generate
+                let weekCount = 1;
+                if (cellForm.scheduleType === '2weeks') weekCount = 2;
+                else if (cellForm.scheduleType === '1month') weekCount = 4;
+
+                for (let w = 0; w < weekCount; w++) {
+                    days.forEach(dayNum => {
+                        const anchor = new Date(date);
+                        anchor.setDate(anchor.getDate() + w * 7);
+                        const dt = dateForDayInWeek(anchor, dayNum, h, m);
+                        const endDt = dateForDayInWeek(anchor, dayNum, eh, em);
+                        sessions.push({ ...payload, startTime: dt.toISOString(), endTime: endDt.toISOString() });
+                    });
+                }
                 await axios.post('/admin/live-sessions', { sessions });
             }
             // Remember settings for next time
@@ -388,26 +506,75 @@ const LiveMonitor = () => {
             {/* ── Header ───────────────────────────────────────────────────── */}
             <div className="flex items-center justify-between pb-2 border-b border-slate-200">
                 <div>
-                    <h1 className="text-xl font-bold text-slate-800">
+                    <h1 className="text-xl font-bold text-slate-800 flex items-center gap-3">
                         Live &amp; Schedule Class
                     </h1>
-                    <p className="text-sm font-medium text-slate-500 mt-0.5">
-                        Full Class Timetable &amp; Real-time Live Monitoring
-                    </p>
+                    <div className="flex flex-col gap-2 mt-1">
+                        {viewType === 'roster' && (
+                            <>
+                                <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                                    <button
+                                        onClick={() => handleMonthJump(-1)}
+                                        className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all ${monthOffset === -1 ? 'bg-white text-[#002147] shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
+                                    >
+                                        ← {navInfo.monthLabels[0]}
+                                    </button>
+                                    <button
+                                        onClick={() => handleMonthJump(0)}
+                                        className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all ${monthOffset === 0 ? 'bg-[#002147] text-white shadow-md' : 'text-slate-500 hover:text-slate-700'}`}
+                                    >
+                                        📅 {navInfo.monthLabels[1]}
+                                    </button>
+                                    <button
+                                        onClick={() => handleMonthJump(1)}
+                                        className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all ${monthOffset === 1 ? 'bg-white text-[#002147] shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
+                                    >
+                                        {navInfo.monthLabels[2]} →
+                                    </button>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        disabled={!navInfo.canGoPrev}
+                                        onClick={() => setWeekOffset(w => w - 1)}
+                                        className="px-2 py-1 rounded-lg border border-slate-200 bg-white text-slate-600 font-black hover:text-indigo-600 hover:border-indigo-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm"
+                                    >
+                                        ‹
+                                    </button>
+                                    <span className="text-xs font-bold text-slate-600 bg-white px-3 py-1 rounded-lg border border-slate-200">{navInfo.weekLabel}</span>
+                                    <button
+                                        disabled={!navInfo.canGoNext}
+                                        onClick={() => setWeekOffset(w => w + 1)}
+                                        className="px-2 py-1 rounded-lg border border-slate-200 bg-white text-slate-600 font-black hover:text-indigo-600 hover:border-indigo-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm"
+                                    >
+                                        ›
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
                 </div>
-                <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
-                    <button
-                        onClick={() => setViewType('roster')}
-                        className={`px-3 py-1.5 rounded-md flex items-center gap-2 text-xs font-semibold transition-colors ${viewType === 'roster' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                    >
-                        <Calendar className="w-4 h-4" /> Timetable
-                    </button>
-                    <button
-                        onClick={() => setViewType('monitor')}
-                        className={`px-3 py-1.5 rounded-md flex items-center gap-2 text-xs font-semibold transition-colors ${viewType === 'monitor' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                    >
-                        <Activity className="w-4 h-4" /> Monitors
-                    </button>
+                <div className="flex items-center gap-4">
+                    {recurringSchedules.length > 0 && (
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-xs font-bold shadow-sm animate-in fade-in zoom-in duration-500">
+                            <Activity className="w-3.5 h-3.5" />
+                            <span>{recurringSchedules.length} Active Series</span>
+                        </div>
+                    )}
+                    <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
+                        <button
+                            onClick={() => setViewType('roster')}
+                            className={`px-3 py-1.5 rounded-md flex items-center gap-2 text-xs font-semibold transition-colors ${viewType === 'roster' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                        >
+                            <Calendar className="w-4 h-4" /> Timetable
+                        </button>
+                        <button
+                            onClick={() => setViewType('monitor')}
+                            className={`px-3 py-1.5 rounded-md flex items-center gap-2 text-xs font-semibold transition-colors ${viewType === 'monitor' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                        >
+                            <Activity className="w-4 h-4" /> Monitors
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -426,10 +593,11 @@ const LiveMonitor = () => {
                                     </th>
                                     {weekDates.map((date, di) => {
                                         const isToday = isSameDay(date, today);
-                                        const isSunday = date.getDay() === 0;
+                                        const isInActiveMonth = date.getMonth() === navInfo.activeMonth;
+
                                         return (
-                                            <th key={di} className={`p-3 text-center transition-all relative border-r border-slate-50 last:border-r-0 ${isToday ? `${BOARD_THEMES[boardFilter].primary} text-white shadow-sm z-30` : 'text-slate-600 bg-white'} w-[13.5%] min-w-[120px]`}>
-                                                <div className="flex flex-col items-center gap-0.5">
+                                            <th key={di} className={`p-3 text-center transition-all relative border-r border-slate-50 last:border-r-0 ${isToday ? `${BOARD_THEMES[boardFilter].primary} text-white shadow-sm z-30` : `${isInActiveMonth ? 'bg-white' : 'bg-slate-50/50'} text-slate-600`} w-[13.5%] min-w-[120px]`}>
+                                                <div className={`flex flex-col items-center gap-0.5 ${!isInActiveMonth ? 'opacity-50' : ''}`}>
                                                     <span className={`text-sm font-bold ${isToday ? 'text-white' : 'text-slate-800'}`}>{fmtDay(date)}</span>
                                                     <span className={`text-xs font-medium ${isToday ? 'text-white/80' : 'text-slate-500'}`}>{fmtDate(date)}</span>
                                                 </div>
@@ -440,7 +608,18 @@ const LiveMonitor = () => {
                             </thead>
 
                             <tbody>
-                                {allClasses.map((lvl, ridx) => {
+                                {allClasses.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={8} className="p-10 text-center">
+                                            <div className="flex flex-col items-center gap-3 text-slate-400">
+                                                <AlertCircle className="w-10 h-10" />
+                                                <p className="font-semibold">No classes or subjects found.</p>
+                                                <p className="text-xs">Add classes in Pricing Management or check backend connection.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    allClasses.map((lvl, ridx) => {
                                     const isExpanded = expandedClasses.includes(lvl);
                                     const subs = getSubjectsForLevel(lvl);
 
@@ -484,13 +663,14 @@ const LiveMonitor = () => {
                                                                         return (
                                                                             <button
                                                                                 key={b}
-                                                                                onClick={e => { e.stopPropagation(); setBoardFilter(b); }}
+                                                                                onClick={e => { e.stopPropagation(); setBoardFilter(b);
+                                                                     }}
                                                                                 className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1 ${isActive ? `bg-white text-indigo-600 shadow-sm` : 'text-slate-500 hover:text-slate-700'}`}
                                                                             >
                                                                                 {b}
                                                                             </button>
                                                                         );
-                                                                    })}
+                                                                     })}
                                                                 </div>
                                                             )}
                                                             <div className={`px-4 py-2 rounded-md border flex items-center gap-2 text-xs font-semibold transition-colors ${isExpanded ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-600 group-hover:border-indigo-300 group-hover:text-indigo-600'}`}>
@@ -513,7 +693,13 @@ const LiveMonitor = () => {
 
                                                             {weekDates.map((date, di) => {
                                                                 const isToday = isSameDay(date, today);
-                                                                const isSunday = date.getDay() === 0;
+                                                                const isInActiveMonth = date.getMonth() === navInfo.activeMonth;
+
+                                                                const activeRecurring = recurringSchedules.find(rs => 
+                                                                    rs.classLevel === lvl && 
+                                                                    (rs.subjectName || '').trim().toLowerCase() === (sub.subjectName || '').trim().toLowerCase() && 
+                                                                    rs.board === boardFilter
+                                                                );
 
                                                                 const daySessions = allSessions
                                                                     .filter(s => {
@@ -543,7 +729,7 @@ const LiveMonitor = () => {
                                                                     );
 
                                                                 return (
-                                                                    <td key={di} className={`p-2 align-top transition-colors border-r border-slate-50 last:border-r-0 ${isToday ? `bg-${BOARD_THEMES[boardFilter].main}-50/30 border-x border-${BOARD_THEMES[boardFilter].main}-100` : ''}`}>
+                                                                    <td key={di} className={`p-2 align-top transition-colors border-r border-slate-50 last:border-r-0 ${isToday ? `bg-${BOARD_THEMES[boardFilter].main}-50/30 border-x border-${BOARD_THEMES[boardFilter].main}-100` : !isInActiveMonth ? 'bg-slate-50/30' : ''}`}>
                                                                         <div className="flex flex-col h-full min-h-[60px]">
                                                                             <div className="flex flex-col gap-2 flex-grow">
                                                                                 {daySessions.map((s, sidx) => {
@@ -584,6 +770,11 @@ const LiveMonitor = () => {
                                                                                             </div>
 
                                                                                             <div className="pl-1.5 mt-1">
+                                                                                                {s.recurringScheduleId && (
+                                                                                                    <div className="absolute top-1 right-1 p-0.5 bg-amber-100 rounded group-hover/card:bg-amber-200 transition-colors" title="Daily Recurring Series">
+                                                                                                        <Activity className="w-2.5 h-2.5 text-amber-600" />
+                                                                                                    </div>
+                                                                                                )}
                                                                                                 {isLive ? (
                                                                                                     <a href={s.link} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-1 w-full py-1 bg-rose-600 text-white rounded text-[10px] font-semibold hover:bg-rose-700 transition-colors">
                                                                                                         <Video className="w-3 h-3" /> Join Now
@@ -597,7 +788,7 @@ const LiveMonitor = () => {
                                                                                             </div>
                                                                                         </div>
                                                                                     );
-                                                                                })}
+                                                                     })}
                                                                             </div>
 
                                                                             {isPreviewDay && (
@@ -628,7 +819,8 @@ const LiveMonitor = () => {
                                                                                     </select>
 
                                                                                     <div className="bg-slate-50 p-2 rounded-md border border-slate-200">
-                                                                                        <div className="flex gap-1.5 items-center">
+                                                                                        <div className="flex gap-1.5 items-center mb-2">
+                                                                                            <span className="text-[10px] font-bold text-slate-500 uppercase w-8">Start</span>
                                                                                             {(() => {
                                                                                                 const [h24, m24] = (cellForm.time || '10:00').split(':').map(Number);
                                                                                                 const h12 = h24 % 12 || 12;
@@ -638,6 +830,35 @@ const LiveMonitor = () => {
                                                                                                     if (np === 'PM' && h < 12) h += 12;
                                                                                                     if (np === 'AM' && h === 12) h = 0;
                                                                                                     setCellForm(f => ({ ...f, time: `${h.toString().padStart(2, '0')}:${nm.toString().padStart(2, '0')}` }));
+                                                                                                };
+                                                                                                return (
+                                                                                                    <>
+                                                                                                        <select value={h12} onChange={e => update(e.target.value, m24, period)} className="flex-1 text-sm font-medium bg-white border border-slate-200 p-1 rounded">
+                                                                                                            {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(h => <option key={h} value={h}>{h}</option>)}
+                                                                                                        </select>
+                                                                                                        <span className="font-bold text-slate-400">:</span>
+                                                                                                        <select value={m24} onChange={e => update(h12, e.target.value, period)} className="flex-1 text-sm font-medium bg-white border border-slate-200 p-1 rounded">
+                                                                                                            {['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'].map(m => <option key={m} value={m}>{m}</option>)}
+                                                                                                        </select>
+                                                                                                        <select value={period} onChange={e => update(h12, m24, e.target.value)} className={`flex-1 text-sm font-medium bg-white border border-slate-200 p-1 rounded`}>
+                                                                                                            <option value="AM">AM</option>
+                                                                                                            <option value="PM">PM</option>
+                                                                                                        </select>
+                                                                                                    </>
+                                                                                                );
+                                                                                            })()}
+                                                                                        </div>
+                                                                                        <div className="flex gap-1.5 items-center">
+                                                                                            <span className="text-[10px] font-bold text-slate-500 uppercase w-8">End</span>
+                                                                                            {(() => {
+                                                                                                const [h24, m24] = (cellForm.endTime || '11:00').split(':').map(Number);
+                                                                                                const h12 = h24 % 12 || 12;
+                                                                                                const period = h24 >= 12 ? 'PM' : 'AM';
+                                                                                                const update = (nh, nm, np) => {
+                                                                                                    let h = parseInt(nh);
+                                                                                                    if (np === 'PM' && h < 12) h += 12;
+                                                                                                    if (np === 'AM' && h === 12) h = 0;
+                                                                                                    setCellForm(f => ({ ...f, endTime: `${h.toString().padStart(2, '0')}:${nm.toString().padStart(2, '0')}` }));
                                                                                                 };
                                                                                                 return (
                                                                                                     <>
@@ -677,24 +898,44 @@ const LiveMonitor = () => {
                                                                                     </div>
 
                                                                                     {!cellForm.sessionId && (
-                                                                                        <div className="pt-2">
-                                                                                            <div className="flex justify-between gap-1">
-                                                                                                {DAYS_META.map((day, idx) => {
-                                                                                                    const isSelected = (cellForm.selectedDays || []).includes(day.value);
-                                                                                                    return (
-                                                                                                        <button
-                                                                                                            type="button" key={idx}
-                                                                                                            onClick={() => setCellForm(prev => {
-                                                                                                                const sel = prev.selectedDays || [];
-                                                                                                                return { ...prev, selectedDays: sel.includes(day.value) ? sel.filter(d => d !== day.value) : [...sel, day.value] };
-                                                                                                            })}
-                                                                                                            className={`w-6 h-6 rounded text-[10px] font-semibold flex items-center justify-center transition-colors ${isSelected ? `bg-indigo-600 text-white` : 'bg-slate-50 text-slate-500 border border-slate-200 hover:bg-slate-100'}`}
-                                                                                                        >
-                                                                                                            {day.label}
-                                                                                                        </button>
-                                                                                                    );
-                                                                                                })}
+                                                                                        <div className="pt-2 space-y-2">
+                                                                                            {/* Day picker — hidden for everyday repeat */}
+                                                                                            {cellForm.scheduleType !== 'everyday' && (
+                                                                                                <div className="flex justify-between gap-1">
+                                                                                                    {DAYS_META.map((day, idx) => {
+                                                                                                        const isSelected = (cellForm.selectedDays || []).includes(day.value);
+                                                                                                        return (
+                                                                                                            <button
+                                                                                                                type="button" key={idx}
+                                                                                                                onClick={() => setCellForm(prev => {
+                                                                                                                    const sel = prev.selectedDays || [];
+                                                                                                                    return { ...prev, selectedDays: sel.includes(day.value) ? sel.filter(d => d !== day.value) : [...sel, day.value] };                                                                     })}
+                                                                                                                className={`w-6 h-6 rounded text-[10px] font-semibold flex items-center justify-center transition-colors ${isSelected ? `bg-indigo-600 text-white` : 'bg-slate-50 text-slate-500 border border-slate-200 hover:bg-slate-100'}`}
+                                                                                                            >
+                                                                                                                {day.label}
+                                                                                                            </button>
+                                                                                                        );
+                                                                     })}
+                                                                                                </div>
+                                                                                            )}
+                                                                                            {/* Repeat / Schedule Type */}
+                                                                                            <div className="flex items-center gap-2">
+                                                                                                <span className="text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">Repeat</span>
+                                                                                                <select
+                                                                                                    value={cellForm.scheduleType}
+                                                                                                    onChange={e => setCellForm(f => ({ ...f, scheduleType: e.target.value }))}
+                                                                                                    className="flex-1 text-xs font-semibold bg-white border border-slate-200 rounded-md px-2 py-1 outline-none focus:border-indigo-500"
+                                                                                                >
+                                                                                                    <option value="once">No Repeat (Once)</option>
+                                                                                                    <option value="1week">Repeat for 1 Week</option>
+                                                                                                    <option value="2weeks">Repeat for 2 Weeks</option>
+                                                                                                    <option value="1month">Repeat for 1 Month</option>
+                                                                                                    <option value="everyday">Every Day (Infinite 🔁)</option>
+                                                                                                </select>
                                                                                             </div>
+                                                                                            {cellForm.scheduleType === 'everyday' && (
+                                                                                                <p className="text-[10px] font-semibold text-indigo-600 bg-indigo-50 p-1.5 rounded-md">⚡ Sessions will auto-generate daily until end of next month. Cron job renews them automatically!</p>
+                                                                                            )}
                                                                                         </div>
                                                                                     )}
 
@@ -731,7 +972,8 @@ const LiveMonitor = () => {
                                             )}
                                         </React.Fragment>
                                     );
-                                })}
+                                })
+                            )}
                             </tbody>
                         </table>
                     </div>

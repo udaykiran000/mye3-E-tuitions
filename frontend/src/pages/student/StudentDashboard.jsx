@@ -40,6 +40,9 @@ const StudentDashboard = () => {
   const [courses, setCourses] = useState([]);
   const [buyLoading, setBuyLoading] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState('oneMonth');
+  const [isInter, setIsInter] = useState(false);
+  const [availableSubjects, setAvailableSubjects] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -66,7 +69,7 @@ const StudentDashboard = () => {
       // Find matching course for this student
       const userClass = userInfo?.className?.replace(/\D/g, '') || '';
       const userBoard = userInfo?.board?.toUpperCase().trim() || '';
-      
+
       const match = catalog.find(c => {
         const courseClass = String(c.classLevel || c.className || '').replace(/\D/g, '') || '';
         const studentBoard = userBoard.replace(' BOARD', '');
@@ -74,6 +77,26 @@ const StudentDashboard = () => {
         return userClass === courseClass && (courseBoard === studentBoard || !courseBoard);
       });
       setMatchingCourse(match);
+
+      const classNum = parseInt(userClass || '0');
+      setIsInter(classNum >= 11);
+      if (classNum >= 11) {
+        const studentBoard = userBoard.replace(' BOARD', '');
+        // Include both type='subject' AND individual Inter bundles (class 11/12 bundles per subject)
+        // Filter out ₹0 subjects — those are not yet priced/available
+        const interItems = catalog.filter(c => {
+          const cLevel = parseInt(c.classLevel || '0');
+          const cBoard = c.board?.toUpperCase().replace(' BOARD', '').trim() || '';
+          const boardMatch = !cBoard || !studentBoard || cBoard === studentBoard;
+          const hasPrice = (c.pricing?.oneMonth || c.price || 0) > 0;
+          return cLevel === classNum && boardMatch && hasPrice && (
+            c.type === 'subject' ||
+            // Individual subject bundles for Inter
+            (c.type === 'bundle')
+          );
+        });
+        setAvailableSubjects(interItems);
+      }
     } catch (error) {
       console.error('Error fetching catalog');
     }
@@ -87,50 +110,82 @@ const StudentDashboard = () => {
   }, [fetchData, fetchCourses]);
 
   const handlePayment = async () => {
-    if (!selectedCourse) return;
-    setBuyLoading(true);
-    try {
+    let itemsToProcess = [];
+    if (isInter) {
+      if (selectedItems.length === 0) return toast.error('కనీసం ఒక్క subject అయినా select చేయండి');
+      itemsToProcess = selectedItems.map(item => {
+        const basePrice = item.pricing?.[selectedDuration] || item.pricing?.oneMonth || item.price || 0;
+        let price = basePrice;
+        if (!item.pricing?.[selectedDuration]) {
+          const base = item.pricing?.oneMonth || item.price || 500;
+          if (selectedDuration === 'oneMonth') price = base;
+          if (selectedDuration === 'threeMonths') price = Math.round(base * 3 * 0.95);
+          if (selectedDuration === 'sixMonths') price = Math.round(base * 6 * 0.90);
+          if (selectedDuration === 'twelveMonths') price = Math.round(base * 12 * 0.85);
+        }
+        return {
+          amount: price,
+          packageName: `${item.name} - ${selectedDuration}`,
+          courseName: `${item.className || userInfo?.className} - ${item.name}`,
+          referenceId: item._id || item.id,
+          type: 'subject',
+          subscriptionType: selectedDuration
+        };
+      });
+    } else {
+      if (!selectedCourse) return;
       const price = selectedCourse.pricing?.[selectedDuration] || selectedCourse.price || 0;
-      await axios.post('/student/mock-payment-success', {
+      itemsToProcess = [{
         amount: price,
         packageName: `${selectedCourse.className || selectedCourse.name} - ${selectedDuration}`,
+        courseName: selectedCourse.className || selectedCourse.name,
         referenceId: selectedCourse._id || selectedCourse.id,
         type: selectedCourse.type || 'bundle',
         subscriptionType: selectedDuration
-      });
-      toast.success('Course Purchased Successfully!');
+      }];
+    }
+
+    setBuyLoading(true);
+    try {
+      await axios.post('/student/mock-payment-success', { items: itemsToProcess });
+      toast.success('Successfully Purchased! 🎉');
+
+      const addedSubs = itemsToProcess.map(payload => ({
+        name: payload.courseName || payload.packageName.split(' - ')[0],
+        type: payload.type,
+        subscriptionType: payload.subscriptionType,
+        expiryDate: new Date(Date.now() + (payload.subscriptionType === 'oneMonth' ? 30 : (payload.subscriptionType === 'threeMonths' ? 90 : (payload.subscriptionType === 'sixMonths' ? 180 : 365))) * 86400000).toISOString(),
+        referenceId: payload.referenceId,
+        purchaseDate: new Date().toISOString()
+      }));
 
       const updatedUser = {
         ...userInfo,
-        activeSubscriptions: [
-          ...(userInfo.activeSubscriptions || []),
-          {
-            name: selectedCourse.className || selectedCourse.name,
-            type: selectedCourse.type || 'bundle',
-            subscriptionType: selectedDuration,
-            expiryDate: new Date(Date.now() + (selectedDuration === 'oneMonth' ? 30 : selectedDuration === 'threeMonths' ? 90 : 365) * 86400000),
-            referenceId: selectedCourse._id || selectedCourse.id,
-            purchaseDate: new Date()
-          }
-        ]
+        activeSubscriptions: [...(userInfo.activeSubscriptions || []), ...addedSubs]
       };
+
       dispatch(setCredentials(updatedUser));
 
       setTimeout(() => {
         setBuyLoading(false);
         setShowCheckout(false);
-        fetchData(); // Refresh local list
+        setSelectedItems([]);
+        fetchData();
       }, 1500);
     } catch (error) {
-      toast.error('Payment Failed');
+      toast.error('Payment Failed. Try again.');
       setBuyLoading(false);
     }
   };
 
   const openCheckout = () => {
-    if (matchingCourse) {
+    if (isInter) {
+      if (availableSubjects.length === 0) return toast.error('No subjects found for your class');
+      setSelectedCourse({ name: userInfo?.className || 'Inter subjects' });
+      setShowCheckout(true);
+    } else if (matchingCourse) {
       setSelectedCourse(matchingCourse);
-      setSelectedDuration('oneMonth'); // Default to monthly
+      setSelectedDuration('oneMonth');
       setShowCheckout(true);
     } else {
       toast.error('Class pricing not available');
@@ -206,71 +261,71 @@ const StudentDashboard = () => {
       {/* 2. MAIN HUB */}
       {!hasSubscriptions ? (
         <div className="space-y-10">
-           <motion.div
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             className="bg-[#002147] rounded-[56px] p-8 md:p-14 text-white relative overflow-hidden shadow-2xl border-b-[12px] border-indigo-600/10"
-           >
-              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#f16126] rounded-full blur-[140px] -mr-64 -mt-64 opacity-10 pointer-events-none" />
-              <div className="flex flex-col lg:flex-row items-center gap-12 relative z-10">
-                 <div className="flex-1 space-y-8 text-center lg:text-left">
-                    <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-white/10 text-[#f16126] rounded-full border border-white/5 text-[10px] font-black uppercase tracking-widest backdrop-blur-md">
-                       Restricted Mode
-                    </div>
-                    <h2 className="text-4xl md:text-7xl font-black uppercase tracking-tighter leading-none">Unlock your <br/><span className="text-[#f16126]">Academic Future</span></h2>
-                    <p className="text-indigo-200/60 font-bold text-xs md:text-sm uppercase tracking-[0.3em] max-w-xl leading-relaxed">Join your specialized class bubble today to access live sessions and strategy notes.</p>
-                 </div>
-                 
-                 <div className="w-full lg:w-[340px] bg-white rounded-[44px] p-8 text-slate-900 shadow-2xl transform lg:rotate-2 hover:rotate-0 transition-transform duration-700">
-                    <div className="flex justify-between items-start mb-8">
-                       <img src={logoImg} className="h-10 object-contain" alt="logo" />
-                       <div className="text-right">
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Entry At</p>
-                          <p className="text-2xl font-black text-[#002147] tracking-tighter leading-none tabular-nums">
-                             ₹{(matchingCourse?.pricing?.oneMonth || matchingCourse?.price || 200).toLocaleString()}
-                          </p>
-                       </div>
-                    </div>
-                    <div className="space-y-5 mb-10">
-                       <h4 className="text-xl font-black uppercase text-[#002147] tracking-tight">{userInfo?.className || 'Class Bundle'}</h4>
-                       <div className="space-y-3">
-                          {['Live Daily Classes', 'Full Subject Notes', 'Recorded Recaps', 'Weekly Mock Tests'].map((item, i) => (
-                             <div key={i} className="flex items-center gap-4 group/item">
-                                <div className="w-5 h-5 bg-emerald-50 rounded-full flex items-center justify-center">
-                                   <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                                </div>
-                                <span className="text-[11px] font-black uppercase text-slate-500 tracking-wide">{item}</span>
-                             </div>
-                          ))}
-                       </div>
-                    </div>
-                    <button 
-                      onClick={openCheckout}
-                      className="w-full py-6 bg-[#002147] text-white rounded-[24px] font-black text-[13px] uppercase tracking-widest hover:bg-[#f16126] transition-all shadow-2xl flex items-center justify-center gap-4 active:scale-95 group/btn"
-                    >
-                       Enroll Now <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-2 transition-transform" />
-                    </button>
-                 </div>
-              </div>
-           </motion.div>
-           
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[
-                { title: 'Live Mentorship', desc: 'Real-time doubt clearing with top faculty.', icon: MonitorPlay, bg: 'bg-indigo-50/50', iconColor: 'text-[#002147]' },
-                { title: 'Full Curriculum', desc: 'Specially targeted for Board Excellence.', icon: Zap, bg: 'bg-orange-50/50', iconColor: 'text-[#f16126]' },
-                { title: 'Smart Analytics', desc: 'Track your growth and learning speed.', icon: Trophy, bg: 'bg-emerald-50/50', iconColor: 'text-emerald-500' }
-              ].map((box, i) => (
-                <div key={i} className="bg-white p-10 rounded-[52px] border border-slate-50 shadow-sm hover:shadow-xl transition-all text-center space-y-6 group">
-                   <div className={`w-16 h-16 ${box.bg} rounded-[24px] flex items-center justify-center mx-auto ${box.iconColor} group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500`}>
-                      <box.icon className="w-8 h-8" />
-                   </div>
-                   <div className="space-y-2 text-center">
-                      <h4 className="text-sm font-black uppercase text-[#002147] tracking-[0.2em]">{box.title}</h4>
-                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed line-clamp-2">{box.desc}</p>
-                   </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-[#002147] rounded-[56px] p-8 md:p-14 text-white relative overflow-hidden shadow-2xl border-b-[12px] border-indigo-600/10"
+          >
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#f16126] rounded-full blur-[140px] -mr-64 -mt-64 opacity-10 pointer-events-none" />
+            <div className="flex flex-col lg:flex-row items-center gap-12 relative z-10">
+              <div className="flex-1 space-y-8 text-center lg:text-left">
+                <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-white/10 text-[#f16126] rounded-full border border-white/5 text-[10px] font-black uppercase tracking-widest backdrop-blur-md">
+                  Restricted Mode
                 </div>
-              ))}
-           </div>
+                <h2 className="text-4xl md:text-7xl font-black uppercase tracking-tighter leading-none">Unlock your <br /><span className="text-[#f16126]">Academic Future</span></h2>
+                <p className="text-indigo-200/60 font-bold text-xs md:text-sm uppercase tracking-[0.3em] max-w-xl leading-relaxed">Join your specialized class bubble today to access live sessions and strategy notes.</p>
+              </div>
+
+              <div className="w-full lg:w-[340px] bg-white rounded-[44px] p-8 text-slate-900 shadow-2xl transform lg:rotate-2 hover:rotate-0 transition-transform duration-700">
+                <div className="flex justify-between items-start mb-8">
+                  <img src={logoImg} className="h-10 object-contain" alt="logo" />
+                  <div className="text-right">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Entry At</p>
+                    <p className="text-2xl font-black text-[#002147] tracking-tighter leading-none tabular-nums">
+                      ₹{(matchingCourse?.pricing?.oneMonth || matchingCourse?.price || 200).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-5 mb-10">
+                  <h4 className="text-xl font-black uppercase text-[#002147] tracking-tight">{userInfo?.className || 'Class Bundle'}</h4>
+                  <div className="space-y-3">
+                    {['Live Daily Classes', 'Full Subject Notes', 'Recorded Recaps', 'Weekly Mock Tests'].map((item, i) => (
+                      <div key={i} className="flex items-center gap-4 group/item">
+                        <div className="w-5 h-5 bg-emerald-50 rounded-full flex items-center justify-center">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                        </div>
+                        <span className="text-[11px] font-black uppercase text-slate-500 tracking-wide">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <button
+                  onClick={openCheckout}
+                  className="w-full py-6 bg-[#002147] text-white rounded-[24px] font-black text-[13px] uppercase tracking-widest hover:bg-[#f16126] transition-all shadow-2xl flex items-center justify-center gap-4 active:scale-95 group/btn"
+                >
+                  Enroll Now <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-2 transition-transform" />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { title: 'Live Mentorship', desc: 'Real-time doubt clearing with top faculty.', icon: MonitorPlay, bg: 'bg-indigo-50/50', iconColor: 'text-[#002147]' },
+              { title: 'Full Curriculum', desc: 'Specially targeted for Board Excellence.', icon: Zap, bg: 'bg-orange-50/50', iconColor: 'text-[#f16126]' },
+              { title: 'Smart Analytics', desc: 'Track your growth and learning speed.', icon: Trophy, bg: 'bg-emerald-50/50', iconColor: 'text-emerald-500' }
+            ].map((box, i) => (
+              <div key={i} className="bg-white p-10 rounded-[52px] border border-slate-50 shadow-sm hover:shadow-xl transition-all text-center space-y-6 group">
+                <div className={`w-16 h-16 ${box.bg} rounded-[24px] flex items-center justify-center mx-auto ${box.iconColor} group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500`}>
+                  <box.icon className="w-8 h-8" />
+                </div>
+                <div className="space-y-2 text-center">
+                  <h4 className="text-sm font-black uppercase text-[#002147] tracking-[0.2em]">{box.title}</h4>
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed line-clamp-2">{box.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         <div className="space-y-10">
@@ -446,32 +501,171 @@ const StudentDashboard = () => {
               className="relative w-full max-w-md bg-white rounded-[48px] overflow-hidden shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="bg-[#002147] p-10 text-white relative border-b-8 border-[#f16126]">
-                <button onClick={() => setShowCheckout(false)} className="absolute top-8 right-8 w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center hover:bg-[#f16126] transition-all"><FiX className="w-6 h-6" /></button>
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-3 text-indigo-300">Class Selection</p>
-                <h3 className="text-3xl font-black uppercase tracking-tighter">{selectedCourse.className || selectedCourse.name}</h3>
+              <div className="bg-[#002147] p-8 text-white relative border-b-8 border-[#f16126]">
+                <button onClick={() => setShowCheckout(false)} className="absolute top-6 right-6 w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center hover:bg-[#f16126] transition-all"><FiX className="w-5 h-5" /></button>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-2 text-indigo-300">{isInter ? 'Inter Subject-Wise Enrollment' : 'Class Selection'}</p>
+                <h3 className="text-2xl font-black uppercase tracking-tighter">{isInter ? (userInfo?.className || 'Intermediate') : (selectedCourse?.className || selectedCourse?.name)}</h3>
+                {isInter && selectedItems.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {selectedItems.map(s => (
+                      <span key={s._id || s.id} className="px-2 py-0.5 bg-[#f16126]/80 text-white text-[9px] font-black uppercase tracking-wider rounded-md">{s.name}</span>
+                    ))}
+                  </div>
+                )}
               </div>
-              <div className="p-10 space-y-8">
-                <div className="space-y-4">
-                  {['oneMonth', 'threeMonths', 'sixMonths', 'twelveMonths'].map(dur => {
-                    const price = selectedCourse.pricing?.[dur];
-                    if (price === 0 && dur !== 'oneMonth') return null;
-                    const isSelected = selectedDuration === dur;
-                    return (
-                      <button key={dur} onClick={() => setSelectedDuration(dur)} className={`w-full flex items-center justify-between p-5 rounded-3xl border-2 transition-all ${isSelected ? 'border-[#f16126] bg-orange-50/50 shadow-lg' : 'border-slate-50 hover:border-slate-100'}`}>
-                        <div className="flex items-center gap-4">
-                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-[#f16126] bg-[#f16126]' : 'border-slate-200'}`}>
-                            {isSelected && <div className="w-2.5 h-2.5 bg-white rounded-full" />}
-                          </div>
-                          <p className={`text-xs font-black uppercase ${isSelected ? 'text-[#002147]' : 'text-slate-400'}`}>{dur.replace(/([A-Z])/g, ' $1')}</p>
+              <div className="p-6 space-y-5 overflow-y-auto max-h-[70vh]">
+                {isInter ? (
+                  <div className="space-y-5">
+
+                    {/* Step 1 — Subject Selection */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-5 h-5 rounded-full bg-[#002147] flex items-center justify-center shrink-0">
+                          <span className="text-[8px] font-black text-white">1</span>
                         </div>
-                        <p className={`text-xl font-black ${isSelected ? 'text-[#f16126]' : 'text-[#002147]'}`}>₹{price?.toLocaleString()}</p>
-                      </button>
-                    );
-                  })}
-                </div>
-                <button disabled={buyLoading} onClick={handlePayment} className="w-full bg-[#f16126] text-white py-6 rounded-3xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-4 hover:bg-[#002147] transition-all shadow-xl active:scale-95 disabled:opacity-50">
-                  {buyLoading ? 'Authorizing...' : <><span className="mt-0.5">Approve & Pay</span> <FiCreditCard className="w-6 h-6" /></>}
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#002147]">Select Subjects</p>
+                      </div>
+                      <div className="space-y-2 max-h-[26vh] overflow-y-auto pr-1">
+                        {availableSubjects.length === 0 ? (
+                          <div className="py-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Subjects not yet available for your class/board.</p>
+                            <p className="text-[9px] text-slate-300 mt-1">Contact admin to add subjects.</p>
+                          </div>
+                        ) : availableSubjects.map(sub => {
+                          const price = sub.pricing?.oneMonth || sub.price || 0;
+                          const isSelected = selectedItems.some(i => (i._id || i.id) === (sub._id || sub.id));
+                          return (
+                            <button key={sub._id || sub.id} onClick={() => {
+                              const key = sub._id || sub.id;
+                              if (isSelected) setSelectedItems(selectedItems.filter(i => (i._id || i.id) !== key));
+                              else setSelectedItems([...selectedItems, sub]);
+                            }} className={`w-full flex items-center justify-between p-3.5 rounded-2xl border-2 transition-all active:scale-[0.98] ${isSelected
+                                ? 'border-[#002147] bg-[#f8fbff] shadow-md'
+                                : 'border-slate-100 hover:border-[#002147]/30 bg-slate-50 hover:bg-white'
+                              }`}>
+                              <div className="flex items-center gap-3">
+                                <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${isSelected ? 'border-[#002147] bg-[#002147]' : 'border-slate-300 bg-white'
+                                  }`}>
+                                  {isSelected && (
+                                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  )}
+                                </div>
+                                <p className={`text-[11px] font-black uppercase text-left tracking-wide ${isSelected ? 'text-[#002147]' : 'text-slate-500'
+                                  }`}>{sub.name}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className={`text-[13px] font-black ${isSelected ? 'text-[#f16126]' : 'text-slate-400'
+                                  }`}>₹{price.toLocaleString()}</p>
+                                <p className="text-[8px] text-slate-300 font-bold">/month</p>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="border-t border-dashed border-slate-200" />
+
+                    {/* Step 2 — Duration Selection (always visible, dims until subject selected) */}
+                    <div className={`transition-all duration-300 ${selectedItems.length === 0 ? 'opacity-40 pointer-events-none select-none' : 'opacity-100'
+                      }`}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-all ${selectedItems.length > 0 ? 'bg-[#f16126]' : 'bg-slate-200'
+                          }`}>
+                          <span className="text-[8px] font-black text-white">2</span>
+                        </div>
+                        <p className={`text-[10px] font-black uppercase tracking-[0.2em] transition-colors ${selectedItems.length > 0 ? 'text-[#002147]' : 'text-slate-400'
+                          }`}>Select Duration</p>
+                        {selectedItems.length === 0 && (
+                          <span className="text-[8px] text-slate-300 font-bold italic ml-auto">↑ Select a subject first</span>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {['oneMonth', 'threeMonths', 'sixMonths', 'twelveMonths'].map(dur => {
+                          const labelMap = { oneMonth: 'Monthly', threeMonths: 'Quarterly', sixMonths: 'Half-Yearly', twelveMonths: 'Annual' };
+                          const subLabelMap = { oneMonth: '1 Month', threeMonths: '3 Months · -5%', sixMonths: '6 Months · -10%', twelveMonths: '12 Months · -15%' };
+                          const discountMap = { oneMonth: 1, threeMonths: 0.95 * 3, sixMonths: 0.90 * 6, twelveMonths: 0.85 * 12 };
+                          const total = selectedItems.reduce((sum, item) => {
+                            const base = item.pricing?.oneMonth || item.price || 0;
+                            const p = item.pricing?.[dur] || Math.round(base * discountMap[dur]);
+                            return sum + p;
+                          }, 0);
+                          const isSelected = selectedDuration === dur;
+                          return (
+                            <button key={dur} onClick={() => setSelectedDuration(dur)}
+                              className={`flex flex-col items-start p-3 rounded-2xl border-2 transition-all active:scale-95 ${isSelected
+                                  ? 'border-[#f16126] bg-orange-50 shadow-md'
+                                  : 'border-slate-100 hover:border-orange-200 bg-white'
+                                }`}>
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <div className={`w-3 h-3 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-[#f16126] bg-[#f16126]' : 'border-slate-300'
+                                  }`}>
+                                  {isSelected && <div className="w-1 h-1 bg-white rounded-full" />}
+                                </div>
+                                <span className={`text-[9px] font-black uppercase ${isSelected ? 'text-[#f16126]' : 'text-slate-500'
+                                  }`}>{labelMap[dur]}</span>
+                                {dur === 'twelveMonths' && (
+                                  <span className="text-[7px] bg-emerald-500 text-white px-1 py-0.5 rounded font-black">BEST</span>
+                                )}
+                              </div>
+                              <p className={`text-[8px] font-bold ${isSelected ? 'text-orange-400' : 'text-slate-300'
+                                }`}>{subLabelMap[dur]}</p>
+                              <p className={`text-base font-black mt-1 tracking-tight ${isSelected ? 'text-[#002147]' : 'text-slate-600'
+                                }`}>₹{total > 0 ? total.toLocaleString() : '—'}</p>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {['oneMonth', 'threeMonths', 'sixMonths', 'twelveMonths'].map(dur => {
+                      const price = selectedCourse?.pricing?.[dur];
+                      if (!price || (price === 0 && dur !== 'oneMonth')) return null;
+                      const isSelected = selectedDuration === dur;
+                      return (
+                        <button key={dur} onClick={() => setSelectedDuration(dur)} className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${isSelected ? 'border-[#f16126] bg-orange-50/50 shadow-lg' : 'border-slate-100 hover:border-slate-200'
+                          }`}>
+                          <div className="flex items-center gap-4">
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-[#f16126] bg-[#f16126]' : 'border-slate-200'
+                              }`}>
+                              {isSelected && <div className="w-2 h-2 bg-white rounded-full" />}
+                            </div>
+                            <p className={`text-xs font-black uppercase ${isSelected ? 'text-[#002147]' : 'text-slate-400'
+                              }`}>{dur.replace(/([A-Z])/g, ' $1')}</p>
+                          </div>
+                          <p className={`text-xl font-black ${isSelected ? 'text-[#f16126]' : 'text-[#002147]'
+                            }`}>₹{price?.toLocaleString()}</p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                <button
+                  disabled={buyLoading || (isInter && selectedItems.length === 0)}
+                  onClick={handlePayment}
+                  className="w-full bg-[#f16126] text-white py-5 rounded-3xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-4 hover:bg-[#002147] transition-all shadow-xl active:scale-95 disabled:opacity-40 mt-2"
+                >
+                  {buyLoading ? 'Authorizing...' : (
+                    <>
+                      <span>Approve & Pay</span>
+                      {isInter && selectedItems.length > 0 && (
+                        <span className="bg-white/20 px-2 py-0.5 rounded-lg text-[10px]">
+                          ₹{selectedItems.reduce((sum, item) => {
+                            const base = item.pricing?.oneMonth || item.price || 0;
+                            const dm = { oneMonth: 1, threeMonths: 2.85, sixMonths: 5.4, twelveMonths: 10.2 };
+                            return sum + Math.round(base * (dm[selectedDuration] || 1));
+                          }, 0).toLocaleString()}
+                        </span>
+                      )}
+                      <FiCreditCard className="w-5 h-5" />
+                    </>
+                  )}
                 </button>
               </div>
             </motion.div>

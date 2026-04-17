@@ -12,6 +12,7 @@ import {
   Activity,
   LogOut,
   FileText,
+  Banknote,
   X
 } from 'lucide-react';
 import logoImg from '../../assets/output-onlinepngtools.png';
@@ -30,6 +31,7 @@ const AdminSidebar = ({ onClose }) => {
     { icon: LayoutDashboard, label: 'Summary', path: '/admin/dashboard' },
     { icon: IndianRupee, label: 'Fees Control', path: '/admin/pricing' },
     { icon: UserSquare2, label: 'Teachers', path: '/admin/teachers' },
+    { icon: Banknote, label: 'Teacher Payroll', path: '/admin/payouts' },
     { icon: Users, label: 'Students', path: '/admin/students' },
     { icon: Activity, label: 'Live & Schedule Class', path: '/admin/live-monitor' },
     { icon: CreditCard, label: 'Fee Payments', path: '/admin/transactions' },

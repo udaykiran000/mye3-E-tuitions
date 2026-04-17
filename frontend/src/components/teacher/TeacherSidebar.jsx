@@ -11,7 +11,8 @@ import {
   User,
   X,
   History,
-  FileText
+  FileText,
+  Banknote
 } from 'lucide-react';
 
 import logoImg from '../../assets/output-onlinepngtools.png';
@@ -32,6 +33,7 @@ const TeacherSidebar = ({ onClose }) => {
     { icon: FileText, label: 'Notes', path: '/teacher/materials' },
     { icon: Video, label: 'Live Classes', path: '/teacher/live-schedule' },
     { icon: History, label: 'Past Sessions', path: '/teacher/past-sessions' },
+    { icon: Banknote, label: 'My Earnings', path: '/teacher/earnings' },
     { icon: User, label: 'Profile', path: '/teacher/profile' },
   ];
 
@@ -86,13 +88,6 @@ const TeacherSidebar = ({ onClose }) => {
 
       {/* Bottom Actions */}
       <div className="p-8 space-y-6">
-         <div className="px-6 py-4 bg-white/5 rounded-[24px] border border-white/5 hidden md:block">
-            <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] text-center mb-2">Faculty Status</p>
-            <div className="flex items-center justify-center gap-2">
-               <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-               <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Online</span>
-            </div>
-         </div>
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-4 px-6 py-5 rounded-[24px] font-black text-xs uppercase tracking-[0.3em] text-white/40 hover:text-orange-400 hover:bg-orange-500/10 transition-all group"

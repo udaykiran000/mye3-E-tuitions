@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const liveSessionSchema = new mongoose.Schema({
+const recurringScheduleSchema = new mongoose.Schema({
   teacherId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   subjectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject' },
   classLevel: { type: String, required: true },
@@ -9,10 +9,13 @@ const liveSessionSchema = new mongoose.Schema({
   title: { type: String, required: true },
   platform: { type: String, enum: ['Zoom', 'Google Meet', 'YouTube Live'], required: true },
   link: { type: String, required: true },
-  startTime: { type: Date, required: true },
-  endTime: { type: Date, required: true },
-  status: { type: String, enum: ['upcoming', 'live', 'ended'], default: 'upcoming' },
-  recurringScheduleId: { type: mongoose.Schema.Types.ObjectId, ref: 'RecurringSchedule' }
+  
+  // Specific for recurring rule
+  recurrenceType: { type: String, enum: ['daily'], default: 'daily' },
+  startHour: { type: Number, required: true }, // hour (0-23)
+  startMinute: { type: Number, required: true }, // minute (0-59)
+  durationMinutes: { type: Number, required: true },
+  isActive: { type: Boolean, default: true }
 }, { timestamps: true });
 
-module.exports = mongoose.model('LiveSession', liveSessionSchema);
+module.exports = mongoose.model('RecurringSchedule', recurringScheduleSchema);

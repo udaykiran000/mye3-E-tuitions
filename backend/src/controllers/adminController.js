@@ -6,6 +6,8 @@ const ClassBundle = require('../models/ClassBundle');
 const Material = require('../models/Material');
 const Transaction = require('../models/Transaction');
 const LiveSession = require('../models/LiveSession');
+const RecurringSchedule = require('../models/RecurringSchedule');
+const { generateSessionsFromTemplate, getEndOfNextMonth } = require('../cron/recurringScheduler');
 
 exports.updatePricing = async (req, res, next) => {
   try {
@@ -430,7 +432,7 @@ exports.extendSubscription = async (req, res, next) => {
 // @access  Admin
 exports.addTeacher = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, payRates } = req.body;
     const userExists = await User.findOne({ email });
 
     if (userExists) return res.status(400).json({ message: 'User already exists' });
@@ -439,6 +441,7 @@ exports.addTeacher = async (req, res, next) => {
       name,
       email,
       password,
+      payRates: payRates || { rateA: 0, rateB: 0 },
       role: 'teacher'
     });
 
@@ -459,6 +462,7 @@ exports.updateUser = async (req, res, next) => {
     user.name = req.body.name || user.name;
     user.email = req.body.email || user.email;
     if (req.body.password) user.password = req.body.password;
+    if (req.body.payRates) user.payRates = req.body.payRates;
 
     const updatedUser = await user.save();
     res.status(200).json({ _id: updatedUser._id, name: updatedUser.name, email: updatedUser.email });
@@ -728,7 +732,52 @@ exports.getAllTransactions = async (req, res, next) => {
 // @access  Admin
 exports.createLiveSession = async (req, res, next) => {
   try {
-    const { sessions } = req.body;
+    const { sessions, isRecurring, recurringTemplate } = req.body;
+
+    if (isRecurring && recurringTemplate) {
+      // 1. Calculate duration and standard start time format
+      const start = new Date(recurringTemplate.startTime);
+      const end = new Date(recurringTemplate.endTime);
+      if (end <= start) return res.status(400).json({ message: 'End time must be after start time' });
+      
+      const startHour = start.getHours();
+      const startMinute = start.getMinutes();
+      const durationMinutes = (end - start) / 60000;
+
+      // 2. Prepare Template Document
+      const templateData = {
+        teacherId: recurringTemplate.teacherId,
+        subjectId: recurringTemplate.subjectId,
+        classLevel: recurringTemplate.classLevel,
+        subjectName: recurringTemplate.subjectName,
+        board: recurringTemplate.board || 'TS Board',
+        title: recurringTemplate.title || `${recurringTemplate.subjectName} Live`,
+        platform: recurringTemplate.platform,
+        link: recurringTemplate.link,
+        recurrenceType: 'daily',
+        startHour,
+        startMinute,
+        durationMinutes,
+        isActive: true
+      };
+
+      if (templateData.subjectId && !/^[0-9a-fA-F]{24}$/.test(templateData.subjectId)) {
+        delete templateData.subjectId;
+      }
+
+      // 3. Save Recurring Schedule Config
+      const template = await RecurringSchedule.create(templateData);
+
+      // 4. Generate Sessions till End of Next Month Instantly
+      const generateStartDate = new Date(start); // starts directly from the selected first day
+      await generateSessionsFromTemplate(template, generateStartDate, getEndOfNextMonth());
+
+      // Let connected clients know an update happened (could emit multiple if preferred)
+      const io = req.app.get('io');
+      if (io) io.emit('live-session-update', { type: 'bulk-recurring' });
+
+      return res.status(201).json({ message: 'Infinite Recurring Schedule created! Sessions populated till next month.' });
+    }
 
     // Validate if it's a bulk creation (sessions array) or single legacy format
     const sessionsToCreate = sessions || [req.body];
@@ -736,6 +785,50 @@ exports.createLiveSession = async (req, res, next) => {
     // Use Upsert logic for each session to prevent duplicates
     const createdSessions = [];
     for (const s of sessionsToCreate) {
+      if (!s.endTime) {
+        return res.status(400).json({ message: 'endTime is required for live sessions.' });
+      }
+
+      const newStart = new Date(s.startTime);
+      const newEnd = new Date(s.endTime);
+
+      if (newEnd <= newStart) {
+        return res.status(400).json({ message: 'End time must be after start time.' });
+      }
+
+      const matchUpsertCond = {
+        classLevel: s.classLevel,
+        subjectName: s.subjectName,
+        startTime: newStart
+      };
+
+      // 1. Teacher Conflict
+      const teacherConflict = await LiveSession.findOne({
+        teacherId: s.teacherId,
+        $or: [
+          { startTime: { $lt: newEnd }, endTime: { $gt: newStart } }
+        ],
+        // Exclude the session that would be overwritten by upsert
+        $nor: [matchUpsertCond]
+      });
+
+      if (teacherConflict) {
+        return res.status(409).json({ message: `Teacher is already booked for another session during this time.` });
+      }
+
+      // 2. Class Level Conflict
+      const classLevelConflict = await LiveSession.findOne({
+        classLevel: s.classLevel,
+        $or: [
+          { startTime: { $lt: newEnd }, endTime: { $gt: newStart } }
+        ],
+        $nor: [matchUpsertCond]
+      });
+
+      if (classLevelConflict) {
+        return res.status(409).json({ message: `A scheduled session already exists for ${s.classLevel} during this time.` });
+      }
+
       const cleanSession = {
         ...s,
         title: s.title || `${s.subjectName} Live`,
@@ -748,11 +841,7 @@ exports.createLiveSession = async (req, res, next) => {
 
       // Upsert: Match by class, subject, and EXACT startTime
       const doc = await LiveSession.findOneAndUpdate(
-        {
-          classLevel: cleanSession.classLevel,
-          subjectName: cleanSession.subjectName,
-          startTime: new Date(cleanSession.startTime)
-        },
+        matchUpsertCond,
         cleanSession,
         { upsert: true, new: true, setDefaultsOnInsert: true }
       ).populate('teacherId', 'name email');
@@ -782,16 +871,52 @@ exports.createLiveSession = async (req, res, next) => {
 // @access  Admin
 exports.updateLiveSession = async (req, res, next) => {
   try {
-    const { title, platform, link, teacherId, startTime, classLevel, subjectName, subjectId, board } = req.body;
+    const { title, platform, link, teacherId, startTime, endTime, classLevel, subjectName, subjectId, board } = req.body;
 
     const session = await LiveSession.findById(req.params.id);
     if (!session) return res.status(404).json({ message: 'Session not found' });
+
+    const newStart = new Date(startTime || session.startTime);
+    const newEnd = new Date(endTime || session.endTime);
+
+    if (newEnd <= newStart) {
+      return res.status(400).json({ message: 'End time must be after start time.' });
+    }
+
+    const proposedClassLevel = classLevel || session.classLevel;
+    const proposedTeacherId = teacherId || session.teacherId;
+
+    // Conflict Check (excluding current session)
+    const teacherConflict = await LiveSession.findOne({
+      _id: { $ne: session._id },
+      teacherId: proposedTeacherId,
+      $or: [
+        { startTime: { $lt: newEnd }, endTime: { $gt: newStart } }
+      ]
+    });
+
+    if (teacherConflict) {
+      return res.status(409).json({ message: `Teacher is already booked for another session during this time.` });
+    }
+
+    const classLevelConflict = await LiveSession.findOne({
+      _id: { $ne: session._id },
+      classLevel: proposedClassLevel,
+      $or: [
+        { startTime: { $lt: newEnd }, endTime: { $gt: newStart } }
+      ]
+    });
+
+    if (classLevelConflict) {
+      return res.status(409).json({ message: `A scheduled session already exists for ${proposedClassLevel} during this time.` });
+    }
 
     session.title = title || `${subjectName || session.subjectName} Live`;
     session.platform = platform || session.platform;
     session.link = link || session.link;
     session.teacherId = teacherId || session.teacherId;
     session.startTime = startTime || session.startTime;
+    session.endTime = endTime || session.endTime;
     session.classLevel = classLevel || session.classLevel;
     session.subjectName = subjectName || session.subjectName;
     if (board) session.board = board;
@@ -850,6 +975,67 @@ exports.getAllLiveSessions = async (req, res, next) => {
       .populate('teacherId', 'name email')
       .sort({ startTime: 1 });
     res.status(200).json(sessions);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get all active recurring schedules
+// @route   GET /api/admin/recurring-schedules
+// @access  Admin
+exports.getRecurringSchedules = async (req, res, next) => {
+  try {
+    const schedules = await RecurringSchedule.find({ isActive: true }).populate('teacherId', 'name email');
+    res.status(200).json(schedules);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update a recurring schedule template
+// @route   PUT /api/admin/recurring-schedules/:id
+// @access  Admin
+exports.updateRecurringSchedule = async (req, res, next) => {
+  try {
+    const { teacherId, platform, link, title } = req.body;
+    const schedule = await RecurringSchedule.findByIdAndUpdate(
+      req.params.id,
+      { teacherId, platform, link, title },
+      { new: true }
+    );
+    if (!schedule) return res.status(404).json({ message: 'Schedule not found' });
+
+    // Sync future sessions
+    await LiveSession.updateMany(
+      { recurringScheduleId: schedule._id, startTime: { $gt: new Date() }, status: 'upcoming' },
+      { teacherId, platform, link, title }
+    );
+
+    res.status(200).json(schedule);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Stop/Delete a recurring schedule
+// @route   DELETE /api/admin/recurring-schedules/:id
+// @access  Admin
+exports.stopRecurringSchedule = async (req, res, next) => {
+  try {
+    const schedule = await RecurringSchedule.findById(req.params.id);
+    if (!schedule) return res.status(404).json({ message: 'Schedule not found' });
+
+    schedule.isActive = false;
+    await schedule.save();
+
+    // Delete future sessions to clean up
+    await LiveSession.deleteMany({
+      recurringScheduleId: schedule._id,
+      startTime: { $gt: new Date() },
+      status: 'upcoming'
+    });
+
+    res.status(200).json({ message: 'Recurring schedule stopped and future sessions removed.' });
   } catch (error) {
     next(error);
   }

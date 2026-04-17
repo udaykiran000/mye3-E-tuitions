@@ -66,59 +66,69 @@ exports.getCatalog = async (req, res, next) => {
 // @access  Student
 exports.processMockPayment = async (req, res, next) => {
   try {
-    const { amount, packageName, referenceId, type, subscriptionType } = req.body;
+    const { amount, packageName, referenceId, type, subscriptionType, items } = req.body;
 
     const student = await User.findById(req.user._id);
     if (!student) return res.status(404).json({ message: 'Student not found' });
 
-    // Calculate duration in months
-    let monthsToAdd = 1;
-    if (subscriptionType === 'threeMonths') monthsToAdd = 3;
-    else if (subscriptionType === 'sixMonths') monthsToAdd = 6;
-    else if (subscriptionType === 'twelveMonths') monthsToAdd = 12;
-
-    // Create the transaction record
-    const transaction = await Transaction.create({
-      studentId: req.user._id,
-      amount: amount || 0,
-      packageName,
-      referenceId: String(referenceId),
-      type: type || 'bundle',
-      status: 'success'
-    });
-
-    // Update student's subscriptions
     if (!student.activeSubscriptions) student.activeSubscriptions = [];
+    let itemsToProcess = [];
 
-    const existingSubIndex = student.activeSubscriptions.findIndex(sub =>
-      String(sub.referenceId) === String(referenceId)
-    );
-
-    let baseDate = new Date(); // Default: Start from today
-    if (existingSubIndex > -1) {
-      const currentExpiry = new Date(student.activeSubscriptions[existingSubIndex].expiryDate);
-      if (currentExpiry > new Date()) {
-        baseDate = currentExpiry; // Additive: Start from existing expiry
-      }
+    if (items && Array.isArray(items)) {
+      itemsToProcess = items;
+    } else {
+      itemsToProcess = [{ amount, packageName, referenceId, type, subscriptionType }];
     }
 
-    const expiryDate = new Date(baseDate);
-    expiryDate.setMonth(expiryDate.getMonth() + monthsToAdd);
+    for (const item of itemsToProcess) {
+      const { amount: itemAmount, packageName: itemPackageName, referenceId: itemRefId, type: itemType, subscriptionType: itemSubType } = item;
 
-    if (existingSubIndex > -1) {
-      // Additive / Extension
-      student.activeSubscriptions[existingSubIndex].expiryDate = expiryDate;
-      student.activeSubscriptions[existingSubIndex].subscriptionType = subscriptionType || 'full';
-    } else {
-      // New Enrollment
-      student.activeSubscriptions.push({
-        name: packageName.split(' - ')[0], // Pure name without duration suffix
-        type: type || 'bundle',
-        subscriptionType: subscriptionType || 'full',
-        referenceId: String(referenceId),
-        expiryDate,
-        purchaseDate: new Date()
+      // Calculate duration in months
+      let monthsToAdd = 1;
+      if (itemSubType === 'threeMonths') monthsToAdd = 3;
+      else if (itemSubType === 'sixMonths') monthsToAdd = 6;
+      else if (itemSubType === 'twelveMonths') monthsToAdd = 12;
+
+      // Create the transaction record
+      await Transaction.create({
+        studentId: req.user._id,
+        amount: itemAmount || 0,
+        packageName: itemPackageName,
+        referenceId: String(itemRefId),
+        type: itemType || 'bundle',
+        status: 'success'
       });
+
+      const existingSubIndex = student.activeSubscriptions.findIndex(sub =>
+        String(sub.referenceId) === String(itemRefId)
+      );
+
+      let baseDate = new Date(); // Default: Start from today
+      if (existingSubIndex > -1) {
+        const currentExpiry = new Date(student.activeSubscriptions[existingSubIndex].expiryDate);
+        if (currentExpiry > new Date()) {
+          baseDate = currentExpiry; // Additive: Start from existing expiry
+        }
+      }
+
+      const expiryDate = new Date(baseDate);
+      expiryDate.setMonth(expiryDate.getMonth() + monthsToAdd);
+
+      if (existingSubIndex > -1) {
+        // Additive / Extension
+        student.activeSubscriptions[existingSubIndex].expiryDate = expiryDate;
+        student.activeSubscriptions[existingSubIndex].subscriptionType = itemSubType || 'full';
+      } else {
+        // New Enrollment
+        student.activeSubscriptions.push({
+          name: item.courseName || itemPackageName.split(' - ')[0], // Exact name including class level
+          type: itemType || 'bundle',
+          subscriptionType: itemSubType || 'full',
+          referenceId: String(itemRefId),
+          expiryDate,
+          purchaseDate: new Date()
+        });
+      }
     }
 
     // Explicitly mark modified for mixed/array types
@@ -128,7 +138,6 @@ exports.processMockPayment = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: 'Payment simulated successfully!',
-      expiryDate,
       activeSubscriptions: student.activeSubscriptions
     });
   } catch (error) {
@@ -173,7 +182,19 @@ exports.getMyLearning = async (req, res, next) => {
 
     // Helper function to expand a bundle name into multiple subject entries
     const expandBundle = async (item) => {
-      if (item.type !== 'bundle' || item.isExpired) return [item];
+      if (item.type !== 'bundle' || item.isExpired) {
+        if (item.type === 'subject') {
+           const parts = item.name.split(' - ');
+           if (parts.length === 2) {
+             return [{
+               ...item.toObject ? item.toObject() : item,
+               name: parts[1].trim(),
+               originalBundleName: `${parts[0].trim()} Subjects`
+             }];
+           }
+        }
+        return [item];
+      }
 
       const classLevelNum = parseInt(item.name.replace(/\D/g, ''));
       if (!classLevelNum) return [item];
@@ -255,15 +276,30 @@ exports.getLiveAlerts = async (req, res, next) => {
     if (!student) return res.status(404).json({ message: 'Student not found' });
 
     const activeSubs = (student.activeSubscriptions || []).filter(sub => new Date() < new Date(sub.expiryDate));
-    // Normalize names to match LiveSessions (e.g., "Class 10 (All Subjects)" -> "Class 10")
-    const enrolledNames = activeSubs.map(sub => {
-      const clean = sub.name
-        .replace(' (All Subjects)', '')
-        .replace(' (Full Course)', '')
-        .replace(' (Full Bundle)', '')
-        .replace(' - Full Bundle', '');
-      return [sub.name, clean];
-    }).flat();
+    
+    // Construct strict OR conditions to prevent crossing class boundaries (e.g. Class 11 Physics vs Class 12 Physics)
+    const orConditions = activeSubs.map(sub => {
+      if (sub.type === 'subject') {
+        // e.g. "Class 12 - Physics" -> classLevel: "Class 12", subjectName: "Physics"
+        const parts = sub.name.split(' - ');
+        if (parts.length === 2) {
+          return { classLevel: parts[0].trim(), subjectName: parts[1].trim() };
+        } else {
+          return { subjectName: sub.name }; // Fallback for bad data
+        }
+      } else {
+        // e.g. "Class 10 (All Subjects)" -> classLevel: "Class 10"
+        const cleanBundle = sub.name
+          .replace(' (All Subjects)', '')
+          .replace(' (Full Course)', '')
+          .replace(' (Full Bundle)', '')
+          .replace(' - Full Bundle', '')
+          .trim();
+        return { classLevel: cleanBundle };
+      }
+    });
+
+    if (orConditions.length === 0) return res.status(200).json([]);
 
     const yesterday = new Date();
     yesterday.setHours(yesterday.getHours() - 24);
@@ -279,14 +315,7 @@ exports.getLiveAlerts = async (req, res, next) => {
         { status: { $in: ['live', 'upcoming'] } },
         { status: 'ended', updatedAt: { $gte: yesterday } }
       ],
-      $and: [
-        {
-          $or: [
-            { classLevel: { $in: enrolledNames } },
-            { subjectName: { $in: enrolledNames } }
-          ]
-        }
-      ]
+      $and: [ { $or: orConditions } ]
     }).populate('teacherId', 'name').sort({ status: 1, startTime: 1 });
 
     // Fetch materials for each session
@@ -348,7 +377,12 @@ exports.getCourseContent = async (req, res, next) => {
     const singleSubjectSub = student.activeSubscriptions.find(sub => {
       const subNameClean = sub.name.replace(' (All Subjects)', '').replace(' (Full Course)', '').replace(' (Full Bundle)', '').trim();
       const isActive = new Date() < new Date(sub.expiryDate);
-      return isActive && (subNameClean === cleanName || sub.name === courseName) && sub.subscriptionType === 'single';
+      
+      // If it's a subject, name might be "Class 12 - Physics"
+      const isDirectMatch = subNameClean === cleanName || sub.name === courseName;
+      const isPartMatch = sub.type === 'subject' && sub.name.split(' - ')[1]?.trim() === cleanName;
+      
+      return isActive && (isDirectMatch || isPartMatch) && (sub.subscriptionType === 'single' || sub.type === 'subject');
     });
 
     // BYPASS FOR ADMIN/TEACHER OR MOCK COURSES

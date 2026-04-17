@@ -11,7 +11,7 @@ const TeacherManagement = () => {
   const [editingTeacher, setEditingTeacher] = useState(null);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
   
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', rateA: 0, rateB: 0 });
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
@@ -60,11 +60,18 @@ const TeacherManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const payload = { 
+        name: formData.name, 
+        email: formData.email, 
+        password: formData.password,
+        payRates: { rateA: Number(formData.rateA), rateB: Number(formData.rateB) }
+      };
+      
       if (editingTeacher) {
-        await axios.put(`/admin/users/${editingTeacher._id}`, formData);
+        await axios.put(`/admin/users/${editingTeacher._id}`, payload);
         toast.success('Teacher updated!');
       } else {
-        await axios.post('/admin/teachers', formData);
+        await axios.post('/admin/teachers', payload);
         toast.success('Teacher account created!');
       }
       setShowModal(false);
@@ -209,7 +216,7 @@ const TeacherManagement = () => {
                 />
              </div>
              <button 
-               onClick={() => { setEditingTeacher(null); setFormData({name:'', email:'', password:''}); setShowModal(true); }}
+               onClick={() => { setEditingTeacher(null); setFormData({name:'', email:'', password:'', rateA: 0, rateB: 0}); setShowModal(true); }}
                className="flex items-center justify-center gap-2 bg-indigo-600 text-white px-4 py-1.5 rounded-md font-medium shadow-sm hover:bg-indigo-700 transition-colors text-sm w-full sm:w-auto"
              >
                 <Plus className="w-4 h-4" /> Add Teacher
@@ -338,7 +345,13 @@ const TeacherManagement = () => {
                           <button 
                             onClick={() => {
                               setEditingTeacher(teacher);
-                              setFormData({ name: teacher.name, email: teacher.email, password: '' });
+                              setFormData({ 
+                                name: teacher.name, 
+                                email: teacher.email, 
+                                password: '', 
+                                rateA: teacher.payRates?.rateA || 0,
+                                rateB: teacher.payRates?.rateB || 0
+                              });
                               setShowModal(true);
                             }}
                             className="p-1.5 text-slate-400 hover:bg-indigo-50 hover:text-indigo-600 rounded transition-colors"
@@ -428,6 +441,16 @@ const TeacherManagement = () => {
                       <input required type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 focus:border-indigo-500 rounded-md outline-none font-medium text-sm text-slate-800 transition-colors shadow-sm" />
                    </div>
                  )}
+                 <div className="grid grid-cols-2 gap-4">
+                     <div className="space-y-1">
+                        <label className="text-xs font-medium text-slate-600 ml-1">Class 6-10 Rate (₹/class)</label>
+                        <input required type="number" min="0" value={formData.rateA} onChange={(e) => setFormData({...formData, rateA: e.target.value})} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 focus:border-indigo-500 rounded-md outline-none font-medium text-sm text-slate-800 transition-colors shadow-sm" />
+                     </div>
+                     <div className="space-y-1">
+                        <label className="text-xs font-medium text-slate-600 ml-1">Class 11-12 Rate (₹/class)</label>
+                        <input required type="number" min="0" value={formData.rateB} onChange={(e) => setFormData({...formData, rateB: e.target.value})} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 focus:border-indigo-500 rounded-md outline-none font-medium text-sm text-slate-800 transition-colors shadow-sm" />
+                     </div>
+                 </div>
                  <div className="pt-2">
                     <button type="submit" className="w-full py-2 bg-indigo-600 text-white rounded-md font-medium text-sm shadow-sm hover:bg-indigo-700 transition-colors">
                        {editingTeacher ? 'Save Changes' : 'Create Account'}

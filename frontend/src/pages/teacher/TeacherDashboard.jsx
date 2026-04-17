@@ -19,6 +19,21 @@ import {
   LogOut
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import io from 'socket.io-client';
+
+const getSocketUrl = () => {
+    if (import.meta.env.VITE_API_URL) {
+        return import.meta.env.VITE_API_URL.replace('/api', '').replace(/\/$/, '');
+    }
+    return `${window.location.protocol}//${window.location.hostname}:5000`;
+};
+
+const socket = io(getSocketUrl(), {
+    transports: ['polling', 'websocket'],
+    reconnection: true,
+    reconnectionAttempts: 10,
+    reconnectionDelay: 2000
+});
 
 const TeacherDashboard = () => {
   const [stats, setStats] = useState({
@@ -51,6 +66,15 @@ const TeacherDashboard = () => {
 
   useEffect(() => {
     fetchData();
+
+    socket.on('live-session-update', (data) => {
+        console.log('TeacherDashboard: Live session update:', data);
+        fetchData();
+    });
+
+    return () => {
+        socket.off('live-session-update');
+    };
   }, [fetchData]);
 
   const handleUpdateStatus = async (id, status) => {

@@ -35,7 +35,11 @@ const userSchema = new mongoose.Schema({
       board: { type: String, enum: ['CBSE', 'ICSE', 'TS Board', 'AP Board'] }
     }
   ],
-  currentDeviceToken: { type: String, default: null } // for single device login
+  currentDeviceToken: { type: String, default: null }, // for single device login
+  payRates: {
+    rateA: { type: Number, default: 0 }, // For Classes 6 to 10
+    rateB: { type: Number, default: 0 }  // For Inter / Class 11, 12
+  }
 }, { timestamps: true });
 
 userSchema.pre('save', async function () {

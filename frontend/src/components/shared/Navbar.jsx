@@ -20,8 +20,8 @@ import { FaWhatsapp, FaHandshake } from 'react-icons/fa';
 import { MdEmail } from 'react-icons/md';
 import { motion } from 'framer-motion';
 
-// Dropdown data
-const NAV_ITEMS = [
+// Dropdown data placeholder - actual items are generated dynamically inside Navbar
+const DEFAULT_NAV_ITEMS = [
   { label: 'Home', to: '/' },
   { 
     label: 'Tuitions', 
@@ -42,6 +42,7 @@ const NAV_ITEMS = [
 
 // Single dropdown component
 const NavDropdown = ({ item }) => {
+
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -315,6 +316,36 @@ const Navbar = () => {
   const [mobileExpanded, setMobileExpanded] = useState(null);
   const [isMobileDrag, setIsMobileDrag] = useState(false);
 
+  // Helper to generate slug for board routes (e.g., 'TS Board' -> 'ts-board')
+  const getBoardSlug = (boardName) => {
+    if (!boardName) return 'all';
+    let clean = boardName.toLowerCase().replace(' board', '').trim();
+    return `${clean}-board`;
+  };
+
+  const isStudent = userInfo?.role?.toLowerCase() === 'student';
+
+  const NAV_ITEMS = [
+    { label: 'Home', to: '/' },
+    { 
+      label: 'Tuitions', 
+      to: '#', 
+      dropdown: isStudent && userInfo?.board ? [
+        { label: `${userInfo.board} - ${userInfo.className}`, to: '/courses' },
+      ] : [
+        { label: 'All', to: '/courses' },
+        { label: 'AP BOARD', to: '/courses/board/ap-board' },
+        { label: 'TS BOARD', to: '/courses/board/ts-board' },
+        { label: 'CBSE BOARD', to: '/courses/board/cbse-board' },
+        { label: 'ICSE BOARD', to: '/courses/board/icse-board' },
+      ]
+    },
+    { label: 'Teachers', to: '/teachers' },
+    { label: 'About Us', to: '/about' },
+    { label: 'FAQs', to: '/faqs' },
+    { label: 'Contact Us', to: '/contact-us' },
+  ];
+
   useEffect(() => {
     const checkMobile = () => setIsMobileDrag(window.innerWidth < 768);
     checkMobile();
@@ -405,9 +436,15 @@ const Navbar = () => {
                     ? '/teacher/dashboard'
                     : '/student/dashboard'
                 }
-                className="w-10 h-10 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center hover:bg-orange-100 hover:text-orange-600 transition-all border border-slate-200"
+                className="flex items-center gap-2 px-4 py-1.5 bg-[#002147] text-white rounded-full hover:bg-orange-600 transition-all shadow-md group border border-[#002147]/10"
               >
-                <HiOutlineUserCircle className="text-2xl" />
+                <div className="flex flex-col items-end mr-1 hidden sm:flex">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-orange-400 opacity-80 leading-none mb-0.5">Welcome</span>
+                  <span className="text-[11px] font-bold leading-none">{userInfo.name?.split(' ')[0]}</span>
+                </div>
+                <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                  <HiOutlineUserCircle className="text-xl" />
+                </div>
               </Link>
             ) : (
               <Link

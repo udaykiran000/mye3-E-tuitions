@@ -328,8 +328,8 @@ const Register = () => {
                     <option value="" disabled>Select Board</option>
                     <option value="TS Board">TS Board</option>
                     <option value="AP Board">AP Board</option>
-                    <option value="CBSE Board">CBSE Board</option>
-                    <option value="ICSE Board">ICSE Board</option>
+                    <option value="CBSE">CBSE Board</option>
+                    <option value="ICSE">ICSE Board</option>
                   </select>
                 </div>
 

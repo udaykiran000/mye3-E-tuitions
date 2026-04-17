@@ -33,7 +33,10 @@ const {
   createLiveSession, // New
   updateLiveSession, // New
   deleteLiveSession, // New
-  getAllLiveSessions // New
+  getAllLiveSessions, // New
+  getRecurringSchedules,
+  updateRecurringSchedule,
+  stopRecurringSchedule
 } = require('../controllers/adminController');
 const { protect } = require('../middleware/authMiddleware');
 const { authorizeRoles } = require('../middleware/roleMiddleware');
@@ -50,6 +53,9 @@ router.post('/live-sessions', protect, authorizeRoles('admin'), createLiveSessio
 router.put('/live-sessions/:id', protect, authorizeRoles('admin'), updateLiveSession); // New
 router.delete('/live-sessions/:id', protect, authorizeRoles('admin'), deleteLiveSession); // New
 router.get('/live-sessions', protect, authorizeRoles('admin'), getAllLiveSessions); // New
+router.get('/recurring-schedules', protect, authorizeRoles('admin'), getRecurringSchedules);
+router.put('/recurring-schedules/:id', protect, authorizeRoles('admin'), updateRecurringSchedule);
+router.delete('/recurring-schedules/:id', protect, authorizeRoles('admin'), stopRecurringSchedule);
 
 router.get('/materials/all', protect, authorizeRoles('admin'), getAllMaterials);
 router.post('/materials', protect, authorizeRoles('admin'), upload.single('file'), addMaterial);

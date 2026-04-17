@@ -17,10 +17,12 @@ exports.getPaymentConfig = async (req, res, next) => {
   try {
     const keyId = process.env.RAZORPAY_KEY_ID;
     const isMock = !keyId || keyId === 'testmode' || keyId.includes('YOUR_');
+    const enableReal = (process.env.ENABLE_REAL_PAYMENT || '').trim() === 'true';
     
     res.status(200).json({
       mode: isMock ? 'test' : 'live',
-      keyId: isMock ? null : keyId
+      keyId: keyId,
+      enableRealPayment: enableReal
     });
   } catch (error) {
     next(error);
@@ -29,7 +31,13 @@ exports.getPaymentConfig = async (req, res, next) => {
 
 exports.createOrder = async (req, res, next) => {
   try {
-    const { amount, type, referenceIds } = req.body; 
+    const { amount, type, referenceIds, selectedDuration, names } = req.body; 
+
+    if (!process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID.includes('YOUR_')) {
+        return res.status(400).json({ 
+            message: "Razorpay keys are not configured properly. Please add your real Key ID to the .env file." 
+        });
+    }
 
     const options = {
       amount: amount * 100, // smallest unit
@@ -43,10 +51,82 @@ exports.createOrder = async (req, res, next) => {
       userId: req.user._id,
       amount,
       razorpayOrderId: order.id,
-      subscriptionDetails: { type, referenceIds }
+      subscriptionDetails: { 
+        type, 
+        referenceIds, 
+        selectedDuration: selectedDuration || 'oneMonth',
+        names: names || []
+      }
     });
 
     res.status(200).json(order);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.verifyPayment = async (req, res, next) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+    const secret = process.env.RAZORPAY_KEY_SECRET;
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+
+    const expectedSignature = crypto
+      .createHmac("sha256", secret)
+      .update(body.toString())
+      .digest("hex");
+
+    if (expectedSignature === razorpay_signature) {
+      const paymentRecord = await Payment.findOne({ razorpayOrderId: razorpay_order_id });
+      if (!paymentRecord) return res.status(404).json({ message: 'Payment record not found' });
+
+      if (paymentRecord.status !== 'captured') {
+        paymentRecord.status = 'captured';
+        paymentRecord.razorpayPaymentId = razorpay_payment_id;
+        paymentRecord.razorpaySignature = razorpay_signature;
+        await paymentRecord.save();
+
+        const user = await User.findById(req.user._id);
+        const { type, referenceIds, selectedDuration } = paymentRecord.subscriptionDetails;
+        
+        const now = new Date();
+        const durationMap = { oneMonth: 30, threeMonths: 90, sixMonths: 180, twelveMonths: 365 };
+        const days = durationMap[selectedDuration] || 30;
+        const expiryDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+
+        referenceIds.forEach((id, index) => {
+          user.activeSubscriptions.push({
+            type,
+            referenceId: id,
+            name: paymentRecord.subscriptionDetails.names[index] || 'Class Subscription',
+            subscriptionType: selectedDuration,
+            expiryDate,
+            purchaseDate: now
+          });
+        });
+
+        await user.save();
+
+        // Create Transaction History Record
+        await Transaction.create({
+          studentId: req.user._id,
+          amount: paymentRecord.amount,
+          status: 'success',
+          packageName: type === 'bundle' ? 'Class Bundle Subscription' : 'Individual Subject Access',
+          referenceId: referenceIds[0],
+          type: type,
+          date: now
+        });
+
+        return res.status(200).json({ status: 'ok', user });
+      }
+
+      const user = await User.findById(req.user._id);
+      return res.status(200).json({ status: 'ok', user });
+    } else {
+      return res.status(400).json({ message: 'Invalid payment signature' });
+    }
   } catch (error) {
     next(error);
   }

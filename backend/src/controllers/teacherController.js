@@ -359,3 +359,18 @@ exports.toggleMaterialVisibility = async (req, res, next) => {
   }
 };
 
+// @desc    Get teacher's earnings/payout history
+// @route   GET /api/teacher/earnings
+// @access  Teacher
+exports.getEarnings = async (req, res, next) => {
+  try {
+    const Payout = require('../models/Payout');
+    const payouts = await Payout.find({ teacherId: req.user._id })
+      .sort({ year: -1, month: -1 });
+
+    res.status(200).json(payouts);
+  } catch (error) {
+    next(error);
+  }
+};
+

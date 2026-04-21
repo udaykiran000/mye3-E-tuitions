@@ -8,11 +8,8 @@ import {
   BookOpen, 
   LogOut,
   Home,
-  User,
   X,
-  History,
-  FileText,
-  Banknote
+  FileText
 } from 'lucide-react';
 
 import logoImg from '../../assets/output-onlinepngtools.png';
@@ -32,9 +29,6 @@ const TeacherSidebar = ({ onClose }) => {
     { icon: BookOpen, label: 'My Classes', path: '/teacher/classes' },
     { icon: FileText, label: 'Notes', path: '/teacher/materials' },
     { icon: Video, label: 'Live Classes', path: '/teacher/live-schedule' },
-    { icon: History, label: 'Past Sessions', path: '/teacher/past-sessions' },
-    { icon: Banknote, label: 'My Earnings', path: '/teacher/earnings' },
-    { icon: User, label: 'Profile', path: '/teacher/profile' },
   ];
 
   return (

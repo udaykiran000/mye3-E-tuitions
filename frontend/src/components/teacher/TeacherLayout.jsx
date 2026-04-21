@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import TeacherSidebar from './TeacherSidebar';
 import { HiBell, HiMenuAlt2 } from 'react-icons/hi';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, NavLink } from 'react-router-dom';
 import { logout } from '../../store/slices/authSlice';
-import { LogOut, UserCircle } from 'lucide-react';
+import { LogOut, UserCircle, History, Banknote, User } from 'lucide-react';
 
 const TeacherLayout = ({ children }) => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -47,6 +47,18 @@ const TeacherLayout = ({ children }) => {
               </button>
               <div className="bg-teal-50 text-teal-600 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest border border-teal-100 hidden sm:block">
                  Faculty Portal
+              </div>
+              
+              <div className="hidden lg:flex items-center gap-2 ml-4">
+                 <NavLink to="/teacher/past-sessions" className={({isActive}) => `flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors ${isActive ? 'bg-orange-50 text-orange-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
+                    <History className="w-4 h-4" /> Past Sessions
+                 </NavLink>
+                 <NavLink to="/teacher/earnings" className={({isActive}) => `flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors ${isActive ? 'bg-orange-50 text-orange-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
+                    <Banknote className="w-4 h-4" /> My Earnings
+                 </NavLink>
+                 <NavLink to="/teacher/profile" className={({isActive}) => `flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors ${isActive ? 'bg-orange-50 text-orange-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
+                    <User className="w-4 h-4" /> Profile
+                 </NavLink>
               </div>
            </div>
 

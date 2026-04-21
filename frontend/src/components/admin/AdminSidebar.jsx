@@ -7,11 +7,7 @@ import {
   IndianRupee, 
   Users, 
   UserSquare2, 
-  CreditCard, 
-  Settings,
   Activity,
-  LogOut,
-  FileText,
   Banknote,
   X
 } from 'lucide-react';
@@ -34,30 +30,29 @@ const AdminSidebar = ({ onClose }) => {
     { icon: Banknote, label: 'Teacher Payroll', path: '/admin/payouts' },
     { icon: Users, label: 'Students', path: '/admin/students' },
     { icon: Activity, label: 'Live & Schedule Class', path: '/admin/live-monitor' },
-    { icon: CreditCard, label: 'Fee Payments', path: '/admin/transactions' },
-    { icon: FileText, label: 'Study Notes', path: '/admin/notes' },
-    { icon: Settings, label: 'Options', path: '/admin/settings' },
   ];
 
   return (
-    <aside className="w-full lg:w-72 bg-slate-900 h-screen text-white flex flex-col shadow-2xl">
-      <div className="py-8 md:py-12 border-b border-slate-800 flex flex-col items-center justify-center relative">
-        <Link to="/" className="flex flex-col items-center group">
+    <aside className="w-full lg:w-72 bg-[#e6f0dc] h-screen text-slate-800 flex flex-col shadow-2xl border-r border-emerald-900/5">
+      <div className="pt-8 pb-4 border-b border-emerald-900/10 flex flex-col items-center justify-center relative">
+        <Link to="/" className="flex flex-col items-center group gap-0">
           <img 
             src={logoImg} 
             alt="Logo" 
-            className="h-20 md:h-24 w-auto object-contain transition-transform group-hover:scale-110" 
+            className="h-28 md:h-32 w-auto object-contain transition-transform group-hover:scale-105" 
           />
-          <p className="text-[11px] font-black text-indigo-400 uppercase tracking-[0.4em] -mt-1 leading-none">Admin</p>
+          <div className="bg-[#1b4332] px-4 py-1.5 rounded-full shadow-sm -mt-2">
+            <p className="text-[10px] font-black text-white uppercase tracking-[0.4em] leading-none">Admin</p>
+          </div>
         </Link>
         {onClose && (
-          <button onClick={onClose} className="lg:hidden absolute top-6 right-6 p-2 text-slate-400 hover:text-white transition-colors">
+          <button onClick={onClose} className="lg:hidden absolute top-6 right-6 p-2 text-slate-500 hover:text-slate-900 transition-colors">
             <X className="w-6 h-6" />
           </button>
         )}
       </div>
 
-      <nav className="flex-1 p-4 md:p-6 space-y-1.5 mt-4 overflow-y-auto">
+      <nav className="flex-1 p-4 space-y-1 mt-1 overflow-hidden">
         {menuItems.map((item, idx) => (
           <NavLink
             key={idx}
@@ -66,8 +61,8 @@ const AdminSidebar = ({ onClose }) => {
             className={({ isActive }) => `
               flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all group text-sm
               ${isActive 
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/40' 
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'}
+                ? 'bg-[#1b4332] text-white shadow-lg shadow-[#1b4332]/30' 
+                : 'text-slate-600 hover:text-white hover:bg-[#2d6a4f] hover:shadow-md'}
             `}
           >
             <item.icon className="w-5 h-5 group-hover:scale-110 transition-transform" />
@@ -76,15 +71,6 @@ const AdminSidebar = ({ onClose }) => {
         ))}
       </nav>
 
-      <div className="p-6 border-t border-slate-800">
-        <button 
-          onClick={handleLogout}
-          className="w-full flex items-center gap-4 px-5 py-4 rounded-xl font-bold text-rose-400 hover:text-white hover:bg-rose-600/20 transition-all group text-sm"
-        >
-          <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
-          <span>Logout</span>
-        </button>
-      </div>
     </aside>
   );
 };

@@ -32,6 +32,7 @@ const authUser = async (req, res, next) => {
           role: user.role,
           board: user.board,
           className: user.className,
+          payRates: user.payRates,
           token,
         });
       }
@@ -119,6 +120,7 @@ const getUserProfile = async (req, res, next) => {
         role: user.role,
         board: user.board,
         className: user.className,
+        payRates: user.payRates,
       });
     } else {
       res.status(404).json({ message: 'User not found' });

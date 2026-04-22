@@ -26,8 +26,7 @@ const AdminSidebar = ({ onClose }) => {
   const menuItems = [
     { icon: LayoutDashboard, label: 'Summary', path: '/admin/dashboard' },
     { icon: IndianRupee, label: 'Fees Control', path: '/admin/pricing' },
-    { icon: UserSquare2, label: 'Teachers', path: '/admin/teachers' },
-    { icon: Banknote, label: 'Teacher Payroll', path: '/admin/payouts' },
+    { icon: UserSquare2, label: 'Teacher Management', path: '/admin/teachers' },
     { icon: Users, label: 'Students', path: '/admin/students' },
     { icon: Activity, label: 'Live & Schedule Class', path: '/admin/live-monitor' },
   ];

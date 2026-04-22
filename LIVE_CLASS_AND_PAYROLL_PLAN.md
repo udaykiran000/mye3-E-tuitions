@@ -84,3 +84,15 @@ No one needs to refresh their browser anymore:
 
 > [!NOTE]
 > This plan has been created and approved for implementation.
+
+## ✨ Phase 6: Teacher Management & Payroll Integration (Redesign)
+- [x] **Sidebar UI Update:** Remove "Teacher Payroll" route, rename "Teachers" to "Teacher Management".
+- [x] **Teacher Management API & Models:** 
+   - Ensure Admin can fetch completed/upcoming classes per teacher.
+   - Payout model integration to mark payments as 'Settled'.
+- [x] **Card View UI (`TeacherManagement.jsx`):**
+   - Display a highly polished, interactive grid of Teacher Cards.
+- [x] **Detailed Teacher View:**
+   - Clicking a card opens a dedicated component showing performance, sessions (past, live, upcoming), assigned subjects, and session-wise payment.
+- [x] **Class Live Flow Integration:**
+   - Tracking connection and marking a class `ended` so payment calculations trigger.

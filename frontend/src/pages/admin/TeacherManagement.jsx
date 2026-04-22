@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Plus, Search, Edit2, Trash2, User, Mail, Shield, Save, X, Loader2, BookOpen, GraduationCap, CheckCircle, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, User, Mail, Shield, Save, X, Loader2, BookOpen, GraduationCap, CheckCircle, ChevronLeft, ChevronRight, AlertCircle, Award, DollarSign } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
+import TeacherProfile from './TeacherProfile';
 
 const TeacherManagement = () => {
   const [teachers, setTeachers] = useState([]);
@@ -18,6 +19,7 @@ const TeacherManagement = () => {
   
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [teacherToDelete, setTeacherToDelete] = useState(null);
+  const [detailedTeacher, setDetailedTeacher] = useState(null);
   
   // Assignment States
   const [classes, setClasses] = useState([]); 
@@ -198,7 +200,7 @@ const TeacherManagement = () => {
     <div className="space-y-6 animate-in fade-in duration-300 px-2 md:px-0 max-w-6xl mx-auto">
       <Toaster position="top-right" />
       
-       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+       <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 ${detailedTeacher ? 'hidden' : 'pb-4 border-b border-slate-100'}`}>
           <div className="space-y-0.5">
              <h1 className="text-xl font-bold text-slate-800 tracking-tight">Faculty Management</h1>
              <p className="text-slate-500 font-medium text-xs">Manage academic staff and subject assignments</p>
@@ -224,173 +226,136 @@ const TeacherManagement = () => {
           </div>
        </div>
 
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-         <div className="overflow-x-auto">
-         <table className="w-full text-left whitespace-nowrap">
-            <thead className="bg-slate-50/50 border-b border-slate-100">
-               <tr className="text-sm font-semibold text-slate-600">
-                  <th className="px-5 py-3">Faculty Profile</th>
-                  <th className="px-5 py-3">Assigned Subjects</th>
-                  <th className="px-5 py-3 text-right">Controls</th>
-               </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-               {currentItems.length === 0 ? (
-                 <tr>
-                    <td colSpan="3" className="px-5 py-12 text-center text-slate-400">
-                       <div className="flex flex-col items-center gap-3">
-                          <User className="w-8 h-8" />
-                          <p className="font-medium text-sm">No faculty found</p>
-                       </div>
-                    </td>
-                 </tr>
-               ) : currentItems.map(teacher => (
-                 <tr key={teacher._id} className="hover:bg-slate-50/50 transition-colors align-top group">
-                    <td className="px-5 py-4">
-                       <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-full flex items-center justify-center font-bold text-sm shrink-0">
-                             {teacher.name.charAt(0)}
-                          </div>
-                          <div>
-                             <p className="font-semibold text-slate-800 text-base leading-tight">{teacher.name}</p>
-                             <div className="flex items-center gap-1.5 text-sm text-slate-500 mt-0.5">
-                                <Mail className="w-3.5 h-3.5" /> {teacher.email}
-                             </div>
-                          </div>
-                       </div>
-                    </td>
-                     <td className="px-5 py-4">
-                        <div className="space-y-3 min-w-[320px]">
-                           {teacher.assignedSubjects?.length > 0 ? (
-                              <div className="flex flex-wrap gap-3">
-                                 {Object.entries(
-                                    teacher.assignedSubjects.reduce((acc, sub) => {
-                                       const board = sub.board || 'Unassigned Board';
-                                       const lvl = sub.classLevel;
-                                       if (!acc[board]) acc[board] = {};
-                                       if (!acc[board][lvl]) acc[board][lvl] = [];
-                                       acc[board][lvl].push(sub);
-                                       return acc;
-                                    }, {})
-                                 ).sort(([a], [b]) => a.localeCompare(b)).map(([board, classes], idx) => (
-                                   <div key={idx} className="bg-slate-50/50 rounded-lg border border-slate-100 p-2.5 space-y-3 min-w-[200px] flex-1 max-w-[300px]">
-                                      <div className="flex items-center gap-2">
-                                         <div className={`w-1.5 h-1.5 rounded-full ${board.includes('TS') ? 'bg-indigo-500' : board.includes('AP') ? 'bg-orange-500' : 'bg-purple-500'}`}></div>
-                                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">{board}</span>
-                                      </div>
-                                      
-                                      <div className="space-y-2.5">
-                                         {Object.entries(classes).sort((a,b) => {
-                                            const numA = parseInt(a[0].replace(/\D/g,'')) || 0;
-                                            const numB = parseInt(b[0].replace(/\D/g,'')) || 0;
-                                            return numA - numB;
-                                         }).map(([lvl, subs], i) => (
-                                           <div key={i} className="flex flex-col gap-1.5">
-                                              <div className="text-[10px] font-bold text-slate-500 flex items-center gap-1.5 ml-1">
-                                                 <GraduationCap className="w-3 h-3 text-slate-400" /> {lvl}
-                                              </div>
-                                              <div className="flex flex-wrap gap-1.5">
-                                                 {subs.map((sub, j) => (
-                                                   <span
-                                                     key={j}
-                                                     className={`pl-2 pr-1 py-0.5 text-[11px] rounded border flex items-center gap-1.5 group/tag ${
-                                                       sub.assignmentType === 'bundle'
-                                                       ? 'bg-purple-50 text-purple-700 border-purple-200 font-semibold'
-                                                       : 'bg-white text-slate-600 border-slate-200 shadow-sm font-semibold'
-                                                     }`}
-                                                   >
-                                                      {sub.subjectName}
-                                                      <button
-                                                        onClick={() => handleRemoveAssignment(teacher._id, sub._id)}
-                                                        className="text-slate-300 hover:text-red-500 transition-colors p-0.5 rounded hover:bg-red-50"
-                                                        title="Remove subject"
-                                                      >
-                                                         <X className="w-2.5 h-2.5" />
-                                                      </button>
-                                                   </span>
-                                                 ))}
-                                              </div>
-                                           </div>
-                                         ))}
-                                      </div>
-                                   </div>
-                                 ))}
-                              </div>
-                           ) : (
-                             <div className="flex items-center gap-2 text-slate-400 p-2 bg-slate-50 rounded-md border border-dashed border-slate-200">
-                                <AlertCircle className="w-3.5 h-3.5" />
-                                <span className="text-[11px] font-medium italic">No curriculum configured yet</span>
-                             </div>
+      {detailedTeacher ? (
+         <TeacherProfile teacher={detailedTeacher} onBack={() => setDetailedTeacher(null)} />
+      ) : (
+         <>
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {currentItems.length === 0 ? (
+               <div className="col-span-full py-20 text-center text-slate-400">
+                  <div className="flex flex-col items-center gap-3">
+                     <User className="w-12 h-12 opacity-50" />
+                     <p className="font-medium">No faculty found</p>
+                  </div>
+               </div>
+            ) : currentItems.map(teacher => (
+               <div key={teacher._id} className="bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all group flex flex-col overflow-hidden relative">
+                  {/* Top Color Banner */}
+                  <div className="h-20 bg-[#002147] relative border-b-4 border-[#f16126]">
+                     <div className="absolute -bottom-8 left-6">
+                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm p-1">
+                           <div className="w-full h-full bg-[#f16126]/10 text-[#f16126] rounded-xl flex items-center justify-center font-black text-xl">
+                              {teacher.name.charAt(0)}
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  
+                  {/* Action Buttons Container - Elevated and Compact near Avatar */}
+                  <div className="absolute top-[4.5rem] right-4 flex items-center gap-1.5 p-1 bg-white rounded-xl shadow-lg border border-slate-100 z-10">
+                     <button 
+                        onClick={(e) => {
+                           e.stopPropagation();
+                           setSelectedTeacher(teacher); 
+                           setSelectedAssignments([]); 
+                           setShowAssignModal(true); 
+                           const boardKeys = Object.keys(groupedByBoard);
+                           if (boardKeys.length > 0) {
+                             setActiveBoard(boardKeys[0]);
+                             const clsKeys = Object.keys(groupedByBoard[boardKeys[0]]);
+                             if (clsKeys.length > 0) setActiveClasses([clsKeys[0]]);
+                           }
+                        }}
+                        className="w-7 h-7 flex items-center justify-center bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white transition-colors"
+                        title="Assign Subjects"
+                     >
+                        <Plus className="w-3.5 h-3.5" />
+                     </button>
+                     <button 
+                        onClick={(e) => {
+                           e.stopPropagation();
+                           setEditingTeacher(teacher);
+                           setFormData({ 
+                              name: teacher.name, 
+                              email: teacher.email, 
+                              password: '', 
+                              rateA: teacher.payRates?.rateA || 0,
+                              rateB: teacher.payRates?.rateB || 0
+                           });
+                           setShowModal(true);
+                        }}
+                        className="w-7 h-7 flex items-center justify-center bg-slate-50 text-slate-500 rounded-lg hover:bg-slate-200 transition-colors"
+                        title="Edit Profile"
+                     >
+                        <Edit2 className="w-3.5 h-3.5" />
+                     </button>
+                     <button 
+                        onClick={(e) => { e.stopPropagation(); setTeacherToDelete(teacher); setShowDeleteConfirm(true); }}
+                        className="w-7 h-7 flex items-center justify-center bg-rose-50 text-rose-500 rounded-lg hover:bg-rose-500 hover:text-white transition-colors"
+                        title="Remove Teacher"
+                     >
+                        <Trash2 className="w-3.5 h-3.5" />
+                     </button>
+                  </div>
+
+                  <div className="p-6 pt-12 flex-1 flex flex-col">
+                     <h3 className="text-xl font-black text-[#002147] line-clamp-1 cursor-pointer" onClick={() => setDetailedTeacher(teacher)}>{teacher.name}</h3>
+                     <p className="text-xs font-bold text-slate-400 mt-0.5 flex items-center gap-1.5 line-clamp-1"><Mail className="w-3.5 h-3.5"/> {teacher.email}</p>
+                     
+                     <div className="mt-5 space-y-3 flex-1 flex flex-col justify-end">
+                        
+                        <div className="flex flex-wrap gap-1.5 mb-1">
+                           {Array.from(new Set(teacher.assignedSubjects?.map(s => s.board).filter(Boolean))).length > 0 ? Array.from(new Set(teacher.assignedSubjects.map(s => s.board).filter(Boolean))).map((b, i) => (
+                              <span key={i} className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[9px] font-bold rounded-md uppercase tracking-wider border border-slate-200">{b}</span>
+                           )) : (
+                              <span className="px-2 py-0.5 bg-rose-50 text-rose-500 text-[9px] font-bold rounded-md uppercase tracking-wider">Unassigned</span>
                            )}
-                           <button
-                             onClick={() => { 
-                                setSelectedTeacher(teacher); 
-                                setSelectedAssignments([]); 
-                                setShowAssignModal(true); 
-                                const boardKeys = Object.keys(groupedByBoard);
-                                if (boardKeys.length > 0) {
-                                  setActiveBoard(boardKeys[0]);
-                                  const clsKeys = Object.keys(groupedByBoard[boardKeys[0]]);
-                                  if (clsKeys.length > 0) setActiveClasses([clsKeys[0]]);
-                                }
-                             }}
-                             className="mt-1 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider bg-white text-indigo-600 border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-indigo-300 hover:shadow-sm transition-all flex items-center gap-2 w-fit"
+                           <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-[9px] font-bold rounded-md uppercase tracking-wider ml-auto">{teacher.assignedSubjects?.length || 0} Subjects</span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                           <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex flex-col justify-center text-center">
+                              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">School (6-10)</span>
+                              <span className="text-sm font-black text-[#002147]">₹{teacher.payRates?.rateA || 0}</span>
+                           </div>
+                           <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex flex-col justify-center text-center">
+                              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">College (Inter)</span>
+                              <span className="text-sm font-black text-[#f16126]">₹{teacher.payRates?.rateB || 0}</span>
+                           </div>
+                        </div>
+                        
+                        <div className="mt-3 pt-4 border-t border-slate-100">
+                           <button 
+                              onClick={() => setDetailedTeacher(teacher)}
+                              className="w-full py-2.5 bg-[#002147] text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#f16126] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-1.5"
                            >
-                              <Plus className="w-3 h-3" /> Assign New Subject
+                              <span>View Profile</span>
+                              <ChevronRight className="w-4 h-4" />
                            </button>
                         </div>
-                     </td>
-                    <td className="px-5 py-4">
-                       <div className="flex items-center justify-end gap-2">
-                          <button 
-                            onClick={() => {
-                              setEditingTeacher(teacher);
-                              setFormData({ 
-                                name: teacher.name, 
-                                email: teacher.email, 
-                                password: '', 
-                                rateA: teacher.payRates?.rateA || 0,
-                                rateB: teacher.payRates?.rateB || 0
-                              });
-                              setShowModal(true);
-                            }}
-                            className="p-1.5 text-slate-400 hover:bg-indigo-50 hover:text-indigo-600 rounded transition-colors"
-                            title="Edit Profile"
-                          >
-                             <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => { setTeacherToDelete(teacher); setShowDeleteConfirm(true); }}
-                            className="p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-500 rounded transition-colors"
-                            title="Remove Faculty"
-                          >
-                             <Trash2 className="w-4 h-4" />
-                          </button>
-                       </div>
-                    </td>
-                 </tr>
-               ))}
-            </tbody>
-         </table>
+                     </div>
+                  </div>
+               </div>
+            ))}
          </div>
 
          {/* PAGINATION CONTROLS */}
          {totalPages > 1 && (
-            <div className="px-5 py-3 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between gap-4">
-               <p className="text-xs text-slate-500">
-                  Showing <span className="font-medium text-slate-800">{indexOfFirstItem + 1}</span> to <span className="font-medium text-slate-800">{Math.min(indexOfLastItem, filteredTeachers.length)}</span> of <span className="font-medium text-slate-800">{filteredTeachers.length}</span>
+            <div className="mt-8 flex items-center justify-between gap-4">
+               <p className="text-xs font-bold text-slate-400">
+                  Showing <span className="text-slate-800">{indexOfFirstItem + 1}</span> to <span className="text-slate-800">{Math.min(indexOfLastItem, filteredTeachers.length)}</span> of <span className="text-slate-800">{filteredTeachers.length}</span>
                </p>
                
-               <div className="flex items-center gap-1">
+               <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl shadow-sm border border-slate-100">
                   <button
                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                      disabled={currentPage === 1}
-                     className="p-1 rounded text-slate-400 hover:bg-white hover:text-slate-800 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                     className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-50 hover:text-slate-800 disabled:opacity-30 transition-colors"
                   >
                      <ChevronLeft className="w-4 h-4" />
                   </button>
 
-                  <div className="flex items-center gap-0.5">
+                  <div className="flex items-center gap-1">
                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => {
                         if (totalPages > 5 && Math.abs(pg - currentPage) > 1 && pg !== 1 && pg !== totalPages) return pg === 2 || pg === totalPages - 1 ? <span key={pg} className="text-slate-300 mx-1 text-xs">...</span> : null;
                         
@@ -398,7 +363,7 @@ const TeacherManagement = () => {
                            <button
                               key={pg}
                               onClick={() => setCurrentPage(pg)}
-                              className={`w-6 h-6 rounded text-xs font-medium transition-colors ${currentPage === pg ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-white'}`}
+                              className={`w-7 h-7 rounded-lg text-xs font-black transition-colors ${currentPage === pg ? 'bg-[#f16126] text-white shadow-md shadow-orange-200' : 'text-slate-500 hover:bg-slate-50'}`}
                            >
                               {pg}
                            </button>
@@ -409,14 +374,15 @@ const TeacherManagement = () => {
                   <button
                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                      disabled={currentPage === totalPages}
-                     className="p-1 rounded text-slate-400 hover:bg-white hover:text-slate-800 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                     className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-50 hover:text-slate-800 disabled:opacity-30 transition-colors"
                   >
                      <ChevronRight className="w-4 h-4" />
                   </button>
                </div>
             </div>
          )}
-      </div>
+         </>
+      )}
 
       {/* CREATE/EDIT MODAL */}
       {showModal && (

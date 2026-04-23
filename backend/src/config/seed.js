@@ -78,30 +78,8 @@ const seedData = async () => {
       console.log('Seeded Admin: admin@mye3.com');
     }
 
-    // 3. Seed Teachers
-    const teachers = [
-      { name: 'Dr. Emily Watson', email: 'emily@mye3.com', password: 'teacherpassword', role: 'teacher' },
-      { name: 'Prof. Arjun Singh', email: 'arjun@mye3.com', password: 'teacherpassword', role: 'teacher' }
-    ];
-    for (const t of teachers) {
-      if (!(await User.findOne({ email: t.email }))) {
-        await User.create(t);
-        console.log(`Seeded Teacher: ${t.email}`);
-      }
-    }
-
-    // 4. Seed Students
-    const students = [
-      { name: 'Rahul Sharma', email: 'rahul@gmail.com', password: 'studentpassword', role: 'student' },
-      { name: 'Priya Patel', email: 'priya@gmail.com', password: 'studentpassword', role: 'student' },
-      { name: 'Sneha Reddy', email: 'sneha@gmail.com', password: 'studentpassword', role: 'student' }
-    ];
-    for (const s of students) {
-      if (!(await User.findOne({ email: s.email }))) {
-        await User.create(s);
-        console.log(`Seeded Student: ${s.email}`);
-      }
-    }
+    // 3. Seed Teachers (Removed dummy teachers to prevent re-seeding)
+    // 4. Seed Students (Removed dummy students to prevent re-seeding)
 
   } catch (error) {
     console.error('Error seeding data:', error);

@@ -20,15 +20,26 @@ const TeacherProfile = ({ teacher, onBack }) => {
                 axios.get('/admin/payroll')
             ]);
             
+            const now = new Date();
             // Filter sessions for this teacher
             const teacherSessions = (sessionsRes.data || []).filter(s => 
                 String(s.teacherId?._id || s.teacherId) === String(teacher._id)
-            );
+            ).map(s => {
+                const startTime = new Date(s.startTime);
+                const endTime = new Date(s.endTime);
+                let status = s.status;
+                
+                // Real-time status override for display logic
+                if (status !== 'ended' && status !== 'live') {
+                    if (startTime > now) status = 'upcoming';
+                    else if (startTime < now) status = 'missed';
+                }
+                return { ...s, displayStatus: status };
+            });
             
-            const now = new Date();
-            const past = teacherSessions.filter(s => new Date(s.endTime) < now || s.status === 'ended');
-            const present = teacherSessions.filter(s => s.status === 'live');
-            const future = teacherSessions.filter(s => new Date(s.startTime) > now && s.status !== 'live' && s.status !== 'ended');
+            const past = teacherSessions.filter(s => s.displayStatus === 'ended' || s.displayStatus === 'missed');
+            const present = teacherSessions.filter(s => s.displayStatus === 'live');
+            const future = teacherSessions.filter(s => s.displayStatus === 'upcoming');
 
             setSessions({ past, present, future });
 
@@ -89,16 +100,22 @@ const TeacherProfile = ({ teacher, onBack }) => {
             const dateRef = s.endTime || s.startTime;
             if (!dateRef) return acc;
             
-            let key, dateObj;
+            let key, dateObj, displayDate;
+            const d = new Date(dateRef);
             if (groupType === 'daily') {
-                dateObj = new Date(dateRef);
-                key = dateObj.toLocaleDateString('en-GB');
+                dateObj = d;
+                key = d.toLocaleDateString('en-GB');
+                displayDate = key;
             } else {
-                dateObj = getMonday(dateRef);
-                key = "Week of " + dateObj.toLocaleDateString('en-GB');
+                const monday = getMonday(d);
+                const sunday = new Date(monday);
+                sunday.setDate(monday.getDate() + 6);
+                dateObj = monday;
+                key = monday.toLocaleDateString('en-GB');
+                displayDate = `${monday.toLocaleDateString('en-GB', {day:'2-digit', month:'short'})} - ${sunday.toLocaleDateString('en-GB', {day:'2-digit', month:'short'})}`;
             }
 
-            if (!acc[key]) acc[key] = { date: key, dateObj, sessions: 0, amount: 0, details: [] };
+            if (!acc[key]) acc[key] = { date: key, displayDate, dateObj, sessions: 0, amount: 0, details: [] };
             acc[key].sessions += 1;
             acc[key].amount += s.status === 'ended' ? getSessionRate(s.classLevel) : 0;
             acc[key].details.push(s);
@@ -132,7 +149,7 @@ const TeacherProfile = ({ teacher, onBack }) => {
                     </div>
                 </div>
                 <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center"><CheckCircle className="w-6 h-6" /></div>
+                    <div className="w-12 h-12 bg-[#002147]/5 text-[#002147] rounded-xl flex items-center justify-center"><CheckCircle className="w-6 h-6" /></div>
                     <div>
                         <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Classes Completed</p>
                         <p className="text-xl font-black text-slate-900">{completedClasses}</p>
@@ -146,7 +163,7 @@ const TeacherProfile = ({ teacher, onBack }) => {
                     </div>
                 </div>
                 <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center"><DollarSign className="w-6 h-6" /></div>
+                    <div className="w-12 h-12 bg-[#002147]/5 text-[#002147] rounded-xl flex items-center justify-center"><DollarSign className="w-6 h-6" /></div>
                     <div>
                         <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Total Paid</p>
                         <p className="text-xl font-black text-slate-900">₹{totalEarnings}</p>
@@ -203,10 +220,10 @@ const TeacherProfile = ({ teacher, onBack }) => {
                     <div className="p-5 flex-1 overflow-y-auto max-h-[500px] custom-scrollbar space-y-6">
                         {/* Live Now */}
                         <div>
-                            <h3 className="text-xs font-black text-red-500 uppercase tracking-widest mb-3 flex items-center gap-2"><PlayCircle className="w-4 h-4" /> Live Now</h3>
+                            <h3 className="text-xs font-black text-[#f16126] uppercase tracking-widest mb-3 flex items-center gap-2"><PlayCircle className="w-4 h-4" /> Live Now</h3>
                             {sessions.present.length > 0 ? sessions.present.map(s => (
-                                <div key={s._id} className="p-4 rounded-xl border-2 border-red-500 bg-red-50 flex flex-col gap-1 mb-3">
-                                    <span className="text-[10px] font-black text-red-600 tracking-widest uppercase">{s.classLevel} • {s.subjectName}</span>
+                                <div key={s._id} className="p-4 rounded-xl border-2 border-[#f16126] bg-red-50 flex flex-col gap-1 mb-3">
+                                    <span className="text-[10px] font-black text-[#f16126] tracking-widest uppercase">{s.classLevel} • {s.subjectName}</span>
                                     <p className="text-sm font-bold text-red-900">{s.title}</p>
                                     <span className="text-xs font-semibold text-red-700 mt-1">Started: {new Date(s.startTime).toLocaleTimeString()}</span>
                                 </div>
@@ -227,10 +244,10 @@ const TeacherProfile = ({ teacher, onBack }) => {
 
                          {/* Past */}
                          <div>
-                            <h3 className="text-xs font-black text-emerald-500 uppercase tracking-widest mb-3 flex items-center gap-2"><CheckCircle className="w-4 h-4" /> Completed</h3>
+                            <h3 className="text-xs font-black text-[#002147]/50 uppercase tracking-widest mb-3 flex items-center gap-2"><CheckCircle className="w-4 h-4" /> Completed</h3>
                             {sessions.past.length > 0 ? sessions.past.map(s => (
                                 <div key={s._id} className="p-4 rounded-xl border border-slate-100 bg-slate-50 flex flex-col gap-1 mb-3 opacity-70">
-                                    <span className="text-[10px] font-black text-emerald-600 tracking-widest uppercase">{s.classLevel} • {s.subjectName}</span>
+                                    <span className="text-[10px] font-black text-[#002147] tracking-widest uppercase">{s.classLevel} • {s.subjectName}</span>
                                     <p className="text-sm font-bold text-slate-800">{s.title}</p>
                                     <span className="text-xs font-semibold text-slate-500 mt-1">Ended: {new Date(s.endTime).toLocaleString()}</span>
                                 </div>
@@ -269,10 +286,10 @@ const TeacherProfile = ({ teacher, onBack }) => {
                         <table className="w-full text-left text-sm">
                             <thead className="bg-[#f8fafc] text-[10px] uppercase tracking-widest font-black text-slate-400 border-b border-slate-100">
                                 <tr>
-                                    <th className="px-5 py-4">{viewMode === 'monthly' ? 'Month/Year' : (viewMode === 'weekly' ? 'Week Index' : 'Date')}</th>
+                                    <th className="px-5 py-4">{viewMode === 'monthly' ? 'Month/Year' : (viewMode === 'weekly' ? 'Weekly Range' : 'Date')}</th>
                                     <th className="px-5 py-4">Total Sessions & Details</th>
-                                    <th className="px-5 py-4">Total Amount</th>
-                                    {viewMode === 'monthly' && <th className="px-5 py-4 text-right">Status & Action</th>}
+                                    <th className="px-5 py-4">Status & Amount</th>
+                                    {viewMode === 'monthly' && <th className="px-5 py-4 text-right">Action</th>}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 text-slate-600 font-medium">
@@ -286,7 +303,7 @@ const TeacherProfile = ({ teacher, onBack }) => {
                                             <td className="px-5 py-4 font-black text-slate-900">₹{p.totalAmount}</td>
                                             <td className="px-5 py-4 text-right">
                                                 {p.status === 'Paid' ? (
-                                                    <span className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest border border-emerald-200">
+                                                    <span className="inline-flex items-center gap-1.5 bg-[#002147]/10 text-[#002147] px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest border border-emerald-200">
                                                         <CheckCircle className="w-3 h-3" /> Settled
                                                     </span>
                                                 ) : (
@@ -317,10 +334,10 @@ const TeacherProfile = ({ teacher, onBack }) => {
                                                 <div className="font-black text-slate-800 text-sm mb-3 bg-slate-100 w-max px-3 py-1 rounded-md">{d.sessions} Total Sessions</div>
                                                 <div className="space-y-2 grid grid-cols-1 max-w-lg">
                                                     {d.details.map((s, idx) => (
-                                                        <div key={s._id || idx} className={`p-3 rounded-xl border ${s.status === 'ended' ? 'bg-emerald-50/50 border-emerald-100' : s.status === 'live' ? 'bg-rose-50 border-rose-200 shadow-sm' : 'bg-white border-slate-200'}`}>
+                                                        <div key={s._id || idx} className={`p-3 rounded-xl border ${s.status === 'ended' ? 'bg-[#002147]/5/50 border-[#002147]/10' : s.status === 'live' ? 'bg-rose-50 border-rose-200 shadow-sm' : 'bg-white border-slate-200'}`}>
                                                             <div className="flex justify-between items-start mb-1.5">
                                                                 <span className="font-black text-[#002147]">{s.title}</span>
-                                                                <span className={`text-[9px] px-2 py-1 uppercase tracking-widest font-black rounded-lg ${s.status === 'ended' ? 'text-emerald-700 bg-emerald-100' : s.status === 'live' ? 'text-rose-700 bg-rose-200 animate-pulse' : 'text-slate-500 bg-slate-100'}`}>
+                                                                <span className={`text-[9px] px-2 py-1 uppercase tracking-widest font-black rounded-lg ${s.status === 'ended' ? 'text-[#002147] bg-[#002147]/10' : s.status === 'live' ? 'text-rose-700 bg-rose-200 animate-pulse' : 'text-slate-500 bg-slate-100'}`}>
                                                                     {s.status}
                                                                 </span>
                                                             </div>
@@ -332,7 +349,7 @@ const TeacherProfile = ({ teacher, onBack }) => {
                                                     ))}
                                                 </div>
                                             </td>
-                                            <td className="px-5 py-6 align-top pt-8 text-xl font-black text-emerald-600 tracking-tighter">
+                                            <td className="px-5 py-6 align-top pt-8 text-xl font-black text-[#002147] tracking-tighter">
                                                 {d.amount > 0 ? `₹${d.amount}` : <span className="text-sm text-slate-400">Scheduled</span>}
                                             </td>
                                         </tr>

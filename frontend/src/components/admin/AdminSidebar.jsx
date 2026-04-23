@@ -32,7 +32,7 @@ const AdminSidebar = ({ onClose }) => {
   ];
 
   return (
-    <aside className="w-full lg:w-72 bg-[#e6f0dc] h-screen text-slate-800 flex flex-col shadow-2xl border-r border-emerald-900/5">
+    <aside className="w-full lg:w-72 bg-white h-screen text-slate-800 flex flex-col shadow-2xl border-r border-slate-100">
       <div className="pt-8 pb-4 border-b border-emerald-900/10 flex flex-col items-center justify-center relative">
         <Link to="/" className="flex flex-col items-center group gap-0">
           <img 
@@ -40,7 +40,7 @@ const AdminSidebar = ({ onClose }) => {
             alt="Logo" 
             className="h-28 md:h-32 w-auto object-contain transition-transform group-hover:scale-105" 
           />
-          <div className="bg-[#1b4332] px-4 py-1.5 rounded-full shadow-sm -mt-2">
+          <div className="bg-[#002147] px-4 py-1.5 rounded-full shadow-sm -mt-2">
             <p className="text-[10px] font-black text-white uppercase tracking-[0.4em] leading-none">Admin</p>
           </div>
         </Link>
@@ -60,8 +60,8 @@ const AdminSidebar = ({ onClose }) => {
             className={({ isActive }) => `
               flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold transition-all group text-sm
               ${isActive 
-                ? 'bg-[#1b4332] text-white shadow-lg shadow-[#1b4332]/30' 
-                : 'text-slate-600 hover:text-white hover:bg-[#2d6a4f] hover:shadow-md'}
+                ? 'bg-[#002147] text-white shadow-lg shadow-[#002147]/20' 
+                : 'text-slate-600 hover:text-[#002147] hover:bg-[#002147]/5'}
             `}
           >
             <item.icon className="w-5 h-5 group-hover:scale-110 transition-transform" />

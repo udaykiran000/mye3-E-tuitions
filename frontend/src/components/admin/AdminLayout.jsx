@@ -48,31 +48,31 @@ const AdminLayout = ({ children }) => {
               </button>
               
               <div className="relative group hidden md:block">
-                 <HiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg group-focus-within:text-emerald-600 transition-colors" />
+                 <HiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg group-focus-within:text-[#002147] transition-colors" />
                  <input 
                    type="text" 
                    placeholder="Search..." 
-                   className="pl-10 pr-4 py-2.5 bg-slate-50 border-slate-200 focus:border-emerald-500 focus:bg-white border-2 rounded-xl outline-none w-36 lg:w-48 font-bold transition-all text-sm"
+                   className="pl-10 pr-4 py-2.5 bg-slate-50 border-slate-200 focus:border-[#002147] focus:bg-white border-2 rounded-xl outline-none w-36 lg:w-48 font-bold transition-all text-sm"
                  />
               </div>
            </div>
 
            <div className="flex items-center gap-3 md:gap-5">
               <div className="hidden lg:flex items-center gap-3">
-                 <NavLink to="/admin/transactions" className={({isActive}) => `flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border shadow-sm whitespace-nowrap ${isActive ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-white border-slate-200 text-slate-500 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 hover:-translate-y-0.5'}`}>
+                 <NavLink to="/admin/transactions" className={({isActive}) => `flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border shadow-sm whitespace-nowrap ${isActive ? 'bg-[#002147] border-[#002147] text-white' : 'bg-white border-slate-200 text-slate-500 hover:bg-[#002147]/5 hover:text-[#002147] hover:border-[#002147]/20 hover:-translate-y-0.5'}`}>
                     <CreditCard className="w-4 h-4" /> Fee Payments
                  </NavLink>
-                 <NavLink to="/admin/notes" className={({isActive}) => `flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border shadow-sm whitespace-nowrap ${isActive ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-white border-slate-200 text-slate-500 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 hover:-translate-y-0.5'}`}>
+                 <NavLink to="/admin/notes" className={({isActive}) => `flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border shadow-sm whitespace-nowrap ${isActive ? 'bg-[#002147] border-[#002147] text-white' : 'bg-white border-slate-200 text-slate-500 hover:bg-[#002147]/5 hover:text-[#002147] hover:border-[#002147]/20 hover:-translate-y-0.5'}`}>
                     <FileText className="w-4 h-4" /> Study Notes
                  </NavLink>
-                 <NavLink to="/admin/settings" className={({isActive}) => `flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border shadow-sm whitespace-nowrap ${isActive ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-white border-slate-200 text-slate-500 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 hover:-translate-y-0.5'}`}>
+                 <NavLink to="/admin/settings" className={({isActive}) => `flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border shadow-sm whitespace-nowrap ${isActive ? 'bg-[#002147] border-[#002147] text-white' : 'bg-white border-slate-200 text-slate-500 hover:bg-[#002147]/5 hover:text-[#002147] hover:border-[#002147]/20 hover:-translate-y-0.5'}`}>
                     <User className="w-4 h-4" /> Profile
                  </NavLink>
               </div>
 
-              <button className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 transition-all relative">
+              <button className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-[#002147]/5 hover:text-[#002147] transition-all relative">
                  <HiBell className="text-xl md:text-2xl" />
-                 <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white"></span>
+                 <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-[#f16126] rounded-full border-2 border-white"></span>
               </button>
               
               <div className="h-8 md:h-10 w-px bg-slate-100 hidden sm:block"></div>
@@ -81,12 +81,12 @@ const AdminLayout = ({ children }) => {
                  <div className="text-right hidden sm:block">
                     <p className="text-sm font-black text-slate-900 leading-tight">{userInfo?.name || 'Admin'}</p>
                  </div>
-                 <div className="w-10 h-10 md:w-12 md:h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-lg shadow-lg shadow-indigo-100">
+                 <div className="w-10 h-10 md:w-12 md:h-12 bg-[#002147] rounded-xl flex items-center justify-center text-[#f16126] font-black text-lg shadow-lg shadow-[#002147]/20">
                     {userInfo?.name?.charAt(0) || 'A'}
                  </div>
                  <button
                    onClick={handleLogout}
-                   className="flex items-center gap-2 px-3 py-2 text-rose-600 font-bold hover:bg-rose-50 rounded-lg transition-all border border-rose-100 text-xs md:text-sm"
+                   className="flex items-center gap-2 px-3 py-2 text-[#f16126] hover:bg-[#f16126]/5 rounded-lg transition-all border border-[#f16126]/20 text-xs md:text-sm"
                  >
                     <LogOut className="w-4 h-4" />
                     <span className="hidden md:inline">Logout</span>

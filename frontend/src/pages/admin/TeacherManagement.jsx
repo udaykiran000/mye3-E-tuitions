@@ -192,7 +192,7 @@ const TeacherManagement = () => {
 
   if (loading) return (
     <div className="flex h-[60vh] items-center justify-center">
-      <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      <Loader2 className="w-8 h-8 text-[#002147] animate-spin" />
     </div>
   );
 
@@ -208,18 +208,18 @@ const TeacherManagement = () => {
           
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
              <div className="relative group w-full sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-[#002147] transition-colors" />
                 <input 
                   type="text" 
                   placeholder="Search faculty..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 pr-4 py-1.5 bg-white border border-slate-200 rounded-md w-full outline-none font-medium text-slate-700 focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all shadow-sm text-sm"
+                  className="pl-9 pr-4 py-1.5 bg-white border border-slate-200 rounded-md w-full outline-none font-medium text-slate-700 focus:ring-1 focus:ring-[#002147]/50 focus:border-[#002147] transition-all shadow-sm text-sm"
                 />
              </div>
              <button 
                onClick={() => { setEditingTeacher(null); setFormData({name:'', email:'', password:'', rateA: 0, rateB: 0}); setShowModal(true); }}
-               className="flex items-center justify-center gap-2 bg-indigo-600 text-white px-4 py-1.5 rounded-md font-medium shadow-sm hover:bg-indigo-700 transition-colors text-sm w-full sm:w-auto"
+               className="flex items-center justify-center gap-2 bg-[#002147] text-white px-4 py-1.5 rounded-md font-medium shadow-sm hover:bg-[#001a38] transition-colors text-sm w-full sm:w-auto"
              >
                 <Plus className="w-4 h-4" /> Add Teacher
              </button>
@@ -239,12 +239,12 @@ const TeacherManagement = () => {
                   </div>
                </div>
             ) : currentItems.map(teacher => (
-               <div key={teacher._id} className="bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all group flex flex-col overflow-hidden relative">
+               <div key={teacher._id} className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-[#002147]/30 transition-all group flex flex-col overflow-hidden relative">
                   {/* Top Color Banner */}
-                  <div className="h-20 bg-[#002147] relative border-b-4 border-[#f16126]">
-                     <div className="absolute -bottom-8 left-6">
-                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm p-1">
-                           <div className="w-full h-full bg-[#f16126]/10 text-[#f16126] rounded-xl flex items-center justify-center font-black text-xl">
+                  <div className="h-16 bg-[#002147] relative border-b-4 border-[#f16126]">
+                     <div className="absolute -bottom-6 left-5">
+                        <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-sm p-1">
+                           <div className="w-full h-full bg-[#f16126]/10 text-[#f16126] rounded-lg flex items-center justify-center font-black text-lg">
                               {teacher.name.charAt(0)}
                            </div>
                         </div>
@@ -252,7 +252,7 @@ const TeacherManagement = () => {
                   </div>
                   
                   {/* Action Buttons Container - Elevated and Compact near Avatar */}
-                  <div className="absolute top-[4.5rem] right-4 flex items-center gap-1.5 p-1 bg-white rounded-xl shadow-lg border border-slate-100 z-10">
+                  <div className="absolute top-[3.5rem] right-3 flex items-center gap-1 p-1 bg-white rounded-lg shadow-md border border-slate-100 z-10">
                      <button 
                         onClick={(e) => {
                            e.stopPropagation();
@@ -266,7 +266,7 @@ const TeacherManagement = () => {
                              if (clsKeys.length > 0) setActiveClasses([clsKeys[0]]);
                            }
                         }}
-                        className="w-7 h-7 flex items-center justify-center bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white transition-colors"
+                        className="w-6 h-6 flex items-center justify-center bg-[#002147]/5 text-[#002147] rounded hover:bg-[#002147] hover:text-white transition-colors"
                         title="Assign Subjects"
                      >
                         <Plus className="w-3.5 h-3.5" />
@@ -284,53 +284,42 @@ const TeacherManagement = () => {
                            });
                            setShowModal(true);
                         }}
-                        className="w-7 h-7 flex items-center justify-center bg-slate-50 text-slate-500 rounded-lg hover:bg-slate-200 transition-colors"
+                        className="w-6 h-6 flex items-center justify-center bg-slate-50 text-slate-500 rounded hover:bg-slate-200 transition-colors"
                         title="Edit Profile"
                      >
                         <Edit2 className="w-3.5 h-3.5" />
                      </button>
                      <button 
                         onClick={(e) => { e.stopPropagation(); setTeacherToDelete(teacher); setShowDeleteConfirm(true); }}
-                        className="w-7 h-7 flex items-center justify-center bg-rose-50 text-rose-500 rounded-lg hover:bg-rose-500 hover:text-white transition-colors"
+                        className="w-6 h-6 flex items-center justify-center bg-[#f16126]/5 text-[#f16126] rounded hover:bg-[#f16126] hover:text-white transition-colors"
                         title="Remove Teacher"
                      >
                         <Trash2 className="w-3.5 h-3.5" />
                      </button>
                   </div>
 
-                  <div className="p-6 pt-12 flex-1 flex flex-col">
-                     <h3 className="text-xl font-black text-[#002147] line-clamp-1 cursor-pointer" onClick={() => setDetailedTeacher(teacher)}>{teacher.name}</h3>
-                     <p className="text-xs font-bold text-slate-400 mt-0.5 flex items-center gap-1.5 line-clamp-1"><Mail className="w-3.5 h-3.5"/> {teacher.email}</p>
+                  <div className="p-4 pt-8 flex-1 flex flex-col">
+                     <h3 className="text-lg font-black text-[#002147] line-clamp-1 cursor-pointer" onClick={() => setDetailedTeacher(teacher)}>{teacher.name}</h3>
+                     <p className="text-[10px] font-bold text-slate-400 mt-0.5 flex items-center gap-1.5 line-clamp-1"><Mail className="w-3 h-3"/> {teacher.email}</p>
                      
-                     <div className="mt-5 space-y-3 flex-1 flex flex-col justify-end">
+                     <div className="mt-4 space-y-3 flex-1 flex flex-col justify-end">
                         
                         <div className="flex flex-wrap gap-1.5 mb-1">
                            {Array.from(new Set(teacher.assignedSubjects?.map(s => s.board).filter(Boolean))).length > 0 ? Array.from(new Set(teacher.assignedSubjects.map(s => s.board).filter(Boolean))).map((b, i) => (
-                              <span key={i} className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[9px] font-bold rounded-md uppercase tracking-wider border border-slate-200">{b}</span>
+                              <span key={i} className="px-2 py-0.5 bg-[#002147]/5 text-[#002147] text-[9px] font-bold rounded-md uppercase tracking-wider border border-[#002147]/10">{b}</span>
                            )) : (
-                              <span className="px-2 py-0.5 bg-rose-50 text-rose-500 text-[9px] font-bold rounded-md uppercase tracking-wider">Unassigned</span>
+                              <span className="px-2 py-0.5 bg-[#f16126]/5 text-[#f16126] text-[9px] font-bold rounded-md uppercase tracking-wider">Unassigned</span>
                            )}
-                           <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-[9px] font-bold rounded-md uppercase tracking-wider ml-auto">{teacher.assignedSubjects?.length || 0} Subjects</span>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-2">
-                           <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex flex-col justify-center text-center">
-                              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">School (6-10)</span>
-                              <span className="text-sm font-black text-[#002147]">₹{teacher.payRates?.rateA || 0}</span>
-                           </div>
-                           <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex flex-col justify-center text-center">
-                              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">College (Inter)</span>
-                              <span className="text-sm font-black text-[#f16126]">₹{teacher.payRates?.rateB || 0}</span>
-                           </div>
+                           <span className="px-2 py-0.5 bg-[#f16126]/10 text-[#f16126] text-[9px] font-bold rounded-md uppercase tracking-wider ml-auto">{teacher.assignedSubjects?.length || 0} Subjects</span>
                         </div>
                         
-                        <div className="mt-3 pt-4 border-t border-slate-100">
+                        <div className="mt-2 pt-3 border-t border-slate-100">
                            <button 
                               onClick={() => setDetailedTeacher(teacher)}
-                              className="w-full py-2.5 bg-[#002147] text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#f16126] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-1.5"
+                              className="w-full py-2 bg-[#002147] text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-[#f16126] transition-all shadow-sm hover:shadow flex items-center justify-center gap-1.5"
                            >
                               <span>View Profile</span>
-                              <ChevronRight className="w-4 h-4" />
+                              <ChevronRight className="w-3.5 h-3.5" />
                            </button>
                         </div>
                      </div>
@@ -439,7 +428,7 @@ const TeacherManagement = () => {
                     </div>
                     <div>
                        <h2 className="text-xl font-bold text-slate-800">Assign Subjects</h2>
-                       <p className="text-sm font-medium text-slate-500">Configuring curriculum for <span className="text-indigo-600 font-semibold">{selectedTeacher.name}</span></p>
+                       <p className="text-sm font-medium text-slate-500">Configuring curriculum for <span className="text-[#002147] font-semibold">{selectedTeacher.name}</span></p>
                     </div>
                  </div>
                  <button 
@@ -479,7 +468,7 @@ const TeacherManagement = () => {
                                 }}
                                 className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 ${
                                    isActive 
-                                   ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100' 
+                                   ? 'bg-[#002147] text-white shadow-md shadow-slate-200' 
                                    : 'text-slate-600 hover:bg-slate-50'
                                 }`}
                              >
@@ -488,7 +477,7 @@ const TeacherManagement = () => {
                                    <span className="font-bold leading-tight">{board}</span>
                                 </div>
                                 {selectedInBoard > 0 && (
-                                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${isActive ? 'bg-white text-indigo-600' : 'bg-indigo-100 text-indigo-600'}`}>
+                                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${isActive ? 'bg-white text-[#002147]' : 'bg-[#002147]/10 text-[#002147]'}`}>
                                       {selectedInBoard}
                                    </span>
                                 )}
@@ -514,7 +503,7 @@ const TeacherManagement = () => {
                                    setSelectedAssignments(prev => [...prev, ...newItems]);
                                 }
                              }}
-                             className="text-[10px] font-bold text-indigo-600 hover:underline"
+                             className="text-[10px] font-bold text-[#002147] hover:underline"
                           >
                              Set All
                           </button>
@@ -549,13 +538,13 @@ const TeacherManagement = () => {
                                    }`}
                                 >
                                    <div className="flex items-center gap-3 text-left">
-                                      <div className={`w-4 h-4 shrink-0 rounded border flex items-center justify-center transition-colors ${isActive ? 'bg-indigo-500 border-indigo-500' : 'border-slate-300 bg-white'}`}>
+                                      <div className={`w-4 h-4 shrink-0 rounded border flex items-center justify-center transition-colors ${isActive ? 'bg-[#002147] border-indigo-500' : 'border-slate-300 bg-white'}`}>
                                          {isActive && <CheckCircle className="w-3 h-3 text-white" />}
                                       </div>
                                       <span className={`font-bold leading-tight ${isEmpty ? 'opacity-50' : ''}`}>{level}</span>
                                    </div>
                                    {selectedInClass > 0 && (
-                                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${isActive ? 'bg-indigo-500 text-white' : 'bg-indigo-100 text-indigo-600'}`}>
+                                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${isActive ? 'bg-[#002147] text-white' : 'bg-[#002147]/10 text-[#002147]'}`}>
                                          {selectedInClass}
                                       </span>
                                    )}
@@ -603,7 +592,7 @@ const TeacherManagement = () => {
                                    return (
                                       <div key={level} className="space-y-4 py-8 border-b border-dashed border-slate-200 last:border-0 text-center">
                                           <h4 className="text-xs font-black text-slate-800 uppercase tracking-tighter flex items-center gap-2 justify-center">
-                                             <GraduationCap className="w-4 h-4 text-indigo-600" />
+                                             <GraduationCap className="w-4 h-4 text-[#002147]" />
                                              {level}
                                           </h4>
                                           <div className="flex flex-col items-center gap-2 opacity-40">
@@ -618,7 +607,7 @@ const TeacherManagement = () => {
                                    <div key={level} className="space-y-4">
                                       <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                                          <h4 className="text-xs font-black text-slate-800 uppercase tracking-tighter flex items-center gap-2">
-                                            <GraduationCap className="w-4 h-4 text-indigo-600" />
+                                            <GraduationCap className="w-4 h-4 text-[#002147]" />
                                             {level}
                                          </h4>
                                          <button
@@ -632,7 +621,7 @@ const TeacherManagement = () => {
                                                   setSelectedAssignments(prev => [...prev, ...newItems]);
                                                }
                                             }}
-                                            className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full hover:bg-indigo-100 transition-colors"
+                                            className="text-[10px] font-bold text-[#002147] bg-indigo-50 px-2.5 py-1 rounded-full hover:bg-[#002147]/10 transition-colors"
                                          >
                                             Check All {level}
                                          </button>
@@ -647,19 +636,19 @@ const TeacherManagement = () => {
                                                   onClick={() => toggleAssignment(item)}
                                                   className={`group flex items-center justify-between p-4 rounded-2xl border-2 transition-all duration-200 ${
                                                      isSelected 
-                                                     ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700 shadow-sm' 
+                                                     ? 'border-indigo-600 bg-[#f16126]/10 text-indigo-700 shadow-sm' 
                                                      : 'border-slate-100 hover:border-slate-200 text-slate-600'
                                                   }`}
                                                >
                                                   <div className="flex items-center gap-3 min-w-0">
-                                                     <div className={`w-8 h-8 shrink-0 rounded-lg flex items-center justify-center transition-colors ${isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'}`}>
+                                                     <div className={`w-8 h-8 shrink-0 rounded-lg flex items-center justify-center transition-colors ${isSelected ? 'bg-[#002147] text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'}`}>
                                                         <BookOpen className="w-4 h-4" />
                                                      </div>
                                                      <span className="text-xs font-bold truncate leading-none mt-0.5">{item.subjectName}</span>
                                                   </div>
                                                   <div className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
                                                      isSelected 
-                                                     ? 'bg-indigo-600 border-indigo-600 text-white rotate-0 scale-100' 
+                                                     ? 'bg-[#002147] border-indigo-600 text-white rotate-0 scale-100' 
                                                      : 'border-slate-200 rotate-90 scale-90'
                                                   }`}>
                                                      {isSelected && <CheckCircle className="w-4 h-4" />}
@@ -698,7 +687,7 @@ const TeacherManagement = () => {
                     <div className="h-10 w-px bg-slate-100" />
                     <div className="flex -space-x-2 overflow-hidden">
                        {selectedAssignments.slice(0, 5).map((a, i) => (
-                          <div key={i} className="w-8 h-8 rounded-full bg-indigo-50 border-2 border-white flex items-center justify-center text-[10px] font-bold text-indigo-600 shrink-0" title={`${a.subjectName} (${a.board})`}>
+                          <div key={i} className="w-8 h-8 rounded-full bg-indigo-50 border-2 border-white flex items-center justify-center text-[10px] font-bold text-[#002147] shrink-0" title={`${a.subjectName} (${a.board})`}>
                              {a.subjectName.charAt(0)}
                           </div>
                        ))}
@@ -720,7 +709,7 @@ const TeacherManagement = () => {
                     <button 
                        onClick={handleAssignSubmit}
                        disabled={selectedAssignments.length === 0}
-                       className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-xl shadow-indigo-100 hover:bg-indigo-700 transform active:scale-95 transition-all disabled:opacity-50 disabled:shadow-none"
+                       className="px-8 py-3 bg-[#002147] text-white rounded-xl font-bold text-sm shadow-xl shadow-slate-200 hover:bg-indigo-700 transform active:scale-95 transition-all disabled:opacity-50 disabled:shadow-none"
                     >
                        Confirm Assignments
                     </button>
@@ -735,7 +724,7 @@ const TeacherManagement = () => {
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[120] flex items-center justify-center p-4">
            <div className="bg-white rounded-xl w-full max-w-sm overflow-hidden shadow-xl animate-in zoom-in-95 duration-200">
               <div className="p-6 text-center space-y-4">
-                 <div className="w-12 h-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto">
+                 <div className="w-12 h-12 bg-red-50 text-[#f16126] rounded-full flex items-center justify-center mx-auto">
                     <Trash2 className="w-6 h-6" />
                  </div>
                  <div>
@@ -753,7 +742,7 @@ const TeacherManagement = () => {
                     </button>
                     <button 
                       onClick={handleDelete}
-                      className="flex-1 py-1.5 bg-red-600 text-white rounded-md text-xs font-medium shadow-sm hover:bg-red-700 transition-colors"
+                      className="flex-1 py-1.5 bg-[#f16126] text-white rounded-md text-xs font-medium shadow-sm hover:bg-red-700 transition-colors"
                     >
                        Delete Account
                     </button>

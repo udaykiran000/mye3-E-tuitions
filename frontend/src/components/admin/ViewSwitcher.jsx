@@ -33,9 +33,9 @@ const ViewSwitcher = () => {
   };
 
   const views = [
-    { id: 'admin', label: 'Admin', icon: Settings2, color: 'bg-indigo-600' },
-    { id: 'teacher', label: 'Teacher', icon: UserSquare2, color: 'bg-teal-600' },
-    { id: 'student', label: 'Student', icon: GraduationCap, color: 'bg-blue-600' },
+    { id: 'admin', label: 'Admin', icon: Settings2, color: 'bg-[#002147]' },
+    { id: 'teacher', label: 'Teacher', icon: UserSquare2, color: 'bg-[#f16126]' },
+    { id: 'student', label: 'Student', icon: GraduationCap, color: 'bg-[#002147]' },
   ];
 
   return (

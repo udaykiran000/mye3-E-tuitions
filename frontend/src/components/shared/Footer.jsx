@@ -110,7 +110,7 @@ const Footer = () => {
                 { label: 'Online Classes', to: '/courses' },
                 { label: 'Explore Teachers', to: '/courses' },
                 { label: 'Group & Private Classes', to: '/courses' },
-                { label: 'Contact Us', to: '/about' },
+                { label: 'Contact Us', to: '/contact-us' },
                 { label: 'How To Register', to: '/register' }
               ].map((item, i) => (
                 <li key={i}>

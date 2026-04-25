@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const crypto = require('crypto');
+const { sendEmail } = require('../utils/mailer');
 
 const generateToken = (userId, deviceToken) => {
   return jwt.sign({ userId, deviceToken }, process.env.JWT_SECRET, {
@@ -71,6 +72,22 @@ const registerUser = async (req, res, next) => {
       await user.save();
 
       const token = generateToken(user._id, deviceToken);
+
+      // Send Welcome Email asynchronously
+      sendEmail({
+        to: user.email,
+        subject: 'Welcome to Mye3 e-Tuitions!',
+        html: `
+          <div style="font-family: sans-serif; max-w: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+            <h2 style="color: #002147;">Welcome to Mye3 e-Tuitions, ${user.name}! 🎉</h2>
+            <p>We are thrilled to have you join our learning community.</p>
+            <p>You can now explore our courses, book classes, and start your journey with the best teachers.</p>
+            <br/>
+            <p>Best Regards,</p>
+            <p><strong>Mye3 e-Tuitions Team</strong></p>
+          </div>
+        `
+      });
 
       res.status(201).json({
         _id: user._id,

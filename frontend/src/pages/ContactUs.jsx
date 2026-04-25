@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { FiSearch, FiPhone, FiMail, FiMapPin, FiSend } from 'react-icons/fi';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -10,10 +12,18 @@ const ContactUs = () => {
     message: ''
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Message Sent! We'll get back to you shortly.");
-    setFormData({ name: '', email: '', mobile: '', subject: '', message: '' });
+    try {
+      await axios.post('/inquiries', {
+        ...formData,
+        source: 'Contact Page'
+      });
+      toast.success("Message Sent! We'll get back to you shortly.");
+      setFormData({ name: '', email: '', mobile: '', subject: '', message: '' });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to send message. Please try again.');
+    }
   };
 
   return (
@@ -108,6 +118,8 @@ const ContactUs = () => {
                       type="text" 
                       required
                       placeholder="Enter Full Name" 
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
                       className="w-full px-4 py-2 md:py-3 bg-slate-50 border border-slate-100 rounded-lg outline-none focus:border-[#f16126] focus:bg-white transition-all text-[10px] md:text-sm text-[#002147] font-bold placeholder-slate-400" 
                     />
                   </div>
@@ -117,6 +129,8 @@ const ContactUs = () => {
                       type="email" 
                       required
                       placeholder="Enter Email Address" 
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
                       className="w-full px-4 py-2 md:py-3 bg-slate-50 border border-slate-100 rounded-lg outline-none focus:border-[#f16126] focus:bg-white transition-all text-[10px] md:text-sm text-[#002147] font-bold placeholder-slate-400" 
                     />
                   </div>
@@ -129,6 +143,8 @@ const ContactUs = () => {
                       type="tel" 
                       required
                       placeholder="+91 XXXXX" 
+                      value={formData.mobile}
+                      onChange={(e) => setFormData({...formData, mobile: e.target.value})}
                       className="w-full px-4 py-2 md:py-3 bg-slate-50 border border-slate-100 rounded-lg outline-none focus:border-[#f16126] focus:bg-white transition-all text-[10px] md:text-sm text-[#002147] font-bold placeholder-slate-400" 
                     />
                   </div>
@@ -138,6 +154,8 @@ const ContactUs = () => {
                       type="text" 
                       required
                       placeholder="Topic" 
+                      value={formData.subject}
+                      onChange={(e) => setFormData({...formData, subject: e.target.value})}
                       className="w-full px-4 py-2 md:py-3 bg-slate-50 border border-slate-100 rounded-lg outline-none focus:border-[#f16126] focus:bg-white transition-all text-[10px] md:text-sm text-[#002147] font-bold placeholder-slate-400" 
                     />
                   </div>
@@ -149,6 +167,8 @@ const ContactUs = () => {
                     rows="3"
                     required
                     placeholder="Write your query here..." 
+                    value={formData.message}
+                    onChange={(e) => setFormData({...formData, message: e.target.value})}
                     className="w-full px-4 py-2 md:py-3 bg-slate-50 border border-slate-100 rounded-lg outline-none focus:border-[#f16126] focus:bg-white transition-all text-[10px] md:text-sm text-[#002147] font-bold placeholder-slate-400"
                   ></textarea>
                 </div>

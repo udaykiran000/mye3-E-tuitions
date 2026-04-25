@@ -9,6 +9,7 @@ import {
   UserSquare2, 
   Activity,
   Banknote,
+  MessageSquare,
   X
 } from 'lucide-react';
 import logoImg from '../../assets/output-onlinepngtools.png';
@@ -29,6 +30,7 @@ const AdminSidebar = ({ onClose }) => {
     { icon: UserSquare2, label: 'Teacher Management', path: '/admin/teachers' },
     { icon: Users, label: 'Students', path: '/admin/students' },
     { icon: Activity, label: 'Live & Schedule Class', path: '/admin/live-monitor' },
+    { icon: MessageSquare, label: 'Contact Inquiries', path: '/admin/inquiries' },
   ];
 
   return (

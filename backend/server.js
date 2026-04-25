@@ -4,6 +4,7 @@ const { Server } = require('socket.io');
 const app = require('./src/app');
 const connectDB = require('./src/config/db');
 const { initializeCronJobs } = require('./src/cron/recurringScheduler');
+const { initializeExpiryCron } = require('./src/cron/expiryScheduler');
 
 const seedData = require('./src/config/seed');
 
@@ -12,6 +13,7 @@ const server = http.createServer(app);
 
 // Initialize Cron Jobs
 initializeCronJobs();
+initializeExpiryCron();
 
 // Initialize Socket.io
 const io = new Server(server, {

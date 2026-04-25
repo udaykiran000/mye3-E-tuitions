@@ -6,6 +6,7 @@ const Transaction = require('../models/Transaction');
 const Class = require('../models/Class');
 const Subject = require('../models/Subject');
 const ClassBundle = require('../models/ClassBundle');
+const { sendEmail } = require('../utils/mailer');
 
 // @desc    Get all available classes and subjects for the store
 // @route   GET /api/student/catalog
@@ -134,6 +135,32 @@ exports.processMockPayment = async (req, res, next) => {
     // Explicitly mark modified for mixed/array types
     student.markModified('activeSubscriptions');
     await student.save();
+
+    // Send Payment Success Email
+    if (student.email) {
+      const itemsListHtml = itemsToProcess.map(item => `<li><strong>${item.packageName || item.courseName}</strong> (₹${item.amount})</li>`).join('');
+      const totalAmount = itemsToProcess.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+      
+      sendEmail({
+        to: student.email,
+        subject: 'Payment Successful - Welcome to your new class!',
+        html: `
+          <div style="font-family: sans-serif; max-w: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+            <h2 style="color: #002147;">Payment Successful! 🎉</h2>
+            <p>Dear ${student.name},</p>
+            <p>Thank you for your purchase. Your payment of <strong>₹${totalAmount}</strong> has been received successfully.</p>
+            <h3>You now have access to:</h3>
+            <ul>
+              ${itemsListHtml}
+            </ul>
+            <p>You can access your live classes, recordings, and study materials from your student dashboard immediately.</p>
+            <br/>
+            <p>Happy Learning!</p>
+            <p><strong>Mye3 e-Tuitions Team</strong></p>
+          </div>
+        `
+      });
+    }
 
     res.status(200).json({
       success: true,

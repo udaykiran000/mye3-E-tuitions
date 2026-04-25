@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import StudentDashboard from './pages/student/StudentDashboard';
 import StudentStore from './pages/student/StudentStore';
+import { Toaster } from 'react-hot-toast';
 import AdminDashboard from './pages/AdminDashboard';
 import About from './pages/About';
 import FAQs from './pages/FAQs';
@@ -27,6 +28,7 @@ import AdminTransactions from './pages/admin/AdminTransactions';
 import LiveMonitor from './pages/admin/LiveMonitor';
 import AdminMaterials from './pages/admin/AdminMaterials';
 import TeacherPayouts from './pages/admin/TeacherPayouts';
+import AdminInquiries from './pages/admin/AdminInquiries';
 
 // Teacher Pages
 import TeacherLayout from './components/teacher/TeacherLayout';
@@ -143,6 +145,7 @@ function AppContent() {
                   <Route path="settings" element={<ProfileSettings role="Admin" />} />
                   <Route path="live-monitor" element={<LiveMonitor />} />
                   <Route path="notes" element={<AdminMaterials />} />
+                  <Route path="inquiries" element={<AdminInquiries />} />
                 </Routes>
               </AdminLayout>
             </ProtectedRoute>
@@ -164,6 +167,7 @@ function AppContent() {
 function App() {
   return (
     <PreviewProvider>
+      <Toaster position="top-right" />
       <Router>
         <AppContent />
       </Router>

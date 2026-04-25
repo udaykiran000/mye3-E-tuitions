@@ -4,6 +4,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import logoImg from '../../assets/output-onlinepngtools.png';
 import contactSvg from '../../assets/contact-with-us.svg';
 import { logout } from '../../store/slices/authSlice';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
 import {
   HiMenuAlt3,
   HiOutlineUserCircle,
@@ -112,11 +114,21 @@ const ConnectButton = () => {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: '', mobile: '', role: 'Student' });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert(`Thanks ${form.name}! We'll connect with you soon.`);
-    setOpen(false);
-    setForm({ name: '', mobile: '', role: 'Student' });
+    try {
+      await axios.post('/inquiries', {
+        name: form.name,
+        mobile: form.mobile,
+        role: form.role,
+        source: 'Connect Panel'
+      });
+      toast.success(`Thanks ${form.name}! We'll connect with you soon.`);
+      setOpen(false);
+      setForm({ name: '', mobile: '', role: 'Student' });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Something went wrong. Please try again.');
+    }
   };
 
   return (

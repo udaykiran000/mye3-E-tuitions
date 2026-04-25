@@ -96,3 +96,46 @@ No one needs to refresh their browser anymore:
    - Clicking a card opens a dedicated component showing performance, sessions (past, live, upcoming), assigned subjects, and session-wise payment.
 - [x] **Class Live Flow Integration:**
    - Tracking connection and marking a class `ended` so payment calculations trigger.
+
+---
+
+## 💸 Teacher Payment Calculation Workflow (For Discussion)
+
+As discussed, we need a clear and transparent way to calculate exactly how much a teacher should be paid every month. Here is the proposed logic for discussion:
+
+### 1. How we count "Attempted" (Conducted) Classes
+- We will **ONLY** count classes where the status is successfully marked as `ended` (meaning the teacher joined and completed the session).
+- **Missed or Cancelled Classes:** If a class was scheduled but the teacher never joined (status remained `upcoming` until time passed), it is automatically marked as **Missed** and will **NOT** be added to the month's total.
+
+### 2. Pricing per Class (Class-batti Pricing)
+Every teacher will have fixed rates configured in their profile by the Admin:
+- **Category A Rate:** Price per class for lower classes (e.g., Classes 6 to 10). Example: ₹400/class.
+- **Category B Rate:** Price per class for higher classes (e.g., Inter 1st & 2nd Year). Example: ₹600/class.
+
+### 3. Monthly Total Calculation Formula
+At the end of every month (or when the Admin opens the Payouts page), the system will calculate the total like this:
+1. **Find all `ended` sessions** for Teacher X in the given month (e.g., April).
+2. Separate them into Category A classes and Category B classes.
+3. Multiply the count by the respective rates.
+
+> **Example Calculation for Teacher Ravi in April:**
+> - Conducted **10 classes** for 10th Standard (Category A @ ₹400) = ₹4,000
+> - Conducted **5 classes** for Inter 1st Year (Category B @ ₹600) = ₹3,000
+> - **Total April Payout** = ₹7,000
+
+### 4. Admin Action (Payout Settlement Options)
+When the Admin is ready to pay the teacher (e.g., the ₹7,000 pending amount), they click **"Settle Payment"**. A popup will appear asking for the **Payment Mode**:
+
+**Option A: Online Payment (UPI / Bank Transfer)**
+- Admin selects "Online".
+- Admin enters the **Transaction ID** (Required).
+- Admin can optionally upload a **Proof of Payment** (e.g., screenshot of the PhonePe success screen).
+
+**Option B: Cash Payment**
+- Admin selects "Cash".
+- The Transaction ID is not required, but the Admin can leave a small **Note** (e.g., "Handed over cash directly on 3rd May").
+- No proof image is required.
+
+Once submitted, the status changes to **"Settled"** and the Teacher can immediately see the Transaction ID / Note / Proof in their own dashboard, ensuring zero confusion!
+
+**Are you okay with this calculation method and these payment settlement options? Check the plan file to see the details.**

@@ -184,9 +184,9 @@ const ConnectButton = () => {
             onClick={() => setOpen(false)}
           />
 
-          {/* Panel — full height, no scroll */}
+          {/* Panel — full height, scrollable on small screens */}
           <div
-            className="relative w-full max-w-sm bg-white h-screen shadow-2xl flex flex-col"
+            className="relative w-[280px] max-w-[80vw] bg-white h-screen shadow-2xl flex flex-col overflow-y-auto"
             style={{ animation: 'slideInRight 0.3s ease-out' }}
           >
             {/* Header */}
@@ -267,8 +267,8 @@ const ConnectButton = () => {
               </button>
             </form>
 
-            {/* Illustration — fills remaining space */}
-            <div className="flex-1 flex flex-col items-center justify-end px-4 pb-4 overflow-hidden">
+            {/* Illustration — hidden on very small screens */}
+            <div className="hidden sm:flex flex-1 flex-col items-center justify-end px-4 pb-4 overflow-hidden">
               <img
                 src={contactSvg}
                 alt="Connect With Us"
@@ -278,6 +278,10 @@ const ConnectButton = () => {
               <div className="flex items-center gap-2 text-orange-500 text-[12px] font-bold mt-1">
                 <span>📞</span> +91 99126 71666
               </div>
+            </div>
+            {/* Phone number visible on mobile instead of illustration */}
+            <div className="sm:hidden flex items-center justify-center gap-2 text-orange-500 text-[13px] font-bold py-4">
+              <span>📞</span> +91 99126 71666
             </div>
           </div>
         </div>

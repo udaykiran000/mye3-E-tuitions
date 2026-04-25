@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { ArrowLeft, BookOpen, Clock, DollarSign, Calendar as CalendarIcon, CheckCircle, PlayCircle, Loader2, Award, GraduationCap } from 'lucide-react';
+import { ArrowLeft, BookOpen, Clock, DollarSign, Calendar as CalendarIcon, CheckCircle, PlayCircle, Loader2, Award, GraduationCap, X, Upload, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const TeacherProfile = ({ teacher, onBack }) => {
@@ -8,6 +8,11 @@ const TeacherProfile = ({ teacher, onBack }) => {
     const [payouts, setPayouts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState('monthly'); // 'monthly' | 'daily'
+    
+    // Settlement Modal State
+    const [settleModal, setSettleModal] = useState({ isOpen: false, payoutId: null, mode: 'Online', transactionId: '', note: '', proofImage: '' });
+    const [isSettling, setIsSettling] = useState(false);
+    const [viewProofModal, setViewProofModal] = useState(null);
 
     useEffect(() => {
         fetchData();
@@ -57,14 +62,37 @@ const TeacherProfile = ({ teacher, onBack }) => {
         }
     };
 
-    const markAsPaid = async (payoutId) => {
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) return toast.error('Image must be less than 2MB');
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => setSettleModal(prev => ({ ...prev, proofImage: reader.result }));
+    };
+
+    const handleSettleSubmit = async (e) => {
+        e.preventDefault();
+        const { payoutId, mode, transactionId, note, proofImage } = settleModal;
+        
+        if (mode === 'Online' && !transactionId) return toast.error('Transaction ID is required for Online payments');
+
+        setIsSettling(true);
         try {
-            await axios.put(`/admin/payroll/${payoutId}/pay`, { transactionId: 'Manual Admin Settlement' });
+            const { data } = await axios.put(`/admin/payroll/${payoutId}/pay`, { 
+                paymentMode: mode,
+                transactionId: mode === 'Online' ? transactionId : undefined,
+                note: mode === 'Cash' ? note : undefined,
+                proofImage
+            });
             toast.success('Payout marked as Settled');
-            setPayouts(prev => prev.map(p => p._id === payoutId ? { ...p, status: 'Paid' } : p));
+            setPayouts(prev => prev.map(p => p._id === payoutId ? data.payout : p));
+            setSettleModal({ isOpen: false, payoutId: null, mode: 'Online', transactionId: '', note: '', proofImage: '' });
         } catch (error) {
-            toast.error('Failed to update payout status');
+            toast.error(error.response?.data?.message || 'Failed to update payout status');
             console.error(error);
+        } finally {
+            setIsSettling(false);
         }
     };
 
@@ -106,13 +134,18 @@ const TeacherProfile = ({ teacher, onBack }) => {
                 dateObj = d;
                 key = d.toLocaleDateString('en-GB');
                 displayDate = key;
-            } else {
+            } else if (groupType === 'weekly') {
                 const monday = getMonday(d);
                 const sunday = new Date(monday);
                 sunday.setDate(monday.getDate() + 6);
                 dateObj = monday;
                 key = monday.toLocaleDateString('en-GB');
                 displayDate = `${monday.toLocaleDateString('en-GB', {day:'2-digit', month:'short'})} - ${sunday.toLocaleDateString('en-GB', {day:'2-digit', month:'short'})}`;
+            } else if (groupType === 'monthly') {
+                dateObj = new Date(d.getFullYear(), d.getMonth(), 1);
+                key = `${d.getFullYear()}-${d.getMonth() + 1}`;
+                const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                displayDate = `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
             }
 
             if (!acc[key]) acc[key] = { date: key, displayDate, dateObj, sessions: 0, amount: 0, details: [] };
@@ -126,6 +159,7 @@ const TeacherProfile = ({ teacher, onBack }) => {
 
     const dailyEarnings = buildGroupedData('daily');
     const weeklyEarnings = buildGroupedData('weekly');
+    const monthlyEarnings = buildGroupedData('monthly');
 
     return (
         <div className="space-y-6 animate-in fade-in duration-300">
@@ -286,37 +320,73 @@ const TeacherProfile = ({ teacher, onBack }) => {
                         <table className="w-full text-left text-sm">
                             <thead className="bg-[#f8fafc] text-[10px] uppercase tracking-widest font-black text-slate-400 border-b border-slate-100">
                                 <tr>
-                                    <th className="px-5 py-4">{viewMode === 'monthly' ? 'Month/Year' : (viewMode === 'weekly' ? 'Weekly Range' : 'Date')}</th>
-                                    <th className="px-5 py-4">Total Sessions & Details</th>
-                                    <th className="px-5 py-4">Status & Amount</th>
-                                    {viewMode === 'monthly' && <th className="px-5 py-4 text-right">Action</th>}
+                                    <th className="px-5 py-4">{viewMode === 'monthly' ? 'Month' : (viewMode === 'weekly' ? 'Weekly Range' : 'Date')}</th>
+                                    <th className="px-5 py-4">{viewMode === 'monthly' ? 'Total Sessions' : 'Total Sessions & Details'}</th>
+                                    <th className="px-5 py-4">Amount</th>
+                                    {viewMode === 'monthly' && <th className="px-5 py-4 text-right">Status / Action</th>}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 text-slate-600 font-medium">
                                 {viewMode === 'monthly' ? (
-                                    payouts.length === 0 ? (
+                                    monthlyEarnings.length === 0 ? (
                                         <tr><td colSpan="4" className="px-5 py-8 text-center text-xs font-bold text-slate-400">No monthly payout records yet.</td></tr>
-                                    ) : payouts.map(p => (
-                                        <tr key={p._id} className="hover:bg-slate-50/50">
-                                            <td className="px-5 py-4 font-black text-slate-800">{p.month}/{p.year}</td>
-                                            <td className="px-5 py-4">{p.totalSessions}</td>
-                                            <td className="px-5 py-4 font-black text-slate-900">₹{p.totalAmount}</td>
+                                    ) : monthlyEarnings.map(m => {
+                                        const monthNum = m.dateObj.getMonth() + 1;
+                                        const yearNum = m.dateObj.getFullYear();
+                                        const p = payouts.find(rec => rec.month === monthNum && rec.year === yearNum);
+                                        
+                                        const isPaid = p?.status === 'Paid';
+                                        const isPartiallyPaid = isPaid && m.amount > p.totalAmount;
+                                        const isPending = !isPaid || isPartiallyPaid;
+
+                                        return (
+                                        <tr key={m.date} className="hover:bg-slate-50/50">
+                                            <td className="px-5 py-4 font-black text-slate-800">{m.displayDate}</td>
+                                            <td className="px-5 py-4">
+                                                <div className="font-black text-slate-800 bg-slate-100 w-max px-3 py-1 rounded-md">{m.sessions} Classes</div>
+                                            </td>
+                                            <td className="px-5 py-4 font-black text-slate-900 text-lg">
+                                                ₹{m.amount}
+                                                {isPartiallyPaid && <span className="block text-[10px] text-amber-600 font-bold mt-0.5">Only ₹{p.totalAmount} Settled</span>}
+                                            </td>
                                             <td className="px-5 py-4 text-right">
-                                                {p.status === 'Paid' ? (
-                                                    <span className="inline-flex items-center gap-1.5 bg-[#002147]/10 text-[#002147] px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest border border-emerald-200">
-                                                        <CheckCircle className="w-3 h-3" /> Settled
-                                                    </span>
+                                                {isPaid && !isPartiallyPaid ? (
+                                                    <div className="flex flex-col items-end gap-1">
+                                                        <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest border border-emerald-200">
+                                                            <CheckCircle className="w-3 h-3" /> Settled ({p.paymentMode || 'Online'})
+                                                        </span>
+                                                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
+                                                            {p.paymentMode === 'Online' && p.transactionId && <span>ID: {p.transactionId}</span>}
+                                                            {p.paymentMode === 'Cash' && p.note && <span title={p.note} className="cursor-help border-b border-dashed border-slate-400">Note Attached</span>}
+                                                            {p.proofImage && (
+                                                                <button onClick={() => setViewProofModal(p.proofImage)} className="text-[#f16126] hover:underline flex items-center gap-1">
+                                                                    <ImageIcon className="w-3 h-3" /> Proof
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
                                                 ) : (
-                                                    <button 
-                                                        onClick={() => markAsPaid(p._id)}
-                                                        className="inline-flex items-center gap-1.5 bg-[#002147] text-white px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm hover:opacity-90 transition-opacity"
-                                                    >
-                                                        Mark as Settled
-                                                    </button>
+                                                    <div className="flex flex-col items-end gap-2">
+                                                        <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-600 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border border-amber-200">
+                                                            {isPartiallyPaid ? 'Partially Paid' : 'Pending'}
+                                                        </span>
+                                                        <button 
+                                                            onClick={() => {
+                                                                if (p) {
+                                                                    setSettleModal({ isOpen: true, payoutId: p._id, mode: 'Online', transactionId: '', note: '', proofImage: '' });
+                                                                } else {
+                                                                    toast.error("Please calculate payouts first in Teacher Payouts page.");
+                                                                }
+                                                            }}
+                                                            className="inline-flex items-center gap-1.5 bg-[#002147] text-white px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm hover:opacity-90 transition-opacity"
+                                                        >
+                                                            Settle Payment
+                                                        </button>
+                                                    </div>
                                                 )}
                                             </td>
                                         </tr>
-                                    ))
+                                    )})
                                 ) : (
                                     (viewMode === 'daily' ? dailyEarnings : weeklyEarnings).length === 0 ? (
                                         <tr>
@@ -360,6 +430,122 @@ const TeacherProfile = ({ teacher, onBack }) => {
                     </div>
                 </div>
             </div>
+
+            {/* SETTLEMENT MODAL */}
+            {settleModal.isOpen && (
+                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+                        <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                            <h2 className="text-lg font-black text-[#002147] flex items-center gap-2"><DollarSign className="w-5 h-5 text-[#f16126]" /> Settle Payment</h2>
+                            <button onClick={() => setSettleModal(prev => ({...prev, isOpen: false}))} className="text-slate-400 hover:text-slate-800 transition-colors"><X className="w-5 h-5" /></button>
+                        </div>
+                        <form onSubmit={handleSettleSubmit} className="p-6 space-y-5">
+                            {/* Payment Mode Selection */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <button 
+                                    type="button" 
+                                    onClick={() => setSettleModal(prev => ({...prev, mode: 'Online'}))}
+                                    className={`py-3 rounded-xl border-2 font-bold text-sm flex flex-col items-center gap-1 transition-all ${settleModal.mode === 'Online' ? 'border-[#002147] bg-[#002147]/5 text-[#002147]' : 'border-slate-100 text-slate-500 hover:border-slate-200'}`}
+                                >
+                                    <span>Online Transfer</span>
+                                    <span className="text-[10px] font-medium opacity-70">UPI / Bank / Wallet</span>
+                                </button>
+                                <button 
+                                    type="button" 
+                                    onClick={() => setSettleModal(prev => ({...prev, mode: 'Cash'}))}
+                                    className={`py-3 rounded-xl border-2 font-bold text-sm flex flex-col items-center gap-1 transition-all ${settleModal.mode === 'Cash' ? 'border-[#f16126] bg-[#f16126]/5 text-[#f16126]' : 'border-slate-100 text-slate-500 hover:border-slate-200'}`}
+                                >
+                                    <span>Cash Payment</span>
+                                    <span className="text-[10px] font-medium opacity-70">Handed in person</span>
+                                </button>
+                            </div>
+
+                            {/* Dynamic Fields */}
+                            <div className="space-y-4 pt-2 border-t border-slate-100">
+                                {settleModal.mode === 'Online' ? (
+                                    <>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-slate-700 uppercase tracking-wide flex justify-between">
+                                                <span>Transaction ID <span className="text-red-500">*</span></span>
+                                            </label>
+                                            <input 
+                                                required 
+                                                type="text" 
+                                                placeholder="e.g. T234908123890"
+                                                value={settleModal.transactionId} 
+                                                onChange={(e) => setSettleModal(prev => ({...prev, transactionId: e.target.value}))} 
+                                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none font-medium text-slate-800 focus:border-[#002147] focus:ring-1 focus:ring-[#002147] transition-all" 
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Proof Screenshot (Optional)</label>
+                                            <div className="relative">
+                                                <input 
+                                                    type="file" 
+                                                    accept="image/*"
+                                                    onChange={handleImageUpload} 
+                                                    className="hidden" 
+                                                    id="proof-upload" 
+                                                />
+                                                <label htmlFor="proof-upload" className="w-full flex items-center justify-center gap-2 px-4 py-8 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 hover:border-indigo-300 transition-all">
+                                                    {settleModal.proofImage ? (
+                                                        <div className="flex flex-col items-center gap-2">
+                                                            <div className="w-12 h-12 rounded overflow-hidden shadow-sm">
+                                                                <img src={settleModal.proofImage} alt="Proof" className="w-full h-full object-cover" />
+                                                            </div>
+                                                            <span className="text-xs font-bold text-indigo-600">Change Image</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex flex-col items-center gap-1 text-slate-400">
+                                                            <Upload className="w-6 h-6 mb-1" />
+                                                            <span className="text-xs font-bold">Click to upload receipt</span>
+                                                            <span className="text-[10px] uppercase">Max 2MB</span>
+                                                        </div>
+                                                    )}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide flex justify-between">
+                                            <span>Payment Note (Optional)</span>
+                                        </label>
+                                        <textarea 
+                                            rows="3"
+                                            placeholder="e.g. Paid ₹7000 in cash directly at office."
+                                            value={settleModal.note} 
+                                            onChange={(e) => setSettleModal(prev => ({...prev, note: e.target.value}))} 
+                                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none font-medium text-slate-800 focus:border-[#002147] focus:ring-1 focus:ring-[#002147] transition-all resize-none" 
+                                        ></textarea>
+                                    </div>
+                                )}
+                            </div>
+
+                            <button 
+                                type="submit" 
+                                disabled={isSettling}
+                                className="w-full py-3 bg-[#002147] text-white rounded-xl font-black text-sm shadow-md hover:bg-[#001a38] disabled:opacity-70 flex items-center justify-center gap-2 transition-colors mt-2"
+                            >
+                                {isSettling ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                                {isSettling ? 'Processing...' : 'Confirm & Settle Payout'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* VIEW PROOF MODAL */}
+            {viewProofModal && (
+                <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[110] flex items-center justify-center p-4" onClick={() => setViewProofModal(null)}>
+                    <div className="relative max-w-3xl w-full max-h-[90vh] flex flex-col items-center animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                        <div className="w-full flex justify-end mb-4">
+                            <button onClick={() => setViewProofModal(null)} className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-md transition-colors"><X className="w-6 h-6" /></button>
+                        </div>
+                        <img src={viewProofModal} alt="Payment Proof" className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl" />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

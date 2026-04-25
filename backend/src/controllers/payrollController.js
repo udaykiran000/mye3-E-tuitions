@@ -121,7 +121,7 @@ exports.getPayouts = async (req, res, next) => {
 // @access  Admin
 exports.markPaid = async (req, res, next) => {
   try {
-    const { transactionId } = req.body;
+    const { paymentMode, transactionId, note, proofImage } = req.body;
 
     const payout = await Payout.findById(req.params.id);
     if (!payout) return res.status(404).json({ message: 'Payout not found' });
@@ -130,8 +130,16 @@ exports.markPaid = async (req, res, next) => {
       return res.status(400).json({ message: 'Payout is already marked as Paid' });
     }
 
+    if (paymentMode === 'Online' && !transactionId) {
+      return res.status(400).json({ message: 'Transaction ID is required for Online payments' });
+    }
+
     payout.status = 'Paid';
-    payout.transactionId = transactionId || 'Offline';
+    payout.paymentMode = paymentMode;
+    payout.transactionId = paymentMode === 'Online' ? transactionId : undefined;
+    payout.note = paymentMode === 'Cash' ? note : undefined;
+    payout.proofImage = proofImage;
+    
     await payout.save();
 
     res.status(200).json({ message: 'Payout marked as paid', payout });

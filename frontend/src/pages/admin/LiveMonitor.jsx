@@ -399,6 +399,13 @@ const LiveMonitor = () => {
         const [h, m] = cellForm.time.split(':').map(Number);
         const [eh, em] = (cellForm.endTime || '11:00').split(':').map(Number);
         const board = cellForm.board || boardFilter;
+
+        const sessionStart = new Date(date);
+        sessionStart.setHours(h, m, 0, 0);
+        if (sessionStart < new Date() && !cellForm.sessionId && cellForm.scheduleType === 'once') {
+            return setCellError('Cannot schedule a session for a past time!');
+        }
+
         const payload = {
             platform: cellForm.platform,
             link: cellForm.link,
@@ -694,6 +701,7 @@ const LiveMonitor = () => {
                                                             {weekDates.map((date, di) => {
                                                                 const isToday = isSameDay(date, today);
                                                                 const isInActiveMonth = date.getMonth() === navInfo.activeMonth;
+                                                                const isPastDate = date < today;
 
                                                                 const activeRecurring = recurringSchedules.find(rs => 
                                                                     rs.classLevel === lvl && 
@@ -735,20 +743,22 @@ const LiveMonitor = () => {
                                                                                 {daySessions.map((s, sidx) => {
                                                                                     const isLive = s.status === 'live';
                                                                                     const isEnded = s.status === 'ended';
+                                                                                    const isMissed = s.status === 'upcoming' && new Date(s.endTime || new Date(s.startTime).getTime() + 60*60*1000) < new Date();
+                                                                                    const isPastSessionTime = new Date(s.startTime) < new Date();
                                                                                     const theme = BOARD_THEMES[boardFilter];
                                                                                     return (
                                                                                         <div
                                                                                             key={sidx}
-                                                                                            className={`p-2 border rounded-md shadow-sm flex flex-col justify-between transition-colors relative group/card hover:border-indigo-300 hover:shadow-md ${deleteConfirmId === s._id ? 'border-rose-400 bg-rose-50 z-20' : isLive ? 'bg-rose-50 border-rose-200' : isEnded ? 'bg-slate-50 border-slate-200 text-slate-500' : `bg-white ${theme.border}`}`}
+                                                                                            className={`p-2 border rounded-md shadow-sm flex flex-col justify-between transition-colors relative group/card hover:border-indigo-300 hover:shadow-md ${deleteConfirmId === s._id ? 'border-rose-400 bg-rose-50 z-20' : isLive ? 'bg-rose-50 border-rose-200' : isEnded ? 'bg-slate-50 border-slate-200 text-slate-500' : isMissed ? 'bg-orange-50 border-orange-200 text-orange-600 opacity-80' : `bg-white ${theme.border}`}`}
                                                                                         >
-                                                                                            <div className={`absolute left-0 top-1 bottom-1 w-[3px] rounded-r-sm ${isLive ? 'bg-rose-500' : isEnded ? 'bg-emerald-500' : theme.primary}`} />
+                                                                                            <div className={`absolute left-0 top-1 bottom-1 w-[3px] rounded-r-sm ${isLive ? 'bg-rose-500' : isEnded ? 'bg-emerald-500' : isMissed ? 'bg-orange-500' : theme.primary}`} />
 
                                                                                             <div className="flex items-center justify-between pl-1.5">
-                                                                                                <span className={`text-[10px] font-bold uppercase tracking-wider ${isLive ? 'text-rose-600' : isEnded ? 'text-emerald-600' : 'text-slate-600'}`}>
+                                                                                                <span className={`text-[10px] font-bold uppercase tracking-wider ${isLive ? 'text-rose-600' : isEnded ? 'text-emerald-600' : isMissed ? 'text-orange-600 line-through' : 'text-slate-600'}`}>
                                                                                                     {fmt24To12(get24HFromDate(s.startTime))}
                                                                                                 </span>
                                                                                                 <div className="flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity">
-                                                                                                    {!isEnded && !isLive && (
+                                                                                                    {!isEnded && !isLive && !isPastSessionTime && (
                                                                                                         <>
                                                                                                             {deleteConfirmId === s._id ? (
                                                                                                                 <button onClick={() => handleDeleteSession(s._id)} className="p-1 text-white bg-rose-600 rounded flex gap-1 items-center">
@@ -780,10 +790,11 @@ const LiveMonitor = () => {
                                                                                                         <Video className="w-3 h-3" /> Join Now
                                                                                                     </a>
                                                                                                 ) : (
-                                                                                                    <p className="text-xs font-semibold text-slate-800 truncate">{s.teacherId?.name || 'TBA'}</p>
+                                                                                                    <p className={`text-xs font-semibold truncate ${isMissed ? 'text-orange-700' : 'text-slate-800'}`}>{s.teacherId?.name || 'TBA'}</p>
                                                                                                 )}
-                                                                                                <div className="mt-1">
-                                                                                                    <span className="text-[10px] font-medium text-slate-500">{s.platform}</span>
+                                                                                                <div className="mt-1 flex items-center justify-between">
+                                                                                                    <span className={`text-[10px] font-medium ${isMissed ? 'text-orange-500' : 'text-slate-500'}`}>{s.platform}</span>
+                                                                                                    {isMissed && <span className="text-[9px] font-bold text-orange-600 uppercase bg-orange-100 px-1 rounded">Missed</span>}
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
@@ -954,13 +965,15 @@ const LiveMonitor = () => {
                                                                                     </div>
                                                                                 </div>
                                                                             ) : (
-                                                                                <button
-                                                                                    onClick={() => openCellScheduler(lvl, date, null, sub.subjectName)}
-                                                                                    className={`w-full py-2.5 mt-2 border border-dashed border-slate-300 text-slate-400 rounded-md flex items-center justify-center gap-1.5 hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all opacity-80 hover:opacity-100 ${daySessions.length === 0 ? 'min-h-[44px]' : ''}`}
-                                                                                >
-                                                                                    <Plus className="w-3.5 h-3.5" />
-                                                                                    <span className="text-[10px] uppercase font-bold tracking-wider">Add Slot</span>
-                                                                                </button>
+                                                                                !isPastDate && (
+                                                                                    <button
+                                                                                        onClick={() => openCellScheduler(lvl, date, null, sub.subjectName)}
+                                                                                        className={`w-full py-2.5 mt-2 border border-dashed border-slate-300 text-slate-400 rounded-md flex items-center justify-center gap-1.5 hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all opacity-80 hover:opacity-100 ${daySessions.length === 0 ? 'min-h-[44px]' : ''}`}
+                                                                                    >
+                                                                                        <Plus className="w-3.5 h-3.5" />
+                                                                                        <span className="text-[10px] uppercase font-bold tracking-wider">Add Slot</span>
+                                                                                    </button>
+                                                                                )
                                                                             )}
                                                                         </div>
                                                                     </td>
@@ -998,37 +1011,38 @@ const LiveMonitor = () => {
                         .map((s, idx) => {
                             const isLive = s.status === 'live';
                             const isEnded = s.status === 'ended';
+                            const isMissed = s.status === 'upcoming' && new Date(s.endTime || new Date(s.startTime).getTime() + 60*60*1000) < new Date();
                             return (
-                                <div key={idx} className={`bg-white border rounded-lg overflow-hidden shadow-sm transition-shadow ${isLive ? 'border-rose-300 shadow-rose-50' : isEnded ? 'border-slate-200 opacity-80' : 'border-slate-200 hover:shadow-md'}`}>
-                                    <div className={`px-4 py-2 flex items-center justify-between border-b ${isLive ? 'bg-rose-50 border-rose-100' : isEnded ? 'bg-slate-50 border-slate-100' : 'bg-white border-slate-100'}`}>
-                                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider ${isLive ? 'bg-rose-600 text-white animate-pulse' : isEnded ? 'bg-slate-200 text-slate-600' : 'bg-indigo-100 text-indigo-700'}`}>
-                                            {isLive ? 'LIVE' : isEnded ? 'DONE' : 'NEXT'}
+                                <div key={idx} className={`bg-white border rounded-lg overflow-hidden shadow-sm transition-shadow ${isLive ? 'border-rose-300 shadow-rose-50' : isEnded ? 'border-slate-200 opacity-80' : isMissed ? 'border-orange-200 opacity-80' : 'border-slate-200 hover:shadow-md'}`}>
+                                    <div className={`px-4 py-2 flex items-center justify-between border-b ${isLive ? 'bg-rose-50 border-rose-100' : isEnded ? 'bg-slate-50 border-slate-100' : isMissed ? 'bg-orange-50 border-orange-100' : 'bg-white border-slate-100'}`}>
+                                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider ${isLive ? 'bg-rose-600 text-white animate-pulse' : isEnded ? 'bg-slate-200 text-slate-600' : isMissed ? 'bg-orange-200 text-orange-700' : 'bg-indigo-100 text-indigo-700'}`}>
+                                            {isLive ? 'LIVE' : isEnded ? 'DONE' : isMissed ? 'MISSED' : 'NEXT'}
                                         </span>
                                         <span className="text-xs font-semibold text-slate-600">{s.classLevel}</span>
                                     </div>
                                     <div className="p-4 space-y-4">
                                         <div>
-                                            <h3 className="text-base font-semibold text-slate-800 leading-tight">{s.subjectName}</h3>
-                                            <p className="text-xs font-medium text-slate-500 mt-1">{s.platform} &middot; {new Date(s.startTime).toLocaleDateString()}</p>
+                                            <h3 className={`text-base font-semibold leading-tight ${isMissed ? 'text-orange-800' : 'text-slate-800'}`}>{s.subjectName}</h3>
+                                            <p className={`text-xs font-medium mt-1 ${isMissed ? 'text-orange-600/70' : 'text-slate-500'}`}>{s.platform} &middot; {new Date(s.startTime).toLocaleDateString()}</p>
                                         </div>
-                                        <div className="flex items-center gap-3 bg-slate-50 rounded-lg p-3 border border-slate-100">
-                                            <div className="w-8 h-8 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center font-semibold text-sm">
+                                        <div className={`flex items-center gap-3 rounded-lg p-3 border ${isMissed ? 'bg-orange-50/50 border-orange-100' : 'bg-slate-50 border-slate-100'}`}>
+                                            <div className={`w-8 h-8 rounded-md flex items-center justify-center font-semibold text-sm ${isMissed ? 'bg-orange-100 text-orange-600' : 'bg-indigo-100 text-indigo-600'}`}>
                                                 {(s.teacherId?.name || 'T').charAt(0)}
                                             </div>
                                             <div>
                                                 <p className="text-[10px] font-semibold text-slate-400 uppercase leading-none mb-1">Teacher</p>
                                                 <p className="text-sm font-semibold text-slate-800 leading-none">{s.teacherId?.name || 'TBA'}</p>
                                             </div>
-                                            <span className="ml-auto text-xs font-semibold text-indigo-600">{fmtTime(s.startTime)}</span>
+                                            <span className={`ml-auto text-xs font-semibold ${isMissed ? 'text-orange-600' : 'text-indigo-600'}`}>{fmtTime(s.startTime)}</span>
                                         </div>
-                                        {!isEnded ? (
+                                        {!isEnded && !isMissed ? (
                                             <a href={s.link} target="_blank" rel="noreferrer"
                                                 className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-md text-xs font-semibold transition-colors ${isLive ? 'bg-rose-600 text-white hover:bg-rose-700' : 'bg-slate-900 text-white hover:bg-indigo-600'}`}>
                                                 <Video className="w-4 h-4" /> Join Classroom
                                             </a>
                                         ) : (
-                                            <div className="w-full py-2.5 text-center bg-slate-50 text-slate-500 rounded-md text-xs font-semibold border border-slate-200">
-                                                Session Concluded &#10003;
+                                            <div className={`w-full py-2.5 text-center rounded-md text-xs font-semibold border ${isMissed ? 'bg-orange-50 text-orange-600 border-orange-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+                                                {isMissed ? 'Session Missed ✕' : 'Session Concluded ✓'}
                                             </div>
                                         )}
                                     </div>

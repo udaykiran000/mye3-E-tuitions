@@ -8,7 +8,10 @@ const payoutSchema = new mongoose.Schema({
   totalHours: { type: Number, default: 0 },
   totalAmount: { type: Number, default: 0 },
   status: { type: String, enum: ['Pending', 'Paid'], default: 'Pending' },
-  transactionId: { type: String }
+  paymentMode: { type: String, enum: ['Online', 'Cash'] },
+  transactionId: { type: String },
+  proofImage: { type: String },
+  note: { type: String }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Payout', payoutSchema);
